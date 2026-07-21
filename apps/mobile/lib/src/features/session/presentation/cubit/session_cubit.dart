@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../core/network/app_api_exception.dart';
 import '../../../onboarding/domain/entities/started_music_session.dart';
+import '../../data/session_resume_store.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
@@ -99,15 +100,28 @@ class SessionCubit extends Cubit<SessionState> {
   SessionCubit(
     this._repository, {
     StartedMusicSession? startedSession,
+    SessionResumeStore? resumeStore,
     AppLogger? logger,
   }) : _logger = logger ?? const AppLogger(),
+       _resumeStore = resumeStore,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
   final AppLogger _logger;
+  final SessionResumeStore? _resumeStore;
+  static const int maxPairingRounds = 6;
+  static const int maxMsToDecide = 600000;
 
   Future<void> initialize() async {
-    final sessionId = state.sessionId;
+    var sessionId = state.sessionId;
+    if ((sessionId == null || sessionId.isEmpty) && _resumeStore != null) {
+      final resumedSession = await _resumeStore.load();
+      if (resumedSession != null) {
+        emit(state.copyWith(startedSession: resumedSession));
+        sessionId = resumedSession.sessionId;
+      }
+    }
+
     _logger.event('session.initialize', <String, Object?>{
       'hasSessionId': sessionId?.isNotEmpty == true,
     });
@@ -151,7 +165,7 @@ class SessionCubit extends Cubit<SessionState> {
       'sessionId': sessionId,
       'pairingId': pairingId,
       'chosenSongId': chosenSongId,
-      'msToDecide': msToDecide,
+      'msToDecide': _normalizeMsToDecide(msToDecide),
     });
     if (sessionId == null || pairingId == null) {
       emit(
@@ -173,7 +187,7 @@ class SessionCubit extends Cubit<SessionState> {
         sessionId: sessionId,
         pairingId: pairingId,
         chosenSongId: chosenSongId,
-        msToDecide: msToDecide,
+        msToDecide: _normalizeMsToDecide(msToDecide),
       );
       _logger.event('session.choice_succeeded', <String, Object?>{
         'sessionId': sessionId,
@@ -183,6 +197,60 @@ class SessionCubit extends Cubit<SessionState> {
       await _loadNextPairing(sessionId: sessionId, keepFeedback: true);
     } catch (error) {
       _logger.error('session.choice_failed', error, <String, Object?>{
+        'sessionId': sessionId,
+        'pairingId': pairingId,
+      });
+      final apiError = error is AppApiException ? error : null;
+      emit(
+        state.copyWith(
+          status: SessionStatus.failure,
+          errorMessage: _readableError(apiError ?? error),
+          requiresReauthentication: apiError?.isAuthRelated == true,
+        ),
+      );
+    }
+  }
+
+  Future<void> skipPairing({required int msToDecide}) async {
+    final sessionId = state.sessionId;
+    final pairingId = state.currentRound?.pairing?.id;
+    _logger.event('session.skip_requested', <String, Object?>{
+      'sessionId': sessionId,
+      'pairingId': pairingId,
+      'msToDecide': _normalizeMsToDecide(msToDecide),
+    });
+    if (sessionId == null || pairingId == null) {
+      emit(
+        state.copyWith(
+          status: SessionStatus.failure,
+          errorMessage: 'No active pairing is available yet.',
+          requiresReauthentication: false,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        status: SessionStatus.submitting,
+        clearLastFeedback: true,
+        clearErrorMessage: true,
+      ),
+    );
+
+    try {
+      await _repository.skipPairing(
+        sessionId: sessionId,
+        pairingId: pairingId,
+        msToDecide: _normalizeMsToDecide(msToDecide),
+      );
+      _logger.event('session.skip_succeeded', <String, Object?>{
+        'sessionId': sessionId,
+        'pairingId': pairingId,
+      });
+      await _loadNextPairing(sessionId: sessionId, keepFeedback: false);
+    } catch (error) {
+      _logger.error('session.skip_failed', error, <String, Object?>{
         'sessionId': sessionId,
         'pairingId': pairingId,
       });
@@ -238,9 +306,16 @@ class SessionCubit extends Cubit<SessionState> {
       final reveal = await _repository.revealSession(sessionId: sessionId);
       SharedReveal? sharedReveal;
       if (reveal.shareToken != null && reveal.shareToken!.isNotEmpty) {
-        sharedReveal = await _repository.fetchSharedReveal(
-          token: reveal.shareToken!,
-        );
+        try {
+          sharedReveal = await _repository.fetchSharedReveal(
+            token: reveal.shareToken!,
+          );
+        } catch (error) {
+          _logger.error('session.share_fetch_failed', error, <String, Object?>{
+            'sessionId': sessionId,
+            'shareToken': reveal.shareToken,
+          });
+        }
       }
       _logger.event('session.reveal_succeeded', <String, Object?>{
         'sessionId': sessionId,
@@ -285,11 +360,13 @@ class SessionCubit extends Cubit<SessionState> {
         'done': nextRound.done,
         'hasPairing': nextRound.pairing != null,
       });
+      final isComplete =
+          nextRound.done ||
+          nextRound.pairing == null ||
+          nextRound.round > maxPairingRounds;
       emit(
         state.copyWith(
-          status: nextRound.done || nextRound.pairing == null
-              ? SessionStatus.completed
-              : SessionStatus.ready,
+          status: isComplete ? SessionStatus.completed : SessionStatus.ready,
           currentRound: nextRound,
           clearLastFeedback: !keepFeedback,
           clearReveal: true,
@@ -334,5 +411,9 @@ class SessionCubit extends Cubit<SessionState> {
 
     final message = error.toString().trim();
     return message.isEmpty ? 'Something went wrong.' : message;
+  }
+
+  int _normalizeMsToDecide(int msToDecide) {
+    return msToDecide.clamp(0, maxMsToDecide).toInt();
   }
 }
