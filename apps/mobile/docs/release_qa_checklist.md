@@ -2,6 +2,19 @@
 
 Use this checklist before every TestFlight or App Store build.
 
+## Source And Build Provenance
+
+- Read the [0.1.1 build 3 baseline](release_baseline_0_1_1_build_3.md).
+- Use the active `acedge123/idea-builder/apps/mobile` source, not the historical
+  mobile copy in the Lovable web repository.
+- Record source SHA, branch, API origin, contract capability and catalog/policy
+  versions. Verify the deployed API with an authorized test identity; source
+  inspection or an unauthenticated 401 is not contract acceptance.
+- Build 3 has already been uploaded. The next upload needs a higher number.
+- Record archive creation, validation and upload dates with the exact source
+  SHA. Do not infer a previous archive's SHA from the current branch.
+- Preserve the original release branch until reconciliation is reviewed.
+
 ## Preconditions
 
 - Work from a clean branch or detached checkout of the intended merge target.
