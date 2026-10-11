@@ -6,14 +6,50 @@ import '../../../../core/network/app_api_exception.dart';
 import '../../../../core/network/music_dna_api_client.dart';
 
 class SessionRemoteDataSource {
-  SessionRemoteDataSource(this._apiClient);
+  SessionRemoteDataSource(this._apiClient, {this.experienceV1 = false});
 
   final MusicDnaApiClient _apiClient;
+  final bool experienceV1;
+  Map<String, String> get _experienceHeaders =>
+      experienceV1 ? const {'X-MusicDNA-Experience': '1'} : const {};
+
+  Future<Map<String, dynamic>> fetchExperience({
+    required String sessionId,
+  }) async {
+    return _decodeJson(
+      await _apiClient.get(
+        '/api/v1/session/$sessionId',
+        headers: _experienceHeaders,
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> react({
+    required String sessionId,
+    required String kind,
+    required String mutationId,
+    String? pairingId,
+  }) async {
+    return _decodeJson(
+      await _apiClient.post(
+        '/api/v1/session/$sessionId/react',
+        headers: _experienceHeaders,
+        body: {
+          'kind': kind,
+          'mutation_id': mutationId,
+          'pairing_id': ?pairingId,
+        },
+      ),
+    );
+  }
 
   Future<Map<String, dynamic>> fetchNextPairing({
     required String sessionId,
   }) async {
-    final response = await _apiClient.get('/api/v1/session/$sessionId/next');
+    final response = await _apiClient.get(
+      '/api/v1/session/$sessionId/next',
+      headers: _experienceHeaders,
+    );
     return _decodeJson(response);
   }
 
@@ -25,6 +61,7 @@ class SessionRemoteDataSource {
   }) async {
     final response = await _apiClient.post(
       '/api/v1/session/$sessionId/choice',
+      headers: _experienceHeaders,
       body: <String, dynamic>{
         'pairing_id': pairingId,
         'chosen_song_id': chosenSongId,
@@ -41,6 +78,7 @@ class SessionRemoteDataSource {
   }) async {
     final response = await _apiClient.post(
       '/api/v1/session/$sessionId/skip',
+      headers: _experienceHeaders,
       body: <String, dynamic>{
         'pairing_id': pairingId,
         'ms_to_decide': msToDecide,

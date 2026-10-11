@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'session_experience.dart';
 
 class SessionPairingSong extends Equatable {
   const SessionPairingSong({
@@ -74,6 +75,7 @@ class SessionRoundState extends Equatable {
     this.hesitation,
     this.dim,
     this.delta,
+    this.experienceVersion = false,
   });
 
   final String sessionId;
@@ -86,6 +88,7 @@ class SessionRoundState extends Equatable {
   final String? hesitation;
   final String? dim;
   final double? delta;
+  final bool experienceVersion;
 
   SessionRoundState copyWith({
     int? round,
@@ -115,6 +118,7 @@ class SessionRoundState extends Equatable {
       hesitation: clearHesitation ? null : hesitation ?? this.hesitation,
       dim: clearDim ? null : dim ?? this.dim,
       delta: clearDelta ? null : delta ?? this.delta,
+      experienceVersion: experienceVersion,
     );
   }
 
@@ -130,6 +134,7 @@ class SessionRoundState extends Equatable {
     hesitation,
     dim,
     delta,
+    experienceVersion,
   ];
 }
 
@@ -140,6 +145,7 @@ class SessionChoiceFeedback extends Equatable {
     this.hesitation,
     this.dimension,
     this.delta,
+    this.read,
   });
 
   final String verdict;
@@ -147,6 +153,7 @@ class SessionChoiceFeedback extends Equatable {
   final String? hesitation;
   final String? dimension;
   final double? delta;
+  final SessionRead? read;
 
   @override
   List<Object?> get props => <Object?>[
@@ -155,5 +162,6 @@ class SessionChoiceFeedback extends Equatable {
     hesitation,
     dimension,
     delta,
+    read,
   ];
 }

@@ -14,6 +14,7 @@ import '../../features/session/data/datasources/session_remote_data_source.dart'
 import '../../features/session/data/repositories/session_repository_impl.dart';
 import '../../features/session/data/session_resume_store.dart';
 import '../../features/session/domain/repositories/session_repository.dart';
+import '../../features/session/domain/repositories/session_experience_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
 import '../config/app_config.dart';
 import '../logging/app_logger.dart';
@@ -45,7 +46,7 @@ class AppDependencies {
   late final OnboardingRepository onboardingRepository =
       OnboardingRepositoryImpl(onboardingRemoteDataSource);
   late final SessionRemoteDataSource sessionRemoteDataSource =
-      SessionRemoteDataSource(apiClient);
+      SessionRemoteDataSource(apiClient, experienceV1: config.experienceV1);
   late final SessionRepository sessionRepository = SessionRepositoryImpl(
     sessionRemoteDataSource,
   );
@@ -66,6 +67,9 @@ class AppDependencies {
   SessionCubit createSessionCubit({StartedMusicSession? startedSession}) {
     return SessionCubit(
       sessionRepository,
+      experienceRepository: config.experienceV1
+          ? sessionRepository as SessionExperienceRepository
+          : null,
       startedSession: startedSession,
       resumeStore: sessionResumeStore,
       logger: logger,

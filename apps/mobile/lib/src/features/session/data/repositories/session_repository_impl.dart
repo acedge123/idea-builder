@@ -1,12 +1,50 @@
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
+import '../../domain/repositories/session_experience_repository.dart';
+import '../../domain/entities/session_experience.dart';
+import '../session_experience_mapper.dart';
 import '../datasources/session_remote_data_source.dart';
 
-class SessionRepositoryImpl implements SessionRepository {
+class SessionRepositoryImpl
+    implements SessionRepository, SessionExperienceRepository {
   SessionRepositoryImpl(this._remoteDataSource);
 
   final SessionRemoteDataSource _remoteDataSource;
+
+  @override
+  Future<SessionExperience> fetchExperience({required String sessionId}) async {
+    return mapSessionExperience(
+      await _remoteDataSource.fetchExperience(sessionId: sessionId),
+      sessionId,
+    );
+  }
+
+  @override
+  Future<SessionReactionEffect> react({
+    required String sessionId,
+    required SessionReaction reaction,
+    required String mutationId,
+    String? pairingId,
+  }) async {
+    final response = await _remoteDataSource.react(
+      sessionId: sessionId,
+      kind: reaction.wireName,
+      mutationId: mutationId,
+      pairingId: pairingId,
+    );
+    requireExperienceVersion(response);
+    return SessionReactionEffect(
+      effect: response['effect'] as String,
+      message: response['message'] as String,
+      next: response['next'] == null
+          ? null
+          : _mapNextResponse(
+              sessionId: sessionId,
+              response: experienceObject(response['next']),
+            ),
+    );
+  }
 
   @override
   Future<SessionRoundState> fetchNextPairing({
@@ -32,9 +70,16 @@ class SessionRepositoryImpl implements SessionRepository {
       msToDecide: msToDecide,
     );
 
+    if (_remoteDataSource.experienceV1) requireExperienceVersion(response);
+    final feedback = _remoteDataSource.experienceV1
+        ? experienceObject(response['feedback'])
+        : response;
     return SessionChoiceFeedback(
-      verdict: response['verdict'] as String? ?? '',
-      why: response['why'] as String? ?? '',
+      verdict: feedback['verdict'] as String? ?? '',
+      why: feedback['why'] as String? ?? '',
+      read: _remoteDataSource.experienceV1
+          ? mapSessionRead(experienceObject(response['read']))
+          : null,
       hesitation: response['hesitation'] as String?,
       dimension: response['dim'] as String?,
       delta: _readDouble(response['delta']),
@@ -97,11 +142,23 @@ class SessionRepositoryImpl implements SessionRepository {
     required Map<String, dynamic> response,
   }) {
     final pairing = response['pairing'];
+    if (_remoteDataSource.experienceV1) requireExperienceVersion(response);
+    final progress = _remoteDataSource.experienceV1
+        ? experienceObject(response['progress'])
+        : null;
+    final completion = _remoteDataSource.experienceV1
+        ? experienceObject(response['completion'])
+        : null;
     return SessionRoundState(
       sessionId: sessionId,
-      round: _readInt(response['round']),
+      round: progress == null
+          ? _readInt(response['round'])
+          : _readInt(progress['answered']) + 1,
       confidence: _readDouble(response['confidence']),
-      done: response['done'] == true,
+      done: completion == null
+          ? response['done'] == true
+          : completion['done'] == true,
+      experienceVersion: progress != null,
       pairing: pairing is Map<String, dynamic> ? _mapPairing(pairing) : null,
     );
   }
