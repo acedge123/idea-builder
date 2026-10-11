@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'session_result.dart';
 
 class RevealClaimExample extends Equatable {
   const RevealClaimExample({
@@ -73,6 +74,7 @@ class SessionReveal extends Equatable {
     required this.allowedClaims,
     required this.counterarguments,
     this.shareToken,
+    this.result,
   });
 
   final String? archetypeId;
@@ -82,6 +84,7 @@ class SessionReveal extends Equatable {
   final List<RevealClaim> allowedClaims;
   final List<RevealCounterargument> counterarguments;
   final String? shareToken;
+  final SessionResult? result;
 
   @override
   List<Object?> get props => <Object?>[
@@ -92,6 +95,7 @@ class SessionReveal extends Equatable {
     allowedClaims,
     counterarguments,
     shareToken,
+    result,
   ];
 }
 

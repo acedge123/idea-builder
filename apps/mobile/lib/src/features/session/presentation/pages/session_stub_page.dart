@@ -10,6 +10,7 @@ import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
+import '../widgets/session_result_view.dart';
 
 class SessionStubPage extends StatefulWidget {
   const SessionStubPage({
@@ -186,6 +187,22 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             onPrimary: () =>
                                 context.read<SessionCubit>().revealSession(),
                           )
+                        : state.reveal!.result != null
+                        ? SessionResultView(
+                            state: state,
+                            shareUrl: _buildShareUrl(state.reveal!),
+                            onPublish: () => context
+                                .read<SessionCubit>()
+                                .setPublication(publish: true),
+                            onRevoke: () => context
+                                .read<SessionCubit>()
+                                .setPublication(publish: false),
+                            onVerify: () => context
+                                .read<SessionCubit>()
+                                .verifyPublication(),
+                            onCopy: () => _copyShare(context, state.reveal!),
+                            onSignIn: () => context.push('/auth'),
+                          )
                         : _RevealCard(
                             reveal: state.reveal!,
                             sharedReveal: state.sharedReveal,
@@ -277,6 +294,19 @@ class _SessionStubPageState extends State<SessionStubPage> {
   }
 
   String? _buildShareUrl(SessionReveal reveal) {
+    if (reveal.result != null) {
+      final state = context.read<SessionCubit>().state;
+      if (state.sharing ||
+          !state.shareVerified ||
+          state.publication?.isPublic != true) {
+        return null;
+      }
+      final publication = state.publication!;
+      if (publication.url != null) return publication.url;
+      return Uri.parse(
+        widget.shareBaseUrl,
+      ).resolve('/s/${Uri.encodeComponent(publication.token!)}').toString();
+    }
     final token = reveal.shareToken;
     if (token == null || token.isEmpty) {
       return null;

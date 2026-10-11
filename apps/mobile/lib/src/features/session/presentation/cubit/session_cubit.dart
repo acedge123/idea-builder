@@ -11,6 +11,8 @@ import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/session_experience_repository.dart';
 import '../../domain/entities/session_experience.dart';
+import '../../domain/entities/session_result.dart';
+import '../../domain/repositories/session_result_repository.dart';
 
 enum SessionStatus {
   initial,
@@ -39,6 +41,11 @@ class SessionState extends Equatable {
     this.selectedSongId,
     this.reacting = false,
     this.reactionMessage,
+    this.publication,
+    this.sharing = false,
+    this.shareVerified = false,
+    this.shareMayBePublic = false,
+    this.shareError,
   });
 
   final SessionStatus status;
@@ -53,6 +60,9 @@ class SessionState extends Equatable {
   final SessionRead? read;
   final String? selectedSongId, reactionMessage;
   final bool reacting;
+  final SharePublication? publication;
+  final bool sharing, shareVerified, shareMayBePublic;
+  final String? shareError;
 
   String? get sessionId => startedSession?.sessionId ?? currentRound?.sessionId;
 
@@ -77,6 +87,13 @@ class SessionState extends Equatable {
     bool clearSelection = false,
     bool? reacting,
     String? reactionMessage,
+    SharePublication? publication,
+    bool clearPublication = false,
+    bool? sharing,
+    bool? shareVerified,
+    bool? shareMayBePublic,
+    String? shareError,
+    bool clearShareError = false,
   }) {
     return SessionState(
       status: status ?? this.status,
@@ -107,6 +124,11 @@ class SessionState extends Equatable {
           : selectedSongId ?? this.selectedSongId,
       reacting: reacting ?? this.reacting,
       reactionMessage: reactionMessage ?? this.reactionMessage,
+      publication: clearPublication ? null : publication ?? this.publication,
+      sharing: sharing ?? this.sharing,
+      shareVerified: shareVerified ?? this.shareVerified,
+      shareMayBePublic: shareMayBePublic ?? this.shareMayBePublic,
+      shareError: clearShareError ? null : shareError ?? this.shareError,
     );
   }
 
@@ -125,6 +147,11 @@ class SessionState extends Equatable {
     selectedSongId,
     reacting,
     reactionMessage,
+    publication,
+    sharing,
+    shareVerified,
+    shareMayBePublic,
+    shareError,
   ];
 }
 
@@ -135,14 +162,17 @@ class SessionCubit extends Cubit<SessionState> {
     SessionResumeStore? resumeStore,
     AppLogger? logger,
     SessionExperienceRepository? experienceRepository,
+    SessionResultRepository? resultRepository,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
        _experienceRepository = experienceRepository,
+       _resultRepository = resultRepository,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
   final AppLogger _logger;
   final SessionResumeStore? _resumeStore;
+  final SessionResultRepository? _resultRepository;
   final SessionExperienceRepository? _experienceRepository;
   String? _reactionMutationId;
   SessionReaction? _pendingReaction;
@@ -343,6 +373,7 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> revealSession() async {
+    if (state.status == SessionStatus.revealing || state.sharing) return;
     final sessionId = state.sessionId;
     _logger.event('session.reveal_requested', <String, Object?>{
       'sessionId': sessionId,
@@ -369,7 +400,9 @@ class SessionCubit extends Cubit<SessionState> {
     try {
       final reveal = await _repository.revealSession(sessionId: sessionId);
       SharedReveal? sharedReveal;
-      if (reveal.shareToken != null && reveal.shareToken!.isNotEmpty) {
+      if (reveal.result == null &&
+          reveal.shareToken != null &&
+          reveal.shareToken!.isNotEmpty) {
         try {
           sharedReveal = await _repository.fetchSharedReveal(
             token: reveal.shareToken!,
@@ -391,6 +424,7 @@ class SessionCubit extends Cubit<SessionState> {
           status: SessionStatus.revealed,
           reveal: reveal,
           sharedReveal: sharedReveal,
+          clearSharedReveal: sharedReveal == null,
           clearErrorMessage: true,
           requiresReauthentication: false,
         ),
@@ -408,6 +442,124 @@ class SessionCubit extends Cubit<SessionState> {
         ),
       );
     }
+  }
+
+  Future<void> setPublication({required bool publish}) async {
+    final repository = _resultRepository;
+    final sessionId = state.sessionId;
+    if (repository == null ||
+        sessionId == null ||
+        state.reveal?.result == null ||
+        state.status != SessionStatus.revealed ||
+        state.sharing) {
+      return;
+    }
+    _logger.event('session.share_requested', {
+      'sessionId': sessionId,
+      'publish': publish,
+    });
+    emit(
+      state.copyWith(
+        sharing: true,
+        shareVerified: false,
+        shareMayBePublic: publish || state.shareMayBePublic,
+        clearPublication: true,
+        clearSharedReveal: true,
+        clearShareError: true,
+      ),
+    );
+    try {
+      final publication = await repository.setPublication(
+        sessionId: sessionId,
+        publish: publish,
+      );
+      if (isClosed) return;
+      if (publication.isPublic != publish ||
+          (publish && publication.token?.isNotEmpty != true)) {
+        throw const AppApiException(
+          kind: AppApiErrorKind.upstream,
+          message: 'The server returned an unexpected sharing state.',
+        );
+      }
+      emit(state.copyWith(publication: publication, shareMayBePublic: publish));
+      if (publish) {
+        final shared = await _verifiedShare(publication, sessionId);
+        if (isClosed) return;
+        emit(state.copyWith(sharedReveal: shared, shareVerified: true));
+      }
+      _logger.event('session.share_succeeded', {
+        'sessionId': sessionId,
+        'publish': publish,
+      });
+      emit(state.copyWith(sharing: false));
+    } catch (error) {
+      _shareFailed(error);
+    }
+  }
+
+  Future<void> verifyPublication() async {
+    final publication = state.publication;
+    final sessionId = state.sessionId;
+    if (publication?.isPublic != true ||
+        publication?.token?.isNotEmpty != true ||
+        sessionId == null ||
+        state.sharing) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        sharing: true,
+        shareVerified: false,
+        clearShareError: true,
+      ),
+    );
+    try {
+      final shared = await _verifiedShare(publication!, sessionId);
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          sharedReveal: shared,
+          shareVerified: true,
+          sharing: false,
+        ),
+      );
+    } catch (error) {
+      _shareFailed(error);
+    }
+  }
+
+  Future<SharedReveal> _verifiedShare(
+    SharePublication publication,
+    String sessionId,
+  ) async {
+    final shared = await _repository.fetchSharedReveal(
+      token: publication.token!,
+    );
+    if (shared.sessionId != sessionId ||
+        shared.shareToken != publication.token) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'The public reading did not match this session.',
+      );
+    }
+    return shared;
+  }
+
+  void _shareFailed(Object error) {
+    if (isClosed) return;
+    final apiError = error is AppApiException ? error : null;
+    _logger.event('session.share_failed', {
+      'sessionId': state.sessionId,
+      'kind': apiError?.kind.name ?? 'unknown',
+    });
+    emit(
+      state.copyWith(
+        sharing: false,
+        shareVerified: false,
+        shareError: _readableError(error),
+        requiresReauthentication: apiError?.isAuthRelated == true,
+      ),
+    );
   }
 
   Future<void> _loadNextPairing({
@@ -442,11 +594,17 @@ class SessionCubit extends Cubit<SessionState> {
           clearErrorMessage: true,
           requiresReauthentication: false,
           exchanges: experience?.exchanges,
+          publication: experience?.publication,
+          clearPublication: experience?.publication == null,
+          shareMayBePublic: experience?.publication?.isPublic == true,
+          shareVerified: false,
+          clearShareError: true,
           read: experience?.latestRead,
           clearSelection:
               nextRound.pairing?.id != state.currentRound?.pairing?.id,
         ),
       );
+      if (isComplete && _resultRepository != null) await revealSession();
     } catch (error) {
       _logger.error('session.next_pairing_failed', error, <String, Object?>{
         'sessionId': sessionId,

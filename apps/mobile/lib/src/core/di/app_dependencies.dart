@@ -18,6 +18,7 @@ import '../../features/session/data/repositories/session_repository_impl.dart';
 import '../../features/session/data/session_resume_store.dart';
 import '../../features/session/domain/repositories/session_repository.dart';
 import '../../features/session/domain/repositories/session_experience_repository.dart';
+import '../../features/session/domain/repositories/session_result_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
 import '../config/app_config.dart';
 import '../logging/app_logger.dart';
@@ -108,6 +109,9 @@ class AppDependencies {
       sessionRepository,
       experienceRepository: config.experienceV1
           ? sessionRepository as SessionExperienceRepository
+          : null,
+      resultRepository: config.experienceV1
+          ? sessionRepository as SessionResultRepository
           : null,
       startedSession: startedSession,
       resumeStore: sessionResumeStore,
