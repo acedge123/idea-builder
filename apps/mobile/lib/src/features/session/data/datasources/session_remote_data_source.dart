@@ -90,7 +90,10 @@ class SessionRemoteDataSource {
   Future<Map<String, dynamic>> revealSession({
     required String sessionId,
   }) async {
-    final response = await _apiClient.post('/api/v1/session/$sessionId/reveal');
+    final response = await _apiClient.post(
+      '/api/v1/session/$sessionId/reveal',
+      headers: _experienceHeaders,
+    );
     return _decodeJson(response);
   }
 
@@ -100,6 +103,17 @@ class SessionRemoteDataSource {
     final response = await _apiClient.get('/api/v1/share/$token');
     return _decodeJson(response);
   }
+
+  Future<Map<String, dynamic>> setPublication({
+    required String sessionId,
+    required bool publish,
+  }) async => _decodeJson(
+    await _apiClient.post(
+      '/api/v1/session/$sessionId/share',
+      headers: _experienceHeaders,
+      body: {'publish': publish},
+    ),
+  );
 
   Map<String, dynamic> _decodeJson(http.Response response) {
     final body = _readBody(response);

@@ -4,13 +4,31 @@ import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/session_experience_repository.dart';
 import '../../domain/entities/session_experience.dart';
 import '../session_experience_mapper.dart';
+import '../session_result_mapper.dart';
+import '../../domain/entities/session_result.dart';
+import '../../domain/repositories/session_result_repository.dart';
 import '../datasources/session_remote_data_source.dart';
 
 class SessionRepositoryImpl
-    implements SessionRepository, SessionExperienceRepository {
+    implements
+        SessionRepository,
+        SessionExperienceRepository,
+        SessionResultRepository {
   SessionRepositoryImpl(this._remoteDataSource);
 
   final SessionRemoteDataSource _remoteDataSource;
+
+  @override
+  Future<SharePublication> setPublication({
+    required String sessionId,
+    required bool publish,
+  }) async => mapSharePublication(
+    await _remoteDataSource.setPublication(
+      sessionId: sessionId,
+      publish: publish,
+    ),
+    publish,
+  );
 
   @override
   Future<SessionExperience> fetchExperience({required String sessionId}) async {
@@ -104,14 +122,19 @@ class SessionRepositoryImpl
     final response = await _remoteDataSource.revealSession(
       sessionId: sessionId,
     );
+    final result = _remoteDataSource.experienceV1
+        ? mapSessionResult(response)
+        : null;
+    final full = result == null ? response : experienceObject(response['full']);
     return SessionReveal(
-      archetypeId: response['archetypeId'] as String?,
-      archetypeName: response['archetypeName'] as String?,
-      interpretation: response['interpretation'] as String? ?? '',
-      vector: _readVector(response['vector']),
-      allowedClaims: _readAllowedClaims(response['allowed_claims']),
-      counterarguments: _readCounterarguments(response['counterarguments']),
-      shareToken: response['share_token'] as String?,
+      archetypeId: full['archetypeId'] as String?,
+      archetypeName: full['archetypeName'] as String?,
+      interpretation: full['interpretation'] as String? ?? '',
+      vector: _readVector(full['vector']),
+      allowedClaims: _readAllowedClaims(full['allowed_claims']),
+      counterarguments: _readCounterarguments(full['counterarguments']),
+      shareToken: result == null ? response['share_token'] as String? : null,
+      result: result,
     );
   }
 

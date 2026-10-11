@@ -1,5 +1,6 @@
 import '../../../core/network/app_api_exception.dart';
 import '../domain/entities/session_experience.dart';
+import '../domain/entities/session_result.dart';
 
 Map<String, dynamic> experienceObject(Object? value) {
   if (value is Map<String, dynamic>) return value;
@@ -102,5 +103,13 @@ SessionExperience mapSessionExperience(
   return SessionExperience(
     sessionId: sessionId,
     exchanges: indexed.map((e) => e.exchange).toList(),
+    publication: data['is_public'] is bool
+        ? SharePublication(
+            isPublic: data['is_public'] == true,
+            token: data['is_public'] == true
+                ? data['share_token'] as String?
+                : null,
+          )
+        : null,
   );
 }
