@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'session_pairing.dart';
+import 'session_result.dart';
 
 enum SessionReaction {
   thatsMe('thats_me'),
@@ -79,9 +80,11 @@ class SessionExperience {
   SessionExperience({
     required this.sessionId,
     required List<SessionExchange> exchanges,
+    this.publication,
   }) : exchanges = List.unmodifiable(exchanges);
   final String sessionId;
   final List<SessionExchange> exchanges;
+  final SharePublication? publication;
   SessionRead? get latestRead {
     for (final exchange in exchanges.reversed) {
       if (exchange.read != null) return exchange.read;
