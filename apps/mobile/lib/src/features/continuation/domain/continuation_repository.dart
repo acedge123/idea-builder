@@ -24,10 +24,13 @@ class ConversationMessage {
     required this.role,
     required this.content,
     required this.createdAt,
+    this.id,
+    this.mutationId,
   });
   final ConversationRole role;
   final String content;
   final DateTime createdAt;
+  final String? id, mutationId;
 }
 
 class ConversationSnapshot {
@@ -49,11 +52,15 @@ class ConversationResultVersion {
     required this.source,
     required this.createdAt,
     this.baseVersion,
+    this.interpretation,
+    this.selfReportTurns,
   });
   final int version;
   final String source;
   final int? baseVersion;
   final DateTime createdAt;
+  final String? interpretation;
+  final int? selfReportTurns;
 }
 
 enum ContinuationFailure { unavailable, authentication, rejected, uncertain }

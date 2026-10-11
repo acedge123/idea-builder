@@ -210,8 +210,11 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                 .verifyPublication(),
                             onCopy: () => _copyShare(context, state.reveal!),
                             onSignIn: () => context.push('/auth'),
-                            onPushBack: context.read<SessionCubit>().hasExperience && widget.ownerId != null
-                                ? () => _pushBack(context, state) : null,
+                            onPushBack:
+                                context.read<SessionCubit>().hasExperience &&
+                                    widget.ownerId != null
+                                ? () => _pushBack(context, state)
+                                : null,
                           )
                         : _RevealCard(
                             reveal: state.reveal!,
@@ -308,10 +311,16 @@ class _SessionStubPageState extends State<SessionStubPage> {
   void _pushBack(BuildContext context, SessionState state) {
     final sessionId = state.sessionId;
     if (sessionId == null || widget.ownerId == null) return;
-    context.push('/session/${Uri.encodeComponent(sessionId)}/continuation',
-      extra: ContinuationContext(sessionId: sessionId, ownerId: widget.ownerId!,
-        original: state.reveal!, resultVersion: state.reveal!.result?.version,
-        evidence: state.exchanges));
+    context.push(
+      '/session/${Uri.encodeComponent(sessionId)}/continuation',
+      extra: ContinuationContext(
+        sessionId: sessionId,
+        ownerId: widget.ownerId!,
+        original: state.reveal!,
+        resultVersion: state.reveal!.result?.version,
+        evidence: state.exchanges,
+      ),
+    );
   }
 
   void _skipPairing(BuildContext context) {

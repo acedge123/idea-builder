@@ -1,5 +1,9 @@
 # TGA-313: Native Result Feedback Foundation
 
+Current integration supersedes this foundation checkpoint: see
+[first-session checklist](first-session-integration-status.md). The actual REST
+adapter now exists for experience-v1 testing; production flag defaults stay off.
+
 Baseline: Flutter main `0aa6e16` (merged PR #12). Backend reviewed:
 `acedge123/music-dna@877d7b0`.
 

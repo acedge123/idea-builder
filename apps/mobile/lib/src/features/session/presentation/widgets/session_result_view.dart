@@ -66,8 +66,11 @@ class SessionResultView extends StatelessWidget {
           runSpacing: 8,
           children: [
             if (onPushBack != null)
-              TextButton.icon(onPressed: onPushBack,
-                icon: const Icon(Icons.chat_bubble_outline), label: const Text('Push back')),
+              TextButton.icon(
+                onPressed: onPushBack,
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Push back'),
+              ),
             if (shareUrl == null && state.publication?.isPublic != true)
               FilledButton.icon(
                 onPressed: state.sharing ? null : onPublish,

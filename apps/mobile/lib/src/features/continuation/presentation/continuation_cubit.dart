@@ -39,7 +39,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
   String? _mutationId, _submittedMessage;
 
   void editDraft(String value) {
-    if (state.status == ContinuationStatus.sending) return;
+    if (state.busy || state.uncertainDelivery) return;
     emit(
       ContinuationState(
         status: state.status,
@@ -59,13 +59,31 @@ class ContinuationCubit extends Cubit<ContinuationState> {
       final snapshot = await _repository.load(context);
       _validate(snapshot);
       if (isClosed) return;
+      final reconciled =
+          _mutationId != null &&
+          snapshot.messages.any(
+            (m) =>
+                m.role == ConversationRole.user &&
+                m.mutationId == _mutationId &&
+                m.content == _submittedMessage,
+          ) &&
+          snapshot.messages.any(
+            (m) =>
+                m.role == ConversationRole.assistant &&
+                m.mutationId == '$_mutationId:reply' &&
+                m.content.trim().isNotEmpty,
+          );
+      if (reconciled) {
+        _mutationId = null;
+        _submittedMessage = null;
+      }
       emit(
         ContinuationState(
           status: ContinuationStatus.ready,
           messages: snapshot.messages,
           versions: snapshot.versions,
-          draft: state.draft,
-          uncertainDelivery: state.uncertainDelivery,
+          draft: reconciled ? '' : state.draft,
+          uncertainDelivery: state.uncertainDelivery && !reconciled,
         ),
       );
     } catch (error) {

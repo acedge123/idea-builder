@@ -77,10 +77,26 @@ void main() {
   test('retains all requirement and gap owners without accepting them', () {
     final requirements = (trace['requirements'] as List)
         .cast<Map<String, dynamic>>();
-    expect(requirements.length, 76);
-    expect(requirements.map((r) => r['id']).toSet().length, 76);
+    final prd = File(
+      '../../docs/musicdna/product-requirements.md',
+    ).readAsStringSync();
+    final prdIds = RegExp(
+      r'\*\*([A-Z]+\d{2}) P[01]',
+    ).allMatches(prd).map((m) => m[1]!).toSet();
+    final traceIds = requirements.map((r) => r['id']).toSet();
+    expect(trace['prd_version'], '1.2');
+    expect(traceIds, prdIds);
+    expect(requirements.length, traceIds.length);
     expect(requirements.any((r) => r['id'] == 'ARC06'), isTrue);
+    final entries = {
+      for (final match in RegExp(
+        r'\*\*([A-Z]+\d{2}) (P[01]) [^*]+\*\* ([^\n]+)',
+      ).allMatches(prd))
+        match[1]!: (priority: match[2]!, criteria: match[3]!),
+    };
     for (final requirement in requirements) {
+      expect(requirement['priority'], entries[requirement['id']]!.priority);
+      expect(requirement['criteria'], entries[requirement['id']]!.criteria);
       expect(requirement['tickets'], isNotEmpty);
       expect((requirement['acceptance'] as Map)['status'], 'pending');
     }

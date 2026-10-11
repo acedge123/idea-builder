@@ -89,6 +89,10 @@ class _ContinuationPageState extends State<ContinuationPage> {
                                   if (version.baseVersion != null)
                                     'Based on version ${version.baseVersion}',
                                   version.createdAt.toLocal().toString(),
+                                  if (version.interpretation != null)
+                                    version.interpretation!,
+                                  if (version.selfReportTurns != null)
+                                    '${version.selfReportTurns} conversation self-report turns',
                                 ].join('\n'),
                               ),
                             ),
@@ -142,7 +146,7 @@ class _ContinuationPageState extends State<ContinuationPage> {
                       child: TextField(
                         controller: _draft,
                         onChanged: cubit.editDraft,
-                        enabled: state.status != ContinuationStatus.sending,
+                        enabled: !state.busy && !state.uncertainDelivery,
                         minLines: 1,
                         maxLines: 3,
                         maxLength: 2000,

@@ -1,5 +1,9 @@
 # TGA-316: Native continuation foundation
 
+Current integration supersedes this foundation checkpoint: see
+[first-session checklist](first-session-integration-status.md). Continuation,
+versioned results, and feedback are now consolidated into PR #11.
+
 ## Scope and rollout
 
 Flutter only. `MUSICDNA_EXPERIENCE_V1` remains false by default. No release

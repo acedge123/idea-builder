@@ -21,6 +21,7 @@ import '../../features/session/domain/repositories/session_experience_repository
 import '../../features/session/domain/repositories/session_result_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
 import '../../features/result_feedback/data/unavailable_result_feedback_repository.dart';
+import '../../features/result_feedback/data/rest_result_feedback_repository.dart';
 import '../../features/result_feedback/domain/result_feedback.dart';
 import '../../features/result_feedback/domain/result_feedback_repository.dart';
 import '../../features/result_feedback/presentation/result_feedback_cubit.dart';
@@ -95,8 +96,10 @@ class AppDependencies {
     sessionRemoteDataSource,
   );
   late final SessionResumeStore sessionResumeStore = SessionResumeStore();
-  final ResultFeedbackRepository resultFeedbackRepository =
-      const UnavailableResultFeedbackRepository();
+  late final ResultFeedbackRepository resultFeedbackRepository =
+      config.experienceV1
+      ? RestResultFeedbackRepository(apiClient)
+      : const UnavailableResultFeedbackRepository();
 
   bool get hasResultFeedback =>
       config.experienceV1 && resultFeedbackRepository.available;

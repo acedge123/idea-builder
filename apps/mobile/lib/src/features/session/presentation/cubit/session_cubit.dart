@@ -475,6 +475,9 @@ class SessionCubit extends Cubit<SessionState> {
       );
       if (isClosed) return;
       if (publication.isPublic != publish ||
+          (publish &&
+              publication.resultVersion != null &&
+              publication.resultVersion != state.reveal?.result?.version) ||
           (publish && publication.token?.isNotEmpty != true)) {
         throw const AppApiException(
           kind: AppApiErrorKind.upstream,

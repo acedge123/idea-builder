@@ -10,13 +10,21 @@ import 'package:music_dna/src/features/continuation/presentation/continuation_cu
 
 import 'continuation_test.dart' show savedContext;
 
-Map<String, dynamic> transcript() => {
+Map<String, dynamic> transcript([String mutation = 'stable-id']) => {
   'contract': 1,
   'session_id': 'saved-session',
   'messages': [
-    {'role': 'user', 'content': 'No', 'created_at': '2026-10-11T00:00:00Z'},
+    {
+      'id': 'user-id',
+      'mutation_id': mutation,
+      'role': 'user',
+      'content': 'No',
+      'created_at': '2026-10-11T00:00:00Z',
+    },
     {
       'role': 'assistant',
+      'id': 'reply-id',
+      'mutation_id': '$mutation:reply',
       'content': 'Which part?',
       'created_at': '2026-10-11T00:00:00Z',
     },
@@ -32,6 +40,8 @@ Map<String, dynamic> transcript() => {
       'version': 2,
       'source': 'chat_self_report',
       'base_version': 1,
+      'content': {'synthesis': 'Stored interpretation'},
+      'self_report': {'turns': 1},
       'created_at': '2026-10-11T00:00:00Z',
     },
   ],
@@ -52,6 +62,49 @@ Matcher failure(ContinuationFailure value) => throwsA(
 );
 
 void main() {
+  test(
+    'pending turn is uncertain; exact keyed read clears delivery without resubmitting',
+    () async {
+      String? mutation;
+      var ready = false;
+      var posts = 0;
+      final repo = repository((request) async {
+        if (request.method == 'POST') {
+          posts++;
+          mutation = (jsonDecode(request.body) as Map)['mutation_id'] as String;
+          return http.Response(
+            jsonEncode({
+              'error': {'code': 'CHAT_TURN_PENDING', 'message': 'Pending'},
+            }),
+            409,
+          );
+        }
+        return http.Response(
+          jsonEncode(
+            ready ? transcript(mutation!) : {...transcript(), 'messages': []},
+          ),
+          200,
+        );
+      });
+      final cubit = ContinuationCubit(savedContext(), repo);
+      addTearDown(cubit.close);
+      await cubit.load();
+      cubit.editDraft('No');
+      await cubit.send();
+      expect(cubit.state.uncertainDelivery, true);
+      cubit.editDraft('Changed while pending');
+      expect(cubit.state.draft, 'No');
+      await cubit.load();
+      expect(cubit.state.uncertainDelivery, true);
+      ready = true;
+      await cubit.load();
+      expect(cubit.state.uncertainDelivery, false);
+      expect(cubit.state.draft, '');
+      expect(posts, 1);
+      expect(cubit.state.versions.last.interpretation, 'Stored interpretation');
+      expect(cubit.state.versions.last.selfReportTurns, 1);
+    },
+  );
   test(
     'GET restores chronological messages and separate self-report metadata',
     () async {
@@ -115,7 +168,7 @@ void main() {
                   'session_id': 'saved-session',
                   'replayed': true,
                 }
-              : transcript(),
+              : transcript('same-id'),
         ),
         200,
       ),
@@ -219,8 +272,8 @@ void main() {
       await cubit.load();
       cubit.editDraft('No');
       await cubit.send();
-    expect(cubit.state.uncertainDelivery, true);
-    expect(cubit.state.versions.last.baseVersion, 1);
+      expect(cubit.state.uncertainDelivery, true);
+      expect(cubit.state.versions.last.baseVersion, 1);
       expect(cubit.state.draft, 'No');
       failLoad = false;
       await cubit.load();

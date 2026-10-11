@@ -35,6 +35,10 @@ class RestContinuationRepository implements ContinuationRepository {
               : ConversationRole.assistant,
           content: _text(row['content']),
           createdAt: _date(row['created_at']),
+          id: row['id'] == null ? null : _text(row['id']),
+          mutationId: row['mutation_id'] == null
+              ? null
+              : _text(row['mutation_id']),
         );
       }).toList();
       final versions = (data['result_versions'] as List).map((raw) {
@@ -48,6 +52,12 @@ class RestContinuationRepository implements ContinuationRepository {
           source: source,
           baseVersion: base as int?,
           createdAt: _date(row['created_at']),
+          interpretation: row['content'] == null
+              ? null
+              : _object(row['content'])['synthesis'] as String?,
+          selfReportTurns: row['self_report'] == null
+              ? null
+              : _object(row['self_report'])['turns'] as int?,
         );
       }).toList();
       return ConversationSnapshot(
@@ -91,7 +101,22 @@ class RestContinuationRepository implements ContinuationRepository {
     // POST is not a transcript DTO. Never append a speculative local pair or
     // repeat POST just because the subsequent history refresh failed.
     try {
-      return await load(context);
+      final snapshot = await load(context);
+      if (!snapshot.messages.any(
+            (m) =>
+                m.role == ConversationRole.user &&
+                m.mutationId == mutationId &&
+                m.content == message,
+          ) ||
+          !snapshot.messages.any(
+            (m) =>
+                m.role == ConversationRole.assistant &&
+                m.mutationId == '$mutationId:reply' &&
+                m.content.trim().isNotEmpty,
+          )) {
+        _invalid(true);
+      }
+      return snapshot;
     } catch (_) {
       throw const ContinuationException(ContinuationFailure.uncertain);
     }
@@ -103,6 +128,18 @@ class RestContinuationRepository implements ContinuationRepository {
   }) {
     if (response.statusCode == 401) {
       throw const ContinuationException(ContinuationFailure.authentication);
+    }
+    if (writing && response.statusCode == 409) {
+      try {
+        final error = jsonDecode(response.body);
+        if (error is Map &&
+            error['error'] is Map &&
+            error['error']['code'] == 'CHAT_TURN_PENDING') {
+          _invalid(true);
+        }
+      } on ContinuationException {
+        rethrow;
+      } catch (_) {}
     }
     if ([400, 403, 404, 409].contains(response.statusCode)) {
       throw const ContinuationException(ContinuationFailure.rejected);
