@@ -11,6 +11,8 @@ import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
 import '../widgets/session_result_view.dart';
+import '../../../result_feedback/presentation/result_feedback_cubit.dart';
+import '../../../result_feedback/presentation/result_feedback_view.dart';
 
 class SessionStubPage extends StatefulWidget {
   const SessionStubPage({
@@ -18,11 +20,17 @@ class SessionStubPage extends StatefulWidget {
     required this.shareBaseUrl,
     this.startedSession,
     this.ownerId,
+    this.createFeedbackCubit,
   });
 
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
   final String? ownerId;
+  final ResultFeedbackCubit Function({
+    required String sessionId,
+    required int resultVersion,
+  })?
+  createFeedbackCubit;
 
   @override
   State<SessionStubPage> createState() => _SessionStubPageState();
@@ -202,6 +210,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                 .verifyPublication(),
                             onCopy: () => _copyShare(context, state.reveal!),
                             onSignIn: () => context.push('/auth'),
+                            onPushBack: context.read<SessionCubit>().hasExperience && widget.ownerId != null
+                                ? () => _pushBack(context, state) : null,
                           )
                         : _RevealCard(
                             reveal: state.reveal!,
@@ -262,6 +272,23 @@ class _SessionStubPageState extends State<SessionStubPage> {
                     onPrimary: () => context.go('/onboarding'),
                   ),
                 },
+                if (state.status == SessionStatus.revealed &&
+                    state.reveal?.result != null &&
+                    state.sessionId != null &&
+                    widget.createFeedbackCubit != null)
+                  BlocProvider<ResultFeedbackCubit>(
+                    key: ValueKey((
+                      state.sessionId,
+                      state.reveal!.result!.version,
+                    )),
+                    create: (_) => widget.createFeedbackCubit!(
+                      sessionId: state.sessionId!,
+                      resultVersion: state.reveal!.result!.version,
+                    )..load(),
+                    child: ResultFeedbackView(
+                      onSignIn: () => context.push('/auth'),
+                    ),
+                  ),
               ],
             );
           },
@@ -276,6 +303,15 @@ class _SessionStubPageState extends State<SessionStubPage> {
       chosenSongId: chosenSongId,
       msToDecide: elapsedMs,
     );
+  }
+
+  void _pushBack(BuildContext context, SessionState state) {
+    final sessionId = state.sessionId;
+    if (sessionId == null || widget.ownerId == null) return;
+    context.push('/session/${Uri.encodeComponent(sessionId)}/continuation',
+      extra: ContinuationContext(sessionId: sessionId, ownerId: widget.ownerId!,
+        original: state.reveal!, resultVersion: state.reveal!.result?.version,
+        evidence: state.exchanges));
   }
 
   void _skipPairing(BuildContext context) {

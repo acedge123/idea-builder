@@ -79,6 +79,9 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
           )..initialize(),
           child: SessionStubPage(
             ownerId: dependencies.authRepository.currentUser?.id,
+            createFeedbackCubit: dependencies.hasResultFeedback
+                ? dependencies.createResultFeedbackCubit
+                : null,
             shareBaseUrl: dependencies.config.shareBaseUrl,
             startedSession: state.extra is StartedMusicSession
                 ? state.extra as StartedMusicSession
