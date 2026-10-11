@@ -34,10 +34,26 @@ class ConversationSnapshot {
   ConversationSnapshot({
     required this.sessionId,
     required List<ConversationMessage> messages,
-  }) : messages = List.unmodifiable(messages);
+    List<ConversationResultVersion> versions = const [],
+  }) : messages = List.unmodifiable(messages),
+       versions = List.unmodifiable(versions);
   final String sessionId;
   // Preserve server order, including equal timestamps and repeated content.
   final List<ConversationMessage> messages;
+  final List<ConversationResultVersion> versions;
+}
+
+class ConversationResultVersion {
+  const ConversationResultVersion({
+    required this.version,
+    required this.source,
+    required this.createdAt,
+    this.baseVersion,
+  });
+  final int version;
+  final String source;
+  final int? baseVersion;
+  final DateTime createdAt;
 }
 
 enum ContinuationFailure { unavailable, authentication, rejected, uncertain }
@@ -54,8 +70,9 @@ abstract interface class ContinuationRepository {
   // definite rejection from uncertain delivery; uncertain writes cannot retry.
   Future<ConversationSnapshot> submit(
     ContinuationContext context,
-    String message,
-  );
+    String message, {
+    required String mutationId,
+  });
 }
 
 class UnavailableContinuationRepository implements ContinuationRepository {
@@ -68,8 +85,9 @@ class UnavailableContinuationRepository implements ContinuationRepository {
   @override
   Future<ConversationSnapshot> submit(
     ContinuationContext context,
-    String message,
-  ) async {
+    String message, {
+    required String mutationId,
+  }) async {
     throw const ContinuationException(ContinuationFailure.unavailable);
   }
 }

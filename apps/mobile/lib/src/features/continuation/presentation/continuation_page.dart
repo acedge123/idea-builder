@@ -73,6 +73,27 @@ class _ContinuationPageState extends State<ContinuationPage> {
                     const SizedBox(height: 8),
                     SelectableText(cubit.context.original.interpretation),
                     const Divider(height: 32),
+                    if (state.versions.isNotEmpty)
+                      ExpansionTile(
+                        title: const Text('Result versions'),
+                        tilePadding: EdgeInsets.zero,
+                        children: [
+                          for (final version in state.versions)
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                'Version ${version.version} · ${version.source == 'pairings' ? 'Pairing evidence' : 'Conversation self-report'}',
+                              ),
+                              subtitle: Text(
+                                [
+                                  if (version.baseVersion != null)
+                                    'Based on version ${version.baseVersion}',
+                                  version.createdAt.toLocal().toString(),
+                                ].join('\n'),
+                              ),
+                            ),
+                        ],
+                      ),
                     for (final message in state.messages)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20),

@@ -6,6 +6,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/continuation/domain/continuation_repository.dart';
+import '../../features/continuation/data/rest_continuation_repository.dart';
 import '../../features/continuation/presentation/continuation_cubit.dart';
 import '../../features/onboarding/domain/entities/started_music_session.dart';
 import '../../features/onboarding/data/datasources/onboarding_remote_data_source.dart';
@@ -26,7 +27,7 @@ class AppDependencies {
   AppDependencies({
     required this.config,
     required this.supabase,
-    this.continuationRepository = const UnavailableContinuationRepository(),
+    ContinuationRepository? continuationRepository,
   }) {
     apiClient = MusicDnaApiClient(
       baseUrl: config.apiBaseUrl,
@@ -35,11 +36,16 @@ class AppDependencies {
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
     authRepository = AuthRepositoryImpl(authRemoteDataSource);
+    this.continuationRepository =
+        continuationRepository ??
+        (config.experienceV1
+            ? RestContinuationRepository(apiClient)
+            : const UnavailableContinuationRepository());
   }
 
   final AppConfig config;
   final SupabaseClient supabase;
-  final ContinuationRepository continuationRepository;
+  late final ContinuationRepository continuationRepository;
   final Map<ContinuationContext, ContinuationCubit> _continuations = {};
   String? _continuationOwner;
 

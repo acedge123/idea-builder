@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:math';
 
 import '../domain/continuation_repository.dart';
 
@@ -11,12 +12,14 @@ class ContinuationState {
     this.draft = '',
     this.failure,
     this.uncertainDelivery = false,
+    this.versions = const [],
   });
   final ContinuationStatus status;
   final List<ConversationMessage> messages;
   final String draft;
   final ContinuationFailure? failure;
   final bool uncertainDelivery;
+  final List<ConversationResultVersion> versions;
 
   bool get busy =>
       status == ContinuationStatus.loading ||
@@ -33,6 +36,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
     : super(const ContinuationState());
   final ContinuationContext context;
   final ContinuationRepository _repository;
+  String? _mutationId, _submittedMessage;
 
   void editDraft(String value) {
     if (state.status == ContinuationStatus.sending) return;
@@ -43,6 +47,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
         draft: value,
         failure: state.failure,
         uncertainDelivery: state.uncertainDelivery,
+        versions: state.versions,
       ),
     );
   }
@@ -58,6 +63,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
         ContinuationState(
           status: ContinuationStatus.ready,
           messages: snapshot.messages,
+          versions: snapshot.versions,
           draft: state.draft,
           uncertainDelivery: state.uncertainDelivery,
         ),
@@ -70,15 +76,30 @@ class ContinuationCubit extends Cubit<ContinuationState> {
   Future<void> send() async {
     if (!state.canSend) return;
     final message = state.draft.trim();
+    if (_submittedMessage != message || _mutationId == null) {
+      _submittedMessage = message;
+      final random = Random.secure();
+      _mutationId = List.generate(
+        16,
+        (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join();
+    }
     _transition(ContinuationStatus.sending);
     try {
-      final snapshot = await _repository.submit(context, message);
+      final snapshot = await _repository.submit(
+        context,
+        message,
+        mutationId: _mutationId!,
+      );
       _validate(snapshot);
       if (isClosed) return;
+      _mutationId = null;
+      _submittedMessage = null;
       emit(
         ContinuationState(
           status: ContinuationStatus.ready,
           messages: snapshot.messages,
+          versions: snapshot.versions,
         ),
       );
     } catch (error) {
@@ -98,6 +119,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
       messages: state.messages,
       draft: state.draft,
       uncertainDelivery: state.uncertainDelivery,
+      versions: state.versions,
     ),
   );
 
@@ -113,6 +135,7 @@ class ContinuationCubit extends Cubit<ContinuationState> {
         status: ContinuationStatus.failed,
         messages: state.messages,
         draft: state.draft,
+        versions: state.versions,
         failure: failure,
         uncertainDelivery:
             state.uncertainDelivery || failure == ContinuationFailure.uncertain,

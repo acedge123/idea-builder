@@ -15,31 +15,47 @@ authoritative: no speculative reply or synthetic evidence is added to it.
 Repositories must preserve server order, including repeated text/equal timestamps.
 No chat content is logged or persisted to disk by this implementation.
 
-## Backend dependency: not yet live
+## REST transport update
 
-Reviewed Lovable main `68bd6e77d464e74f8c0b643798e9b0ab9fd1928f`.
-`src/lib/musicdna.functions.ts` provides authenticated `listChat` and `chatTurn`
-TanStack server functions. The `src/routes/api/v1` tree has no stable chat REST
-route. Flutter deliberately does not call generated web server-function URLs.
-Production uses `UnavailableContinuationRepository`; send stays disabled and
-the screen explicitly says conversation is unavailable. Tests inject a repository;
-those tests are not evidence of deployed web/mobile chat parity.
+Reviewed Lovable main `62fdbe0`. The stable route now exists:
+`GET/POST /api/v1/session/:id/chat`. Opted-in Flutter uses
+`RestContinuationRepository`; the default-off experience still has no chat
+requests. Both requests send `X-MusicDNA-Experience: 1` and use the existing
+access-token provider. No generated web server-function URLs are used.
 
-Lovable must supply an accepted, authenticated mobile contract for:
+POST sends a random 128-bit `mutation_id` retained for the pending text. Definite
+rejection/auth retry reuses it; successful completion clears it. A successful
+reply is followed by GET, so the UI renders stored history rather than appending
+synthetic user/assistant rows. Empty replies, invalid acknowledgments and failed
+history refreshes leave the draft and quarantine sending.
 
-- Loading an owned session's ordered recent messages, with stable message IDs,
-  pagination and explicit session/result identity.
-- Submitting a turn to that same session, with a persisted client request ID and
-  replay/reconciliation semantics. The current server function saves the user
-  message before generating the reply; timeouts can leave partially stored turns.
-- Returning authoritative history and separately versioned revisions, including
-  original claim, triggering evidence, evidence source and new interpretation.
-- Access errors and server-verified ownership; no automatic replacement session.
+GET restores transcript order and immutable result-version metadata. The screen
+labels pairing versus conversation self-report and its base version. This DTO
+does not include revision content, original/new claim text, triggering evidence,
+stable message IDs or pagination; do not infer any of those from reply text.
 
-The existing functions return role/content/created_at history and reply/sessionId,
-not a replay-safe transaction or revision DTO. Do not invent endpoint paths or
-interpret a chat reply as a result revision. Wire the real adapter only after that
-contract is agreed and tested against the web fixtures.
+Read-only production check: the chat GET route returns HTTP 401 with the typed
+UNAUTHORIZED envelope without a bearer token. This confirms reachability, not
+authenticated persistence, ownership, index deployment or safe replay.
+
+## Remaining backend correctness gaps
+
+In `src/lib/musicdna.functions.ts` at the reviewed SHA:
+
+- Replay finds the first assistant row after the user's timestamp, not a reply
+  bound to that mutation. Another concurrent turn's reply can be returned.
+- An unfinished turn returns an empty reply with `replayed: true`. A user-row
+  commit alone is not a completed reply acknowledgment or recovery protocol.
+- User and assistant inserts do not check their returned errors. Concurrent
+  attempts can both generate replies/self-report versions even when the unique
+  index rejects one user insert, or acknowledge a reply that was not stored.
+- GET orders ascending then limits to 200, returning the earliest messages, not
+  the latest window once a conversation exceeds that limit.
+
+Lovable owns these fixes. Needed: exact mutation-to-reply association, explicit
+pending/failed/completed status, checked writes and safe concurrent recovery,
+plus revision content and transcript pagination. Flutter does not automatically
+retry an ambiguous write merely because the new endpoint accepts mutation IDs.
 
 ## Failure and draft semantics
 
@@ -64,11 +80,15 @@ Widget coverage checks 375x667 layout at 2x text scale with keyboard insets,
 back navigation and in-process draft restoration.
 
 Local validation: `flutter analyze --no-pub` clean, `flutter test --no-pub`
-68 tests passed, `flutter build ios --simulator --debug --no-pub` succeeded.
-These checks run against the injected test repository, not a live chat service.
+76 tests passed, `flutter build ios --simulator --debug --no-pub` succeeded.
+Coverage includes HTTP mocks for GET/POST, contract/auth/identity validation,
+completed/empty replay and a failed GET after successful POST. These are client
+tests, not authenticated live chat verification.
 
-TGA-316 remains implementation-in-progress, not accepted. Outstanding: real REST
-adapter, result-version restoration, revision/provenance rendering, request-ID
-reconciliation, approved F21/F16/F22 integration fixtures, physical iPhone
+TGA-316 remains implementation-in-progress, not accepted. The REST adapter and
+version metadata presentation are implemented. Outstanding: integration with
+TGA-276's original result-version model (PR #12), full revision/provenance
+restoration, server request-ID reconciliation, approved F21/F16/F22 integration
+fixtures, authenticated persistence/concurrency tests, physical iPhone
 keyboard/scroll/VoiceOver testing, and signed-build acceptance. Apple 0.1.1 build 3
 does not include this work. Automated widget layout checks are not device QA.

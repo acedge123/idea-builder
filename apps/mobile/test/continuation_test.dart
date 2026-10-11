@@ -31,6 +31,7 @@ class FakeConversationRepository implements ContinuationRepository {
   Object? loadError, submitError;
   Completer<ConversationSnapshot>? pending;
   final List<String> sent = [];
+  final List<String> mutationIds = [];
   @override
   Future<ConversationSnapshot> load(ContinuationContext context) async {
     if (loadError != null) throw loadError!;
@@ -40,9 +41,11 @@ class FakeConversationRepository implements ContinuationRepository {
   @override
   Future<ConversationSnapshot> submit(
     ContinuationContext context,
-    String message,
-  ) async {
+    String message, {
+    required String mutationId,
+  }) async {
     sent.add(message);
+    mutationIds.add(mutationId);
     if (submitError != null) throw submitError!;
     if (pending != null) return pending!.future;
     return snapshot;
@@ -153,6 +156,7 @@ void main() {
       await cubit.load();
       await cubit.send();
       expect(repository.sent, ['Keep this draft', 'Keep this draft']);
+      expect(repository.mutationIds[0], repository.mutationIds[1]);
       expect(cubit.state.draft, isEmpty);
     },
   );
