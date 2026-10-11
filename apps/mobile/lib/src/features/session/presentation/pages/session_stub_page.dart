@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../continuation/domain/continuation_repository.dart';
 import '../../../onboarding/domain/entities/started_music_session.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
@@ -15,10 +16,12 @@ class SessionStubPage extends StatefulWidget {
     super.key,
     required this.shareBaseUrl,
     this.startedSession,
+    this.ownerId,
   });
 
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
+  final String? ownerId;
 
   @override
   State<SessionStubPage> createState() => _SessionStubPageState();
@@ -189,6 +192,20 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             shareUrl: _buildShareUrl(state.reveal!),
                             onCopyShare: () =>
                                 _copyShare(context, state.reveal!),
+                            onPushBack:
+                                context.read<SessionCubit>().hasExperience &&
+                                    state.sessionId != null &&
+                                    widget.ownerId != null
+                                ? () => context.push(
+                                    '/session/${Uri.encodeComponent(state.sessionId!)}/continuation',
+                                    extra: ContinuationContext(
+                                      sessionId: state.sessionId!,
+                                      ownerId: widget.ownerId!,
+                                      original: state.reveal!,
+                                      evidence: state.exchanges,
+                                    ),
+                                  )
+                                : null,
                           ),
                   SessionStatus.failure => Column(
                     children: [
@@ -745,12 +762,14 @@ class _RevealCard extends StatelessWidget {
     required this.sharedReveal,
     required this.shareUrl,
     required this.onCopyShare,
+    this.onPushBack,
   });
 
   final SessionReveal reveal;
   final SharedReveal? sharedReveal;
   final String? shareUrl;
   final VoidCallback onCopyShare;
+  final VoidCallback? onPushBack;
 
   @override
   Widget build(BuildContext context) {
@@ -788,6 +807,14 @@ class _RevealCard extends StatelessWidget {
                   : reveal.interpretation,
               style: theme.textTheme.bodyLarge,
             ),
+            if (onPushBack != null) ...[
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: onPushBack,
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Push back'),
+              ),
+            ],
             if (reveal.allowedClaims.isNotEmpty) ...<Widget>[
               const SizedBox(height: 20),
               Text(

@@ -1,8 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/di/app_dependencies.dart';
 import '../../features/auth/presentation/pages/auth_stub_page.dart';
+import '../../features/continuation/domain/continuation_repository.dart';
+import '../../features/continuation/presentation/continuation_page.dart';
 import '../../features/foundation/presentation/pages/foundation_home_page.dart';
 import '../../features/onboarding/domain/entities/started_music_session.dart';
 import '../../features/onboarding/presentation/cubit/onboarding_cubit.dart';
@@ -15,7 +18,9 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
     refreshListenable: dependencies.authRouterNotifier,
     redirect: (context, state) {
       final hasSession = dependencies.authRouterNotifier.isAuthenticated;
-      final isProtectedRoute = state.matchedLocation == '/session';
+      final isProtectedRoute =
+          state.matchedLocation == '/session' ||
+          state.matchedLocation.startsWith('/session/');
 
       if (!hasSession && isProtectedRoute) {
         return '/auth';
@@ -38,6 +43,33 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
         ),
       ),
       GoRoute(
+        path: '/session/:sessionId/continuation',
+        builder: (context, state) => AnimatedBuilder(
+          animation: dependencies.authRouterNotifier,
+          builder: (context, _) {
+            final saved = state.extra;
+            if (!dependencies.config.experienceV1 ||
+                saved is! ContinuationContext ||
+                saved.ownerId != dependencies.authRepository.currentUser?.id ||
+                saved.sessionId != state.pathParameters['sessionId']) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Conversation unavailable')),
+                body: const SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('Open your saved reading to continue.'),
+                  ),
+                ),
+              );
+            }
+            return BlocProvider.value(
+              value: dependencies.continuationFor(saved),
+              child: const ContinuationPage(),
+            );
+          },
+        ),
+      ),
+      GoRoute(
         path: '/session',
         builder: (context, state) => BlocProvider<SessionCubit>(
           create: (_) => dependencies.createSessionCubit(
@@ -46,6 +78,7 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
                 : null,
           )..initialize(),
           child: SessionStubPage(
+            ownerId: dependencies.authRepository.currentUser?.id,
             shareBaseUrl: dependencies.config.shareBaseUrl,
             startedSession: state.extra is StartedMusicSession
                 ? state.extra as StartedMusicSession
