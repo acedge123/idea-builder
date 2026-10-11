@@ -39,9 +39,15 @@ class SessionResult extends Equatable {
 }
 
 class SharePublication extends Equatable {
-  const SharePublication({required this.isPublic, this.token, this.url});
+  const SharePublication({
+    required this.isPublic,
+    this.token,
+    this.url,
+    this.resultVersion,
+  });
   final bool isPublic;
   final String? token, url;
+  final int? resultVersion;
   @override
-  List<Object?> get props => [isPublic, token, url];
+  List<Object?> get props => [isPublic, token, url, resultVersion];
 }
