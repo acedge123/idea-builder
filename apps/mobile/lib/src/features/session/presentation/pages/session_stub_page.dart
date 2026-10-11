@@ -10,16 +10,24 @@ import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
 import '../widgets/session_result_view.dart';
+import '../../../result_feedback/presentation/result_feedback_cubit.dart';
+import '../../../result_feedback/presentation/result_feedback_view.dart';
 
 class SessionStubPage extends StatefulWidget {
   const SessionStubPage({
     super.key,
     required this.shareBaseUrl,
     this.startedSession,
+    this.createFeedbackCubit,
   });
 
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
+  final ResultFeedbackCubit Function({
+    required String sessionId,
+    required int resultVersion,
+  })?
+  createFeedbackCubit;
 
   @override
   State<SessionStubPage> createState() => _SessionStubPageState();
@@ -245,6 +253,23 @@ class _SessionStubPageState extends State<SessionStubPage> {
                     onPrimary: () => context.go('/onboarding'),
                   ),
                 },
+                if (state.status == SessionStatus.revealed &&
+                    state.reveal?.result != null &&
+                    state.sessionId != null &&
+                    widget.createFeedbackCubit != null)
+                  BlocProvider<ResultFeedbackCubit>(
+                    key: ValueKey((
+                      state.sessionId,
+                      state.reveal!.result!.version,
+                    )),
+                    create: (_) => widget.createFeedbackCubit!(
+                      sessionId: state.sessionId!,
+                      resultVersion: state.reveal!.result!.version,
+                    )..load(),
+                    child: ResultFeedbackView(
+                      onSignIn: () => context.push('/auth'),
+                    ),
+                  ),
               ],
             );
           },

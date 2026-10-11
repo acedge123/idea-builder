@@ -17,6 +17,10 @@ import '../../features/session/domain/repositories/session_repository.dart';
 import '../../features/session/domain/repositories/session_experience_repository.dart';
 import '../../features/session/domain/repositories/session_result_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
+import '../../features/result_feedback/data/unavailable_result_feedback_repository.dart';
+import '../../features/result_feedback/domain/result_feedback.dart';
+import '../../features/result_feedback/domain/result_feedback_repository.dart';
+import '../../features/result_feedback/presentation/result_feedback_cubit.dart';
 import '../config/app_config.dart';
 import '../logging/app_logger.dart';
 import '../network/music_dna_api_client.dart';
@@ -52,6 +56,26 @@ class AppDependencies {
     sessionRemoteDataSource,
   );
   late final SessionResumeStore sessionResumeStore = SessionResumeStore();
+  final ResultFeedbackRepository resultFeedbackRepository =
+      const UnavailableResultFeedbackRepository();
+
+  bool get hasResultFeedback =>
+      config.experienceV1 && resultFeedbackRepository.available;
+
+  ResultFeedbackCubit createResultFeedbackCubit({
+    required String sessionId,
+    required int resultVersion,
+  }) => ResultFeedbackCubit(
+    target: FeedbackTarget(
+      ownerId: authRepository.currentUser?.id ?? '',
+      sessionId: sessionId,
+      resultVersion: resultVersion,
+    ),
+    repository: resultFeedbackRepository,
+    currentOwnerId: () => authRepository.currentUser?.id,
+    ownerChanges: authRepository.observeAuthState().map((user) => user?.id),
+    logger: logger,
+  );
 
   AuthCubit createAuthCubit() {
     return AuthCubit(authRepository, logger: logger)..initialize();
