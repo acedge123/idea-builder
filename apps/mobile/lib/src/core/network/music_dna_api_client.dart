@@ -25,10 +25,13 @@ class MusicDnaApiClient {
 
   Uri buildUri(String path) => _baseUri.resolve(path);
 
-  Future<http.Response> get(String path) async {
+  Future<http.Response> get(
+    String path, {
+    Map<String, String> headers = const {},
+  }) async {
     try {
       return _httpClient
-          .get(buildUri(path), headers: await _headers())
+          .get(buildUri(path), headers: {...await _headers(), ...headers})
           .timeout(_requestTimeout);
     } on TimeoutException {
       throw AppApiException(
@@ -48,12 +51,16 @@ class MusicDnaApiClient {
     }
   }
 
-  Future<http.Response> post(String path, {Map<String, dynamic>? body}) async {
+  Future<http.Response> post(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String> headers = const {},
+  }) async {
     try {
       return _httpClient
           .post(
             buildUri(path),
-            headers: await _headers(),
+            headers: {...await _headers(), ...headers},
             body: body == null ? null : jsonEncode(body),
           )
           .timeout(_requestTimeout);

@@ -8,6 +8,7 @@ import '../../../onboarding/domain/entities/started_music_session.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
+import '../widgets/session_experience_view.dart';
 
 class SessionStubPage extends StatefulWidget {
   const SessionStubPage({
@@ -26,7 +27,6 @@ class SessionStubPage extends StatefulWidget {
 class _SessionStubPageState extends State<SessionStubPage> {
   Stopwatch? _stopwatch;
   String? _pairingId;
-  String? _selectedSongId;
 
   @override
   void didChangeDependencies() {
@@ -62,7 +62,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                 state.startedSession ?? widget.startedSession;
             final isBusy =
                 state.status == SessionStatus.loading ||
-                state.status == SessionStatus.submitting;
+                state.status == SessionStatus.submitting ||
+                state.reacting;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(28, 28, 28, 52),
@@ -78,6 +79,17 @@ class _SessionStubPageState extends State<SessionStubPage> {
                 if (state.lastFeedback != null)
                   _FeedbackCard(feedback: state.lastFeedback!),
                 if (state.lastFeedback != null) const SizedBox(height: 16),
+                if (context.read<SessionCubit>().hasExperience)
+                  SessionExperienceView(
+                    exchanges: state.exchanges,
+                    read: state.read,
+                    busy: isBusy || state.status != SessionStatus.ready,
+                    reactionMessage: state.reactionMessage,
+                    pendingReaction: context
+                        .read<SessionCubit>()
+                        .pendingReaction,
+                    onReaction: context.read<SessionCubit>().react,
+                  ),
                 if (state.errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
@@ -106,7 +118,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         _PairingCard(
                           pairing: pairing,
                           isBusy: true,
-                          selectedSongId: _selectedSongId,
+                          selectedSongId: state.selectedSongId,
                           onChoose: (_) {},
                           onSkip: () {},
                         ),
@@ -131,8 +143,13 @@ class _SessionStubPageState extends State<SessionStubPage> {
                               const SizedBox(height: 18),
                               _PairingCard(
                                 pairing: pairing,
-                                isBusy: isBusy,
-                                selectedSongId: _selectedSongId,
+                                isBusy:
+                                    isBusy ||
+                                    context
+                                            .read<SessionCubit>()
+                                            .pendingReaction !=
+                                        null,
+                                selectedSongId: state.selectedSongId,
                                 onChoose: (songId) =>
                                     _chooseSong(context, chosenSongId: songId),
                                 onSkip: () => _skipPairing(context),
@@ -173,23 +190,35 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             onCopyShare: () =>
                                 _copyShare(context, state.reveal!),
                           ),
-                  SessionStatus.failure => _FallbackCard(
-                    title: 'The read got interrupted',
-                    body:
-                        state.errorMessage ??
-                        'We could not continue the pairing loop right now.',
-                    primaryLabel: state.currentRound?.done == true
-                        ? 'Try reveal again'
-                        : 'Retry session',
-                    onPrimary: () => state.currentRound?.done == true
-                        ? context.read<SessionCubit>().revealSession()
-                        : context.read<SessionCubit>().initialize(),
-                    secondaryLabel: state.requiresReauthentication
-                        ? 'Sign in again'
-                        : null,
-                    onSecondary: state.requiresReauthentication
-                        ? () => context.go('/auth')
-                        : null,
+                  SessionStatus.failure => Column(
+                    children: [
+                      if (pairing != null && state.selectedSongId != null)
+                        _PairingCard(
+                          pairing: pairing,
+                          isBusy: true,
+                          selectedSongId: state.selectedSongId,
+                          onChoose: (_) {},
+                          onSkip: () {},
+                        ),
+                      _FallbackCard(
+                        title: 'The read got interrupted',
+                        body:
+                            state.errorMessage ??
+                            'We could not continue the pairing loop right now.',
+                        primaryLabel: state.currentRound?.done == true
+                            ? 'Try reveal again'
+                            : 'Retry session',
+                        onPrimary: () => state.currentRound?.done == true
+                            ? context.read<SessionCubit>().revealSession()
+                            : context.read<SessionCubit>().initialize(),
+                        secondaryLabel: state.requiresReauthentication
+                            ? 'Sign in again'
+                            : null,
+                        onSecondary: state.requiresReauthentication
+                            ? () => context.go('/auth')
+                            : null,
+                      ),
+                    ],
                   ),
                   SessionStatus.missingSession => _FallbackCard(
                     title: 'Start with the interview first',
@@ -209,7 +238,6 @@ class _SessionStubPageState extends State<SessionStubPage> {
 
   void _chooseSong(BuildContext context, {required String chosenSongId}) {
     final elapsedMs = _stopwatch?.elapsedMilliseconds ?? 0;
-    setState(() => _selectedSongId = chosenSongId);
     context.read<SessionCubit>().chooseSong(
       chosenSongId: chosenSongId,
       msToDecide: elapsedMs,
@@ -229,7 +257,6 @@ class _SessionStubPageState extends State<SessionStubPage> {
     _stopwatch?.stop();
     _stopwatch = Stopwatch()..start();
     _pairingId = pairingId;
-    _selectedSongId = null;
   }
 
   String? _buildShareUrl(SessionReveal reveal) {
@@ -389,13 +416,6 @@ class _FeedbackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final verdictLines = feedback.verdict
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .toList(growable: false);
-    final hedge = verdictLines.length > 1 ? verdictLines.first : null;
-    final verdict = verdictLines.isEmpty ? feedback.verdict : verdictLines.last;
     final why = feedback.why.trim();
 
     return Padding(
@@ -409,17 +429,8 @@ class _FeedbackCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (hedge != null) ...<Widget>[
-                Text(
-                  hedge.replaceAll(':', '').toUpperCase(),
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: AppTheme.ember,
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
               Text(
-                verdict,
+                feedback.verdict,
                 style: theme.textTheme.headlineMedium?.copyWith(height: 1.08),
               ),
               if (why.isNotEmpty) ...<Widget>[

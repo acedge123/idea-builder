@@ -15,6 +15,7 @@ class AppConfig {
     required this.shareBaseUrl,
     required this.supabaseUrl,
     required this.supabaseAnonKey,
+    this.experienceV1 = false,
   });
 
   final String appName;
@@ -23,6 +24,7 @@ class AppConfig {
   final String shareBaseUrl;
   final String supabaseUrl;
   final String supabaseAnonKey;
+  final bool experienceV1;
 
   bool get isProduction => environment == 'prod';
 
@@ -37,6 +39,9 @@ class AppConfig {
       'SHARE_BASE_URL': const String.fromEnvironment('SHARE_BASE_URL'),
       'SUPABASE_URL': const String.fromEnvironment('SUPABASE_URL'),
       'SUPABASE_ANON_KEY': const String.fromEnvironment('SUPABASE_ANON_KEY'),
+      'MUSICDNA_EXPERIENCE_V1': const String.fromEnvironment(
+        'MUSICDNA_EXPERIENCE_V1',
+      ),
     });
   }
 
@@ -65,6 +70,7 @@ class AppConfig {
           : requiredValue('API_BASE_URL'),
       supabaseUrl: requiredValue('SUPABASE_URL'),
       supabaseAnonKey: requiredValue('SUPABASE_ANON_KEY'),
+      experienceV1: values['MUSICDNA_EXPERIENCE_V1'] == 'true',
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/logging/app_logger.dart';
@@ -8,6 +9,8 @@ import '../../data/session_resume_store.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
+import '../../domain/repositories/session_experience_repository.dart';
+import '../../domain/entities/session_experience.dart';
 
 enum SessionStatus {
   initial,
@@ -31,6 +34,11 @@ class SessionState extends Equatable {
     this.sharedReveal,
     this.errorMessage,
     this.requiresReauthentication = false,
+    this.exchanges = const [],
+    this.read,
+    this.selectedSongId,
+    this.reacting = false,
+    this.reactionMessage,
   });
 
   final SessionStatus status;
@@ -41,6 +49,10 @@ class SessionState extends Equatable {
   final SharedReveal? sharedReveal;
   final String? errorMessage;
   final bool requiresReauthentication;
+  final List<SessionExchange> exchanges;
+  final SessionRead? read;
+  final String? selectedSongId, reactionMessage;
+  final bool reacting;
 
   String? get sessionId => startedSession?.sessionId ?? currentRound?.sessionId;
 
@@ -59,6 +71,12 @@ class SessionState extends Equatable {
     String? errorMessage,
     bool clearErrorMessage = false,
     bool? requiresReauthentication,
+    List<SessionExchange>? exchanges,
+    SessionRead? read,
+    String? selectedSongId,
+    bool clearSelection = false,
+    bool? reacting,
+    String? reactionMessage,
   }) {
     return SessionState(
       status: status ?? this.status,
@@ -80,6 +98,15 @@ class SessionState extends Equatable {
           : errorMessage ?? this.errorMessage,
       requiresReauthentication:
           requiresReauthentication ?? this.requiresReauthentication,
+      exchanges: exchanges == null
+          ? this.exchanges
+          : List.unmodifiable(exchanges),
+      read: read ?? this.read,
+      selectedSongId: clearSelection
+          ? null
+          : selectedSongId ?? this.selectedSongId,
+      reacting: reacting ?? this.reacting,
+      reactionMessage: reactionMessage ?? this.reactionMessage,
     );
   }
 
@@ -93,6 +120,11 @@ class SessionState extends Equatable {
     sharedReveal,
     errorMessage,
     requiresReauthentication,
+    exchanges,
+    read,
+    selectedSongId,
+    reacting,
+    reactionMessage,
   ];
 }
 
@@ -102,13 +134,21 @@ class SessionCubit extends Cubit<SessionState> {
     StartedMusicSession? startedSession,
     SessionResumeStore? resumeStore,
     AppLogger? logger,
+    SessionExperienceRepository? experienceRepository,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
+       _experienceRepository = experienceRepository,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
   final AppLogger _logger;
   final SessionResumeStore? _resumeStore;
+  final SessionExperienceRepository? _experienceRepository;
+  String? _reactionMutationId;
+  SessionReaction? _pendingReaction;
+  String? _reactionPairingId;
+  bool get hasExperience => _experienceRepository != null;
+  SessionReaction? get pendingReaction => _pendingReaction;
   static const int maxPairingRounds = 6;
   static const int maxMsToDecide = 600000;
 
@@ -159,6 +199,11 @@ class SessionCubit extends Cubit<SessionState> {
     required String chosenSongId,
     required int msToDecide,
   }) async {
+    if (state.status != SessionStatus.ready ||
+        state.reacting ||
+        _pendingReaction != null) {
+      return;
+    }
     final sessionId = state.sessionId;
     final pairingId = state.currentRound?.pairing?.id;
     _logger.event('session.choice_requested', <String, Object?>{
@@ -177,9 +222,17 @@ class SessionCubit extends Cubit<SessionState> {
       );
       return;
     }
+    final pairing = state.currentRound!.pairing!;
+    if (chosenSongId != pairing.songA.id && chosenSongId != pairing.songB.id) {
+      return;
+    }
 
     emit(
-      state.copyWith(status: SessionStatus.submitting, clearErrorMessage: true),
+      state.copyWith(
+        status: SessionStatus.submitting,
+        clearErrorMessage: true,
+        selectedSongId: chosenSongId,
+      ),
     );
 
     try {
@@ -193,7 +246,13 @@ class SessionCubit extends Cubit<SessionState> {
         'sessionId': sessionId,
         'pairingId': pairingId,
       });
-      emit(state.copyWith(lastFeedback: feedback, clearErrorMessage: true));
+      emit(
+        state.copyWith(
+          lastFeedback: feedback,
+          read: feedback.read,
+          clearErrorMessage: true,
+        ),
+      );
       await _loadNextPairing(sessionId: sessionId, keepFeedback: true);
     } catch (error) {
       _logger.error('session.choice_failed', error, <String, Object?>{
@@ -212,6 +271,11 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> skipPairing({required int msToDecide}) async {
+    if (state.status != SessionStatus.ready ||
+        state.reacting ||
+        _pendingReaction != null) {
+      return;
+    }
     final sessionId = state.sessionId;
     final pairingId = state.currentRound?.pairing?.id;
     _logger.event('session.skip_requested', <String, Object?>{
@@ -362,8 +426,12 @@ class SessionCubit extends Cubit<SessionState> {
       });
       final isComplete =
           nextRound.done ||
-          nextRound.pairing == null ||
-          nextRound.round > maxPairingRounds;
+          (!nextRound.experienceVersion &&
+              (nextRound.pairing == null ||
+                  nextRound.round > maxPairingRounds));
+      final experience = _experienceRepository == null
+          ? null
+          : await _experienceRepository.fetchExperience(sessionId: sessionId);
       emit(
         state.copyWith(
           status: isComplete ? SessionStatus.completed : SessionStatus.ready,
@@ -373,6 +441,10 @@ class SessionCubit extends Cubit<SessionState> {
           clearSharedReveal: true,
           clearErrorMessage: true,
           requiresReauthentication: false,
+          exchanges: experience?.exchanges,
+          read: experience?.latestRead,
+          clearSelection:
+              nextRound.pairing?.id != state.currentRound?.pairing?.id,
         ),
       );
     } catch (error) {
@@ -384,6 +456,60 @@ class SessionCubit extends Cubit<SessionState> {
         state.copyWith(
           status: SessionStatus.failure,
           errorMessage: _readableError(apiError ?? error),
+          requiresReauthentication: apiError?.isAuthRelated == true,
+        ),
+      );
+    }
+  }
+
+  Future<void> react(SessionReaction reaction) async {
+    final repository = _experienceRepository;
+    final sessionId = state.sessionId;
+    if (repository == null ||
+        sessionId == null ||
+        state.reacting ||
+        state.status != SessionStatus.ready) {
+      return;
+    }
+    if (_pendingReaction != null && _pendingReaction != reaction) return;
+    _pendingReaction = reaction;
+    _reactionPairingId ??= state.currentRound?.pairing?.id;
+    _reactionMutationId ??= List.generate(
+      16,
+      (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+    emit(state.copyWith(reacting: true, clearErrorMessage: true));
+    try {
+      final effect = await repository.react(
+        sessionId: sessionId,
+        reaction: reaction,
+        mutationId: _reactionMutationId!,
+        pairingId: _reactionPairingId,
+      );
+      final experience = await repository.fetchExperience(sessionId: sessionId);
+      _pendingReaction = null;
+      _reactionMutationId = null;
+      _reactionPairingId = null;
+      emit(
+        state.copyWith(
+          reacting: false,
+          reactionMessage: effect.message,
+          currentRound: effect.next,
+          exchanges: experience.exchanges,
+          read: experience.latestRead,
+          clearErrorMessage: true,
+          clearSelection: effect.next != null,
+          status: effect.next?.done == true
+              ? SessionStatus.completed
+              : SessionStatus.ready,
+        ),
+      );
+    } catch (error) {
+      final apiError = error is AppApiException ? error : null;
+      emit(
+        state.copyWith(
+          reacting: false,
+          errorMessage: _readableError(error),
           requiresReauthentication: apiError?.isAuthRelated == true,
         ),
       );
