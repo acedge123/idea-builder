@@ -1,10 +1,18 @@
-# TGA-328 beta client preparation
+# TGA-328 verified beta client target
 
-October 20, 2026. Mobile base `4b7597c6e808eb9eaf0582781715435dc668199d`; proposed backend base `31adee7753eb6a54a3ea8c2a5ed3baf2e65620d7` plus the session-access correction. Beta environment creation/access changes await explicit approval; TGA-328 remains in progress.
+October 20, 2026: TGA-328 is complete. Normal authenticated beta access and the automated API/Flutter contract matrix passed. This establishes a usable internal beta target; ACE owns hands-on QA and acceptance after TestFlight installation.
 
-`config/beta.example.json` defines the proposed client origin, share origin, existing MusicDNA Supabase project and V1 opt-in. Copy it to ignored `config/beta.local.json` and supply the existing public anon/publishable client key. No OpenAI, service-role, harness or Vercel bypass key belongs in this file or binary. The prepared local configuration was checked to contain an anon/public key only. Proposed beta hostname is not live yet.
+## Configuration
 
-The beta uses the existing accounts/database. Backend release flags will be separate from www.musicdna.fm. Production V1 remains disabled. Do not upload an app pointing to a disabled or SSO-intercepted API.
+- API and share origin: `https://musicdna-beta-alan-edgetts-projects.vercel.app`.
+- Backend: `music-dna@19c1e73ab61c59fa4fbbf09f4134f482d7a4967a`, Vercel deployment `dpl_E9Tboa3WPdKWXku7Cni9iLPRmdu8`.
+- Vercel custom environment `musicdna-beta`: V1 enabled, Persistence V2 enabled, private acceptance disabled, routing `shadow`. Harness key excluded.
+- Exact beta alias bypasses Vercel SSO; normal application bearer and ownership checks remain mandatory. No bypass token belongs in Flutter.
+- Flutter base: `idea-builder@5ab06b707dfa3f070125f73f99aefd6db93389a7`.
+- `config/beta.example.json` records the actual target. Ignored `config/beta.local.json` supplies only the existing public client key, `APP_ENV=beta`, and `MUSICDNA_EXPERIENCE_V1=true`.
+- Existing Supabase project `udycgnhvaanemhrchbuj`: accounts/database are shared with production. API configuration is separate. Production variable values/targets and public V1 gate were preserved.
+
+The user explicitly approved the server-credential reuse and beta alias access before configuration was applied. Server keys remain in Vercel. No OpenAI, service-role, harness or Vercel bypass key belongs in the client configuration or binary.
 
 ## Compatibility correction
 
@@ -14,16 +22,15 @@ This supports existing TGA-313 scope and does not certify the live write/retry U
 
 ## Automated evidence
 
-- `flutter analyze --no-pub`: clean.
-- `MUSICDNA_CONTRACT_CAPTURE=<local probe file> flutter test --no-pub`: **125 passed**, including the captured-response compatibility test and four new feedback-operation regressions.
-- `test/live_contract_snapshot_test.dart` decodes real private-production GET responses through the application's current session, history, continuation and feedback repositories. With no capture file it skips explicitly. Captures contain synthetic reading data and remain local; never commit credentials or captures.
-- `flutter build ios --release --no-codesign --no-pub --dart-define-from-file=config/beta.local.json`: passed for the normal application entry. Artifact: `build/ios/iphoneos/Runner.app`. Build is unsigned, still version 0.1.1 (3), and must not be uploaded. TGA-330 will query Apple and choose an unused higher build before signing/upload.
-- The captured owner DTOs decoded. Current production foreign-session snapshot/chat/feedback denial passed, but foreign `next` returned 200. A backend guard correction is prepared separately; it must be deployed and verified before beta readiness is accepted.
+- Existing Flutter suite: 125 passed with the optional deployed capture configured; analysis clean; normal-entry unsigned iOS release compilation passed.
+- Beta owner snapshot/next/chat/feedback return contract 1; foreign reads deny 403/404, including the previously failing foreign-next case. Anonymous protected reads return 401. Legacy no-header snapshot retains its original shape. Beta harness unavailable; production public V1 remains 503-gated.
+- A new approved synthetic-owned session ran start, next, reaction, six real choices, server completion and reveal. Feedback replay/conflict, chat replay/conflict/changed revision, frozen original, version-specific feedback, paged transcript, pinned anonymous share, revocation and cross-user chat/feedback/share write denial passed. Temporary synthetic shares were revoked.
+- Real beta GET payloads passed through the actual Flutter session/history/continuation/feedback repositories. Real replayed mutation captures also passed Flutter choice/reaction/reveal/continuation submit/feedback submit/publication/shared/revocation repository parsing.
+- Raw captures contain synthetic reading data and remain local, mode 0600. Never commit them or credentials. Sanitized deployment/configuration evidence is attached to TGA-328.
+- The earlier compiled beta app embeds this now-live API origin and contains no server/provider/harness secret markers. It was unsigned build 3 and is not an upload candidate.
 
-## Remaining order
+## Delivery and rollback
 
-1. TGA-328: approve/create the separate beta environment, deploy reviewed fixes, prove ordinary bearer access and the complete technical route matrix, then finalize this configuration's actual origin/SHA.
-2. TGA-330: merge/review intended source, choose a unique build above consumed build 3, sign/archive/upload and verify installability.
-3. ACE performs all hands-on QA and acceptance in TestFlight (TGA-329 functional/recovery; TGA-321 visual/device/accessibility). Codex fixes reported defects and supplies another build.
+TGA-330 owns a unique build increment, exact-source signed archive/export/upload, Apple processing and actual internal installability. ACE performs all hands-on functional/recovery and visual/device/accessibility QA in TGA-329/TGA-321 afterward. Automated technical checks still run before upload.
 
-No Apple upload, production flag change, database migration or manual acceptance occurred during this preparation. The automatic approval review rejected copying production credentials and enabling beta V1 without explicit authorization; the environment creation command did not execute.
+Rollback only the beta alias exception/alias or beta V1 flag. Preserve production domains/flags and shared listener data. No production release, schema/catalog migration or device/user acceptance is implied.
