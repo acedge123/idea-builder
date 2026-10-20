@@ -1,0 +1,9 @@
+{
+  "APP_NAME": "MusicDNA",
+  "APP_ENV": "beta",
+  "API_BASE_URL": "https://musicdna-beta-alan-edgetts-projects.vercel.app",
+  "SHARE_BASE_URL": "https://musicdna-beta-alan-edgetts-projects.vercel.app",
+  "SUPABASE_URL": "https://udycgnhvaanemhrchbuj.supabase.co",
+  "SUPABASE_ANON_KEY": "YOUR_EXISTING_MUSICDNA_PUBLIC_CLIENT_KEY",
+  "MUSICDNA_EXPERIENCE_V1": "true"
+}
