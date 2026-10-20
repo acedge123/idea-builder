@@ -102,3 +102,29 @@ class SessionReactionEffect {
   final String effect, message;
   final SessionRoundState? next;
 }
+
+/// Presentation grouping only: preserves server order and verbatim content.
+/// No eligibility, scoring or revision decisions are made here.
+class SessionExchangeGroup {
+  SessionExchangeGroup(List<SessionExchange> exchanges)
+    : exchanges = List.unmodifiable(exchanges);
+  final List<SessionExchange> exchanges;
+  bool get hasReaction => exchanges.any((e) => e.type == 'reaction');
+}
+
+List<SessionExchangeGroup> groupSessionExchanges(
+  List<SessionExchange> exchanges,
+) {
+  final groups = <SessionExchangeGroup>[];
+  var current = <SessionExchange>[];
+  for (final exchange in exchanges) {
+    if ((exchange.type == 'choice' || exchange.type == 'skip') &&
+        current.isNotEmpty) {
+      groups.add(SessionExchangeGroup(current));
+      current = [];
+    }
+    current.add(exchange);
+  }
+  if (current.isNotEmpty) groups.add(SessionExchangeGroup(current));
+  return List.unmodifiable(groups);
+}

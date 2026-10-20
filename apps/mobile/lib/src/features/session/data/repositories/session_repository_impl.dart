@@ -182,6 +182,10 @@ class SessionRepositoryImpl
           ? response['done'] == true
           : completion['done'] == true,
       experienceVersion: progress != null,
+      prompt: progress == null ? null : response['prompt'] as String?,
+      maxAnswered: progress == null
+          ? null
+          : _readIntOrNull(progress['max_answered']),
       pairing: pairing is Map<String, dynamic> ? _mapPairing(pairing) : null,
     );
   }

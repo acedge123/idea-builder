@@ -83,10 +83,12 @@ class SessionState extends Equatable {
     bool? requiresReauthentication,
     List<SessionExchange>? exchanges,
     SessionRead? read,
+    bool clearRead = false,
     String? selectedSongId,
     bool clearSelection = false,
     bool? reacting,
     String? reactionMessage,
+    bool clearReactionMessage = false,
     SharePublication? publication,
     bool clearPublication = false,
     bool? sharing,
@@ -118,12 +120,14 @@ class SessionState extends Equatable {
       exchanges: exchanges == null
           ? this.exchanges
           : List.unmodifiable(exchanges),
-      read: read ?? this.read,
+      read: clearRead ? null : read ?? this.read,
       selectedSongId: clearSelection
           ? null
           : selectedSongId ?? this.selectedSongId,
       reacting: reacting ?? this.reacting,
-      reactionMessage: reactionMessage ?? this.reactionMessage,
+      reactionMessage: clearReactionMessage
+          ? null
+          : reactionMessage ?? this.reactionMessage,
       publication: clearPublication ? null : publication ?? this.publication,
       sharing: sharing ?? this.sharing,
       shareVerified: shareVerified ?? this.shareVerified,
@@ -252,6 +256,9 @@ class SessionCubit extends Cubit<SessionState> {
       );
       return;
     }
+    if (state.selectedSongId != null && state.selectedSongId != chosenSongId) {
+      return;
+    }
     final pairing = state.currentRound!.pairing!;
     if (chosenSongId != pairing.songA.id && chosenSongId != pairing.songB.id) {
       return;
@@ -262,6 +269,8 @@ class SessionCubit extends Cubit<SessionState> {
         status: SessionStatus.submitting,
         clearErrorMessage: true,
         selectedSongId: chosenSongId,
+        clearLastFeedback: true,
+        clearReactionMessage: true,
       ),
     );
 
@@ -301,6 +310,7 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> skipPairing({required int msToDecide}) async {
+    if (state.selectedSongId != null) return;
     if (state.status != SessionStatus.ready ||
         state.reacting ||
         _pendingReaction != null) {
@@ -603,6 +613,7 @@ class SessionCubit extends Cubit<SessionState> {
           shareVerified: false,
           clearShareError: true,
           read: experience?.latestRead,
+          clearRead: experience != null && experience.latestRead == null,
           clearSelection:
               nextRound.pairing?.id != state.currentRound?.pairing?.id,
         ),
@@ -639,6 +650,10 @@ class SessionCubit extends Cubit<SessionState> {
       16,
       (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
     ).join();
+    _logger.event('session.reaction_requested', {
+      'sessionId': sessionId,
+      'kind': reaction.wireName,
+    });
     emit(state.copyWith(reacting: true, clearErrorMessage: true));
     try {
       final effect = await repository.react(
@@ -658,6 +673,7 @@ class SessionCubit extends Cubit<SessionState> {
           currentRound: effect.next,
           exchanges: experience.exchanges,
           read: experience.latestRead,
+          clearRead: experience.latestRead == null,
           clearErrorMessage: true,
           clearSelection: effect.next != null,
           status: effect.next?.done == true
@@ -665,7 +681,15 @@ class SessionCubit extends Cubit<SessionState> {
               : SessionStatus.ready,
         ),
       );
+      _logger.event('session.reaction_succeeded', {
+        'sessionId': sessionId,
+        'effect': effect.effect,
+      });
+      if (effect.next?.done == true && _resultRepository != null) {
+        await revealSession();
+      }
     } catch (error) {
+      _logger.event('session.reaction_failed', {'sessionId': sessionId});
       final apiError = error is AppApiException ? error : null;
       emit(
         state.copyWith(

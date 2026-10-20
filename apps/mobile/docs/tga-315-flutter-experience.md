@@ -1,5 +1,7 @@
 # TGA-315 Flutter Experience Foundation
 
+Historical foundation record. The October 20 approved-reference follow-up and current acceptance limits are in [TGA-315 approved-reference alignment](tga-315-approved-reference.md).
+
 Flutter-only implementation, stacked on TGA-301/302 client fixtures (PR #9).
 Web/backend ownership remains Lovable. No backend, migration, routing, production
 configuration or Apple build/version changes are included.

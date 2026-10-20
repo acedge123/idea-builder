@@ -10,6 +10,7 @@ import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
+import '../widgets/session_pairing_card.dart';
 import '../widgets/session_result_view.dart';
 import '../../../result_feedback/presentation/result_feedback_cubit.dart';
 import '../../../result_feedback/presentation/result_feedback_view.dart';
@@ -39,13 +40,15 @@ class SessionStubPage extends StatefulWidget {
 class _SessionStubPageState extends State<SessionStubPage> {
   Stopwatch? _stopwatch;
   String? _pairingId;
+  final _activeExchangeKey = GlobalKey();
+  final _resultKey = GlobalKey();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncStopwatch(
-      context.read<SessionCubit>().state.currentRound?.pairing?.id,
-    );
+    final state = context.read<SessionCubit>().state;
+    _syncStopwatch(state.currentRound?.pairing?.id);
+    _scrollToActive(state);
   }
 
   @override
@@ -63,9 +66,12 @@ class _SessionStubPageState extends State<SessionStubPage> {
         child: BlocConsumer<SessionCubit, SessionState>(
           listenWhen: (previous, current) =>
               previous.currentRound?.pairing?.id !=
-              current.currentRound?.pairing?.id,
+                  current.currentRound?.pairing?.id ||
+              previous.exchanges != current.exchanges ||
+              previous.status != current.status,
           listener: (context, state) {
             _syncStopwatch(state.currentRound?.pairing?.id);
+            _scrollToActive(state);
           },
           builder: (context, state) {
             final round = state.currentRound;
@@ -77,227 +83,268 @@ class _SessionStubPageState extends State<SessionStubPage> {
                 state.status == SessionStatus.submitting ||
                 state.reacting;
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(28, 28, 28, 52),
-              children: <Widget>[
-                Text('THE INTERVIEW', style: theme.textTheme.labelSmall),
-                if (startedSession != null) ...<Widget>[
-                  const SizedBox(height: 34),
-                  _OpeningTranscript(session: startedSession),
-                  const SizedBox(height: 34),
-                  _CriticBridge(hypothesis: startedSession.hypothesis),
-                  const SizedBox(height: 26),
-                ],
-                if (state.lastFeedback != null)
-                  _FeedbackCard(feedback: state.lastFeedback!),
-                if (state.lastFeedback != null) const SizedBox(height: 16),
-                if (context.read<SessionCubit>().hasExperience)
-                  SessionExperienceView(
-                    exchanges: state.exchanges,
-                    read: state.read,
-                    busy: isBusy || state.status != SessionStatus.ready,
-                    reactionMessage: state.reactionMessage,
-                    pendingReaction: context
-                        .read<SessionCubit>()
-                        .pendingReaction,
-                    onReaction: context.read<SessionCubit>().react,
-                  ),
-                if (state.errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      state.errorMessage!,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.error,
+            final showFeedback =
+                state.lastFeedback != null &&
+                (!context.read<SessionCubit>().hasExperience ||
+                    (state.status == SessionStatus.failure &&
+                        state.selectedSongId != null));
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 52),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('THE INTERVIEW', style: theme.textTheme.labelSmall),
+                  if (startedSession != null) ...<Widget>[
+                    const SizedBox(height: 34),
+                    _OpeningTranscript(session: startedSession),
+                    const SizedBox(height: 34),
+                    _CriticBridge(hypothesis: startedSession.hypothesis),
+                    const SizedBox(height: 26),
+                  ],
+                  if (showFeedback)
+                    _FeedbackCard(feedback: state.lastFeedback!),
+                  if (showFeedback) const SizedBox(height: 16),
+                  if (context.read<SessionCubit>().hasExperience)
+                    SessionExperienceView(
+                      activeExchangeKey: _activeExchangeKey,
+                      exchanges: state.exchanges,
+                      read: state.read,
+                      busy: isBusy || state.status != SessionStatus.ready,
+                      reactionMessage: state.reactionMessage,
+                      pendingReaction: context
+                          .read<SessionCubit>()
+                          .pendingReaction,
+                      onReaction: context.read<SessionCubit>().react,
+                    ),
+                  if (state.errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        state.errorMessage!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                     ),
-                  ),
-                switch (state.status) {
-                  SessionStatus.initial ||
-                  SessionStatus.loading => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 48),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  SessionStatus.submitting => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      if (pairing != null)
-                        _PairingIntro(pairing: pairing, round: round),
-                      if (pairing != null) const SizedBox(height: 18),
-                      if (pairing != null)
-                        _PairingCard(
-                          pairing: pairing,
-                          isBusy: true,
-                          selectedSongId: state.selectedSongId,
-                          onChoose: (_) {},
-                          onSkip: () {},
+                  KeyedSubtree(
+                    key: _resultKey,
+                    child: switch (state.status) {
+                      SessionStatus.initial ||
+                      SessionStatus.loading => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 48),
+                          child: CircularProgressIndicator(),
                         ),
-                      const SizedBox(height: 20),
-                      const Center(child: CircularProgressIndicator()),
-                    ],
-                  ),
-                  SessionStatus.ready =>
-                    pairing == null
-                        ? _FallbackCard(
-                            title: 'No pairing yet',
-                            body:
-                                'We are in the interview, but the next comparison did not come through yet.',
-                            primaryLabel: 'Try again',
-                            onPrimary: () =>
-                                context.read<SessionCubit>().initialize(),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              _PairingIntro(pairing: pairing, round: round),
-                              const SizedBox(height: 18),
-                              _PairingCard(
-                                pairing: pairing,
-                                isBusy:
-                                    isBusy ||
+                      ),
+                      SessionStatus.submitting => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          if (pairing != null)
+                            _PairingIntro(pairing: pairing, round: round),
+                          if (pairing != null) const SizedBox(height: 18),
+                          if (pairing != null)
+                            SessionPairingCard(
+                              pairing: pairing,
+                              isBusy: true,
+                              selectedSongId: state.selectedSongId,
+                              onChoose: (_) {},
+                              onSkip: () {},
+                            ),
+                          const SizedBox(height: 20),
+                          const Center(child: CircularProgressIndicator()),
+                        ],
+                      ),
+                      SessionStatus.ready =>
+                        pairing == null
+                            ? _FallbackCard(
+                                title: 'No pairing yet',
+                                body:
+                                    'We are in the interview, but the next comparison did not come through yet.',
+                                primaryLabel: 'Try again',
+                                onPrimary: () =>
+                                    context.read<SessionCubit>().initialize(),
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  _PairingIntro(pairing: pairing, round: round),
+                                  const SizedBox(height: 18),
+                                  SessionPairingCard(
+                                    pairing: pairing,
+                                    isBusy:
+                                        isBusy ||
+                                        context
+                                                .read<SessionCubit>()
+                                                .pendingReaction !=
+                                            null,
+                                    selectedSongId: state.selectedSongId,
+                                    onChoose: (songId) => _chooseSong(
+                                      context,
+                                      chosenSongId: songId,
+                                    ),
+                                    onSkip: () => _skipPairing(context),
+                                  ),
+                                ],
+                              ),
+                      SessionStatus.completed => _FallbackCard(
+                        title: 'Good. We have enough.',
+                        body:
+                            'Now let me turn those choices into a sharper read of your taste.',
+                        primaryLabel: 'Generate my reading',
+                        onPrimary: () =>
+                            context.read<SessionCubit>().revealSession(),
+                      ),
+                      SessionStatus.revealing => _FallbackCard(
+                        title: 'Building your reading',
+                        body:
+                            'Tightening the theory, checking the pattern, and turning it into a read worth keeping.',
+                        primaryLabel: 'Generating...',
+                        onPrimary: () {},
+                        primaryEnabled: false,
+                        busy: true,
+                      ),
+                      SessionStatus.revealed =>
+                        state.reveal == null
+                            ? _FallbackCard(
+                                title: 'Reading unavailable',
+                                body:
+                                    'The session finished, but the reveal payload did not come back yet.',
+                                primaryLabel: 'Try reveal again',
+                                onPrimary: () => context
+                                    .read<SessionCubit>()
+                                    .revealSession(),
+                              )
+                            : state.reveal!.result != null
+                            ? SessionResultView(
+                                state: state,
+                                shareUrl: _buildShareUrl(state.reveal!),
+                                onPublish: () => context
+                                    .read<SessionCubit>()
+                                    .setPublication(publish: true),
+                                onRevoke: () => context
+                                    .read<SessionCubit>()
+                                    .setPublication(publish: false),
+                                onVerify: () => context
+                                    .read<SessionCubit>()
+                                    .verifyPublication(),
+                                onCopy: () =>
+                                    _copyShare(context, state.reveal!),
+                                onSignIn: () => context.push('/auth'),
+                                onPushBack:
                                     context
                                             .read<SessionCubit>()
-                                            .pendingReaction !=
-                                        null,
-                                selectedSongId: state.selectedSongId,
-                                onChoose: (songId) =>
-                                    _chooseSong(context, chosenSongId: songId),
-                                onSkip: () => _skipPairing(context),
+                                            .hasExperience &&
+                                        widget.ownerId != null
+                                    ? () => _pushBack(context, state)
+                                    : null,
+                              )
+                            : _RevealCard(
+                                reveal: state.reveal!,
+                                sharedReveal: state.sharedReveal,
+                                shareUrl: _buildShareUrl(state.reveal!),
+                                onCopyShare: () =>
+                                    _copyShare(context, state.reveal!),
+                                onPushBack:
+                                    context
+                                            .read<SessionCubit>()
+                                            .hasExperience &&
+                                        state.sessionId != null &&
+                                        widget.ownerId != null
+                                    ? () => context.push(
+                                        '/session/${Uri.encodeComponent(state.sessionId!)}/continuation',
+                                        extra: ContinuationContext(
+                                          sessionId: state.sessionId!,
+                                          ownerId: widget.ownerId!,
+                                          original: state.reveal!,
+                                          evidence: state.exchanges,
+                                        ),
+                                      )
+                                    : null,
                               ),
-                            ],
-                          ),
-                  SessionStatus.completed => _FallbackCard(
-                    title: 'Good. We have enough.',
-                    body:
-                        'Now let me turn those choices into a sharper read of your taste.',
-                    primaryLabel: 'Generate my reading',
-                    onPrimary: () =>
-                        context.read<SessionCubit>().revealSession(),
-                  ),
-                  SessionStatus.revealing => _FallbackCard(
-                    title: 'Building your reading',
-                    body:
-                        'Tightening the theory, checking the pattern, and turning it into a read worth keeping.',
-                    primaryLabel: 'Generating...',
-                    onPrimary: () {},
-                    primaryEnabled: false,
-                    busy: true,
-                  ),
-                  SessionStatus.revealed =>
-                    state.reveal == null
-                        ? _FallbackCard(
-                            title: 'Reading unavailable',
+                      SessionStatus.failure => Column(
+                        children: [
+                          if (pairing != null && state.selectedSongId != null)
+                            SessionPairingCard(
+                              pairing: pairing,
+                              isBusy: true,
+                              selectedSongId: state.selectedSongId,
+                              onChoose: (_) {},
+                              onSkip: () {},
+                            ),
+                          _FallbackCard(
+                            title: 'The read got interrupted',
                             body:
-                                'The session finished, but the reveal payload did not come back yet.',
-                            primaryLabel: 'Try reveal again',
-                            onPrimary: () =>
-                                context.read<SessionCubit>().revealSession(),
-                          )
-                        : state.reveal!.result != null
-                        ? SessionResultView(
-                            state: state,
-                            shareUrl: _buildShareUrl(state.reveal!),
-                            onPublish: () => context
-                                .read<SessionCubit>()
-                                .setPublication(publish: true),
-                            onRevoke: () => context
-                                .read<SessionCubit>()
-                                .setPublication(publish: false),
-                            onVerify: () => context
-                                .read<SessionCubit>()
-                                .verifyPublication(),
-                            onCopy: () => _copyShare(context, state.reveal!),
-                            onSignIn: () => context.push('/auth'),
-                            onPushBack:
-                                context.read<SessionCubit>().hasExperience &&
-                                    widget.ownerId != null
-                                ? () => _pushBack(context, state)
+                                state.errorMessage ??
+                                'We could not continue the pairing loop right now.',
+                            primaryLabel: state.currentRound?.done == true
+                                ? 'Try reveal again'
+                                : 'Retry session',
+                            onPrimary: () => state.currentRound?.done == true
+                                ? context.read<SessionCubit>().revealSession()
+                                : context.read<SessionCubit>().initialize(),
+                            secondaryLabel: state.requiresReauthentication
+                                ? 'Sign in again'
                                 : null,
-                          )
-                        : _RevealCard(
-                            reveal: state.reveal!,
-                            sharedReveal: state.sharedReveal,
-                            shareUrl: _buildShareUrl(state.reveal!),
-                            onCopyShare: () =>
-                                _copyShare(context, state.reveal!),
-                            onPushBack:
-                                context.read<SessionCubit>().hasExperience &&
-                                    state.sessionId != null &&
-                                    widget.ownerId != null
-                                ? () => context.push(
-                                    '/session/${Uri.encodeComponent(state.sessionId!)}/continuation',
-                                    extra: ContinuationContext(
-                                      sessionId: state.sessionId!,
-                                      ownerId: widget.ownerId!,
-                                      original: state.reveal!,
-                                      evidence: state.exchanges,
-                                    ),
-                                  )
+                            onSecondary: state.requiresReauthentication
+                                ? () => context.go('/auth')
                                 : null,
                           ),
-                  SessionStatus.failure => Column(
-                    children: [
-                      if (pairing != null && state.selectedSongId != null)
-                        _PairingCard(
-                          pairing: pairing,
-                          isBusy: true,
-                          selectedSongId: state.selectedSongId,
-                          onChoose: (_) {},
-                          onSkip: () {},
-                        ),
-                      _FallbackCard(
-                        title: 'The read got interrupted',
-                        body:
-                            state.errorMessage ??
-                            'We could not continue the pairing loop right now.',
-                        primaryLabel: state.currentRound?.done == true
-                            ? 'Try reveal again'
-                            : 'Retry session',
-                        onPrimary: () => state.currentRound?.done == true
-                            ? context.read<SessionCubit>().revealSession()
-                            : context.read<SessionCubit>().initialize(),
-                        secondaryLabel: state.requiresReauthentication
-                            ? 'Sign in again'
-                            : null,
-                        onSecondary: state.requiresReauthentication
-                            ? () => context.go('/auth')
-                            : null,
+                        ],
                       ),
-                    ],
+                      SessionStatus.missingSession => _FallbackCard(
+                        title: 'Start with the interview first',
+                        body:
+                            'Give me your opening songs first, then we can start drilling into the pairings.',
+                        primaryLabel: 'Go to the interview',
+                        onPrimary: () => context.go('/onboarding'),
+                      ),
+                    },
                   ),
-                  SessionStatus.missingSession => _FallbackCard(
-                    title: 'Start with the interview first',
-                    body:
-                        'Give me your opening songs first, then we can start drilling into the pairings.',
-                    primaryLabel: 'Go to the interview',
-                    onPrimary: () => context.go('/onboarding'),
-                  ),
-                },
-                if (state.status == SessionStatus.revealed &&
-                    state.reveal?.result != null &&
-                    state.sessionId != null &&
-                    widget.createFeedbackCubit != null)
-                  BlocProvider<ResultFeedbackCubit>(
-                    key: ValueKey((
-                      state.sessionId,
-                      state.reveal!.result!.version,
-                    )),
-                    create: (_) => widget.createFeedbackCubit!(
-                      sessionId: state.sessionId!,
-                      resultVersion: state.reveal!.result!.version,
-                    )..load(),
-                    child: ResultFeedbackView(
-                      onSignIn: () => context.push('/auth'),
+                  if (state.status == SessionStatus.revealed &&
+                      state.reveal?.result != null &&
+                      state.sessionId != null &&
+                      widget.createFeedbackCubit != null)
+                    BlocProvider<ResultFeedbackCubit>(
+                      key: ValueKey((
+                        state.sessionId,
+                        state.reveal!.result!.version,
+                      )),
+                      create: (_) => widget.createFeedbackCubit!(
+                        sessionId: state.sessionId!,
+                        resultVersion: state.reveal!.result!.version,
+                      )..load(),
+                      child: ResultFeedbackView(
+                        onSignIn: () => context.push('/auth'),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             );
           },
         ),
       ),
     );
+  }
+
+  void _scrollToActive(SessionState state) {
+    if (state.status == SessionStatus.ready ||
+        state.status == SessionStatus.revealed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final target = state.status == SessionStatus.revealed
+            ? _resultKey.currentContext
+            : _activeExchangeKey.currentContext;
+        if (target != null) {
+          Scrollable.ensureVisible(
+            target,
+            alignment: 0.02,
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 250),
+          );
+        }
+      });
+    }
   }
 
   void _chooseSong(BuildContext context, {required String chosenSongId}) {
@@ -392,7 +439,7 @@ class _OpeningTranscript extends StatelessWidget {
           const SizedBox(height: 30),
         ],
         Text(
-          'NEXT ONE COMING UP…',
+          'FROM YOUR OPENING SONGS',
           style: theme.textTheme.labelSmall?.copyWith(
             color: AppTheme.mutedForeground,
           ),
@@ -413,12 +460,11 @@ class _CriticBridge extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(hypothesis, style: theme.textTheme.displaySmall),
-        const SizedBox(height: 16),
         Text(
-          'Let\'s drill down.',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: AppTheme.mutedForeground,
+          hypothesis,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: 24,
+            height: 1.2,
           ),
         ),
       ],
@@ -439,15 +485,16 @@ class _PairingIntro extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'ROUND ${(round?.round ?? 1).toString().padLeft(2, '0')} / ${SessionCubit.maxPairingRounds}',
+          'ROUND ${(round?.round ?? 1).toString().padLeft(2, '0')} / ${round?.maxAnswered ?? SessionCubit.maxPairingRounds}',
           style: theme.textTheme.labelSmall?.copyWith(
             color: AppTheme.mutedForeground,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          pairing.whyGood ??
-              'Trust the one that feels more instinctively yours.',
+          round?.experienceVersion == true
+              ? round?.prompt ?? 'Which one would you keep?'
+              : pairing.whyGood ?? 'Which one would you keep?',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: AppTheme.mutedForeground,
           ),
@@ -488,7 +535,7 @@ class _TranscriptSongRow extends StatelessWidget {
         const SizedBox(width: 18),
         Expanded(
           child: Text(
-            song.toLowerCase(),
+            song,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontFamily: 'monospace',
               letterSpacing: 0.3,
@@ -546,217 +593,6 @@ class _FeedbackCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PairingCard extends StatelessWidget {
-  const _PairingCard({
-    required this.pairing,
-    required this.isBusy,
-    required this.selectedSongId,
-    required this.onChoose,
-    required this.onSkip,
-  });
-
-  final SessionPairing pairing;
-  final bool isBusy;
-  final String? selectedSongId;
-  final ValueChanged<String> onChoose;
-  final VoidCallback onSkip;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final stackChoices = constraints.maxWidth < 520;
-        final first = _SongChoiceCard(
-          song: pairing.songA,
-          isBusy: isBusy,
-          isSelected: selectedSongId == pairing.songA.id,
-          hasSelection: selectedSongId != null,
-          onChoose: () => onChoose(pairing.songA.id),
-        );
-        final second = _SongChoiceCard(
-          song: pairing.songB,
-          isBusy: isBusy,
-          isSelected: selectedSongId == pairing.songB.id,
-          hasSelection: selectedSongId != null,
-          onChoose: () => onChoose(pairing.songB.id),
-        );
-
-        return Column(
-          children: <Widget>[
-            if (stackChoices)
-              Column(children: <Widget>[first, const _OrDivider(), second])
-            else
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(child: first),
-                    const SizedBox(width: 12),
-                    Expanded(child: second),
-                  ],
-                ),
-              ),
-            const SizedBox(height: 14),
-            Align(
-              alignment: Alignment.center,
-              child: TextButton(
-                onPressed: isBusy ? null : onSkip,
-                child: const Text('Skip this pairing'),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _OrDivider extends StatelessWidget {
-  const _OrDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: <Widget>[
-          const Expanded(child: Divider(color: AppTheme.border)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text('OR', style: Theme.of(context).textTheme.labelSmall),
-          ),
-          const Expanded(child: Divider(color: AppTheme.border)),
-        ],
-      ),
-    );
-  }
-}
-
-class _SongChoiceCard extends StatelessWidget {
-  const _SongChoiceCard({
-    required this.song,
-    required this.isBusy,
-    required this.isSelected,
-    required this.hasSelection,
-    required this.onChoose,
-  });
-
-  final SessionPairingSong song;
-  final bool isBusy;
-  final bool isSelected;
-  final bool hasSelection;
-  final VoidCallback onChoose;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDimmed = isBusy && hasSelection && !isSelected;
-    final borderColor = isSelected
-        ? AppTheme.ember
-        : isBusy
-        ? AppTheme.border
-        : AppTheme.borderStrong;
-    final backgroundColor = isSelected
-        ? AppTheme.surfaceRaised
-        : AppTheme.surface.withValues(alpha: isDimmed ? 0.45 : 1);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: isBusy ? null : onChoose,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            border: Border.all(color: borderColor, width: isSelected ? 1.4 : 1),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isSelected
-                ? <BoxShadow>[
-                    BoxShadow(
-                      color: AppTheme.ember.withValues(alpha: 0.2),
-                      blurRadius: 26,
-                      offset: const Offset(0, 12),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 176),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 180),
-                opacity: isDimmed ? 0.48 : 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    if (song.primaryLane != null || song.year != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Text(
-                          [
-                            if (song.primaryLane != null)
-                              song.primaryLane!.toUpperCase().replaceAll(
-                                '-',
-                                '_',
-                              ),
-                            if (song.year != null) song.year.toString(),
-                          ].join('  ·  '),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppTheme.mutedForeground,
-                          ),
-                        ),
-                      ),
-                    Text(
-                      song.title,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        height: 1.02,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      song.artist,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: AppTheme.mutedForeground,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 160),
-                      child: isSelected && isBusy
-                          ? const SizedBox(
-                              key: ValueKey<String>('spinner'),
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              key: ValueKey<String>(
-                                isSelected ? 'selected' : 'idle',
-                              ),
-                              isSelected
-                                  ? Icons.check_circle
-                                  : Icons.arrow_forward,
-                              size: 22,
-                              color: isSelected
-                                  ? AppTheme.ember
-                                  : AppTheme.mutedForeground,
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ),
         ),
       ),
