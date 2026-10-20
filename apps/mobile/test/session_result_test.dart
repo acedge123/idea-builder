@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:music_dna/src/features/continuation/domain/continuation_repository.dart';
+import 'package:music_dna/src/features/session/presentation/pages/session_stub_page.dart';
 import 'package:music_dna/src/core/network/app_api_exception.dart';
 import 'package:music_dna/src/core/network/music_dna_api_client.dart';
 import 'package:music_dna/src/features/onboarding/domain/entities/started_music_session.dart';
@@ -88,6 +92,7 @@ class ResultRepository extends FakeSessionRepository
   Completer<SharePublication>? pending;
   SharePublication? restoredPublication;
   String publicSessionId = 'session-1';
+  int? publishedResultVersion;
   @override
   Future<SessionReveal> revealSession({required String sessionId}) async {
     revealCalls++;
@@ -105,6 +110,7 @@ class ResultRepository extends FakeSessionRepository
     return SharePublication(
       isPublic: publish,
       token: publish ? 'opaque-token' : null,
+      resultVersion: publishedResultVersion,
     );
   }
 
@@ -147,6 +153,73 @@ SessionCubit cubitFor(ResultRepository repository) => SessionCubit(
 );
 
 void main() {
+  testWidgets(
+    'versioned result opens continuation with exact original and returns unchanged',
+    (tester) async {
+      final repository = ResultRepository();
+      final cubit = cubitFor(repository);
+      addTearDown(cubit.close);
+      await cubit.initialize();
+      ContinuationContext? received;
+      late GoRouter router;
+      router = GoRouter(
+        initialLocation: '/session',
+        routes: [
+          GoRoute(
+            path: '/session',
+            builder: (_, _) => BlocProvider.value(
+              value: cubit,
+              child: const SessionStubPage(
+                shareBaseUrl: 'https://www.musicdna.fm',
+                ownerId: 'owner',
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/session/:id/continuation',
+            builder: (_, state) {
+              received = state.extra as ContinuationContext;
+              return Scaffold(
+                body: TextButton(
+                  onPressed: router.pop,
+                  child: const Text('Return to reading'),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Push back'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Push back'));
+      await tester.pumpAndSettle();
+      expect(received!.original, same(reveal));
+      expect(received!.resultVersion, result.version);
+      expect(received!.ownerId, 'owner');
+      await tester.tap(find.text('Return to reading'));
+      await tester.pumpAndSettle();
+      expect(find.text(result.headline), findsOneWidget);
+      expect(cubit.state.reveal, same(reveal));
+      expect(repository.revealCalls, 1);
+    },
+  );
+  test(
+    'reported published version mismatch prevents verification and preserves revoke',
+    () async {
+      final repository = ResultRepository()..publishedResultVersion = 2;
+      final cubit = cubitFor(repository);
+      addTearDown(cubit.close);
+      await cubit.initialize();
+      await cubit.setPublication(publish: true);
+      expect(cubit.state.shareVerified, false);
+      expect(cubit.state.shareMayBePublic, true);
+      expect(repository.lookups, 0);
+      expect(cubit.state.shareError, isNotNull);
+    },
+  );
   test(
     'v1 reveal opts in, maps result and full separately and ignores token as consent',
     () async {

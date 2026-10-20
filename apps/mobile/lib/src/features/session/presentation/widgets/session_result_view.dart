@@ -13,10 +13,12 @@ class SessionResultView extends StatelessWidget {
     required this.onVerify,
     required this.onCopy,
     required this.onSignIn,
+    this.onPushBack,
   });
   final SessionState state;
   final String? shareUrl;
   final VoidCallback onPublish, onRevoke, onVerify, onCopy, onSignIn;
+  final VoidCallback? onPushBack;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +65,12 @@ class SessionResultView extends StatelessWidget {
           spacing: 12,
           runSpacing: 8,
           children: [
+            if (onPushBack != null)
+              TextButton.icon(
+                onPressed: onPushBack,
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Push back'),
+              ),
             if (shareUrl == null && state.publication?.isPublic != true)
               FilledButton.icon(
                 onPressed: state.sharing ? null : onPublish,

@@ -5,6 +5,9 @@ import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../../features/continuation/domain/continuation_repository.dart';
+import '../../features/continuation/data/rest_continuation_repository.dart';
+import '../../features/continuation/presentation/continuation_cubit.dart';
 import '../../features/onboarding/domain/entities/started_music_session.dart';
 import '../../features/onboarding/data/datasources/onboarding_remote_data_source.dart';
 import '../../features/onboarding/data/repositories/onboarding_repository_impl.dart';
@@ -17,12 +20,21 @@ import '../../features/session/domain/repositories/session_repository.dart';
 import '../../features/session/domain/repositories/session_experience_repository.dart';
 import '../../features/session/domain/repositories/session_result_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
+import '../../features/result_feedback/data/unavailable_result_feedback_repository.dart';
+import '../../features/result_feedback/data/rest_result_feedback_repository.dart';
+import '../../features/result_feedback/domain/result_feedback.dart';
+import '../../features/result_feedback/domain/result_feedback_repository.dart';
+import '../../features/result_feedback/presentation/result_feedback_cubit.dart';
 import '../config/app_config.dart';
 import '../logging/app_logger.dart';
 import '../network/music_dna_api_client.dart';
 
 class AppDependencies {
-  AppDependencies({required this.config, required this.supabase}) {
+  AppDependencies({
+    required this.config,
+    required this.supabase,
+    ContinuationRepository? continuationRepository,
+  }) {
     apiClient = MusicDnaApiClient(
       baseUrl: config.apiBaseUrl,
       accessTokenProvider: () async =>
@@ -30,10 +42,42 @@ class AppDependencies {
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
     authRepository = AuthRepositoryImpl(authRemoteDataSource);
+    this.continuationRepository =
+        continuationRepository ??
+        (config.experienceV1
+            ? RestContinuationRepository(apiClient)
+            : const UnavailableContinuationRepository());
   }
 
   final AppConfig config;
   final SupabaseClient supabase;
+  late final ContinuationRepository continuationRepository;
+  final Map<ContinuationContext, ContinuationCubit> _continuations = {};
+  String? _continuationOwner;
+
+  ContinuationCubit continuationFor(ContinuationContext context) {
+    final owner = authRepository.currentUser?.id;
+    if (owner == null || context.ownerId != owner) {
+      throw StateError('Reading owner authentication required');
+    }
+    if (_continuationOwner != owner) {
+      for (final cubit in _continuations.values) {
+        cubit.close();
+      }
+      _continuations.clear();
+      _continuationOwner = owner;
+    }
+    for (final entry in _continuations.entries) {
+      if (entry.key.sessionId == context.sessionId &&
+          entry.key.resultVersion == context.resultVersion &&
+          identical(entry.key.original, context.original)) {
+        return entry.value;
+      }
+    }
+    final cubit = ContinuationCubit(context, continuationRepository)..load();
+    _continuations[context] = cubit;
+    return cubit;
+  }
 
   late final AppLogger logger = const AppLogger();
   late final AuthRemoteDataSource authRemoteDataSource;
@@ -52,6 +96,28 @@ class AppDependencies {
     sessionRemoteDataSource,
   );
   late final SessionResumeStore sessionResumeStore = SessionResumeStore();
+  late final ResultFeedbackRepository resultFeedbackRepository =
+      config.experienceV1
+      ? RestResultFeedbackRepository(apiClient)
+      : const UnavailableResultFeedbackRepository();
+
+  bool get hasResultFeedback =>
+      config.experienceV1 && resultFeedbackRepository.available;
+
+  ResultFeedbackCubit createResultFeedbackCubit({
+    required String sessionId,
+    required int resultVersion,
+  }) => ResultFeedbackCubit(
+    target: FeedbackTarget(
+      ownerId: authRepository.currentUser?.id ?? '',
+      sessionId: sessionId,
+      resultVersion: resultVersion,
+    ),
+    repository: resultFeedbackRepository,
+    currentOwnerId: () => authRepository.currentUser?.id,
+    ownerChanges: authRepository.observeAuthState().map((user) => user?.id),
+    logger: logger,
+  );
 
   AuthCubit createAuthCubit() {
     return AuthCubit(authRepository, logger: logger)..initialize();

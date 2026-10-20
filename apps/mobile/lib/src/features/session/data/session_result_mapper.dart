@@ -49,6 +49,8 @@ SharePublication mapSharePublication(Map<String, dynamic> data, bool publish) {
   if (data['is_public'] != publish) _invalid();
   final token = publish ? _text(data['share_token']) : null;
   final url = data['share_url'];
+  final version = data['result_version'];
+  if (version != null && (version is! int || version < 1)) _invalid();
   if (url != null &&
       (url is! String ||
           Uri.tryParse(url)?.scheme != 'https' ||
@@ -59,5 +61,6 @@ SharePublication mapSharePublication(Map<String, dynamic> data, bool publish) {
     isPublic: publish,
     token: token,
     url: publish ? url as String? : null,
+    resultVersion: version as int?,
   );
 }
