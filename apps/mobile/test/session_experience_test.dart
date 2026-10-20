@@ -89,6 +89,7 @@ void main() {
               enabled
                   ? {
                       'contract': 1,
+                      'prompt': 'Actual selected pairing question',
                       'pairing': null,
                       'progress': {'answered': 2, 'max_answered': 6},
                       'completion': {'done': false, 'reason': null},
@@ -113,6 +114,11 @@ void main() {
         expect(round.round, 3);
         expect(round.done, isFalse);
         expect(round.experienceVersion, enabled);
+        expect(
+          round.prompt,
+          enabled ? 'Actual selected pairing question' : null,
+        );
+        expect(round.maxAnswered, enabled ? 6 : null);
       },
     );
   }
@@ -177,7 +183,7 @@ void main() {
     expect(find.textContaining('earlier provisional'), findsOneWidget);
     expect(
       find.textContaining('3 supporting / 4 tested / 1 contradicting'),
-      findsOneWidget,
+      findsNothing,
     );
     await expectLater(
       find.byType(MaterialApp),

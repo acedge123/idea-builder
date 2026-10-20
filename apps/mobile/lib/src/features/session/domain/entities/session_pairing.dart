@@ -76,6 +76,8 @@ class SessionRoundState extends Equatable {
     this.dim,
     this.delta,
     this.experienceVersion = false,
+    this.prompt,
+    this.maxAnswered,
   });
 
   final String sessionId;
@@ -89,6 +91,8 @@ class SessionRoundState extends Equatable {
   final String? dim;
   final double? delta;
   final bool experienceVersion;
+  final String? prompt;
+  final int? maxAnswered;
 
   SessionRoundState copyWith({
     int? round,
@@ -119,6 +123,8 @@ class SessionRoundState extends Equatable {
       dim: clearDim ? null : dim ?? this.dim,
       delta: clearDelta ? null : delta ?? this.delta,
       experienceVersion: experienceVersion,
+      prompt: prompt,
+      maxAnswered: maxAnswered,
     );
   }
 
@@ -135,6 +141,8 @@ class SessionRoundState extends Equatable {
     dim,
     delta,
     experienceVersion,
+    prompt,
+    maxAnswered,
   ];
 }
 
