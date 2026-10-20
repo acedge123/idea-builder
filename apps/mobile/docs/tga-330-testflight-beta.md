@@ -14,7 +14,11 @@ The passing 125-test/analysis/release-compilation evidence and live beta GET/mut
 
 ## Apple delivery status
 
-Preparation only. No signed archive, export, upload or new processing success is claimed here. Apple currently displays an updated Developer Program License Agreement notice for the account holder to review. Acceptance of legal terms belongs to the user. Signing/export availability must still be verified with Xcode's available account or managed signing access.
+A development-signed archive was built successfully from clean source `23b8e74aee261007a30cf7117e66fd05d0d6677b` at `/tmp/musicdna330-build4.xcarchive`. Its plist confirms bundle `fm.musicdna.app`, version `0.1.1`, build `4`; generated config confirms V1 enabled and the verified beta API/share origins. Public configuration SHA-256: `7b421f72956b6f723a46f77c457348e132e112c6dc6c01ca846efed93f945937`.
+
+App Store Connect export with automatic signing failed: `No Accounts` and no `iOS Distribution` signing certificate. Browser sign-in is working and Apple build history has been verified, but Xcode's export has no usable Apple account/distribution signing access. Sign in/check the account under Xcode Settings > Accounts for team EK Enterprises (`SK2W4373LK`), then retry export; no new build number is consumed by this failed export. Native Xcode UI automation is unavailable in this session, so the user must complete that sign-in/check.
+
+No distribution IPA, Apple upload or new processing success is claimed. Apple also displays an updated Developer Program License Agreement notice, with October 28, 2026 review deadline. Its legal terms remain untouched; the tested export errors concern account/certificate access, so the agreement is not asserted as the demonstrated export failure.
 
 Do not mark TGA-330 Done until Apple processing finishes and build 4 is actually installable for the intended existing internal reviewer. Do not invite new testers or enable external/public release. Record final upload/processing state in the ticket and release record.
 
