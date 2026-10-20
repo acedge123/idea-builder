@@ -128,4 +128,84 @@ void main() {
       throwsFormatException,
     );
   });
+  test(
+    'immutable feedback saves restore the latest operation and real mutation',
+    () async {
+      final repository = repo(
+        (_) async => history([
+          {
+            ...row(),
+            'id': 'second',
+            'mutation_id': 'new',
+            'created_at': '2026-10-20T02:00:00Z',
+            'comment': 'New opinion',
+          },
+          {
+            ...row(),
+            'id': 'first',
+            'mutation_id': 'old',
+            'created_at': '2026-10-20T01:00:00Z',
+          },
+        ]),
+      );
+      final saved = await repository.load(target);
+      expect(saved!.draft.comment, 'New opinion');
+      expect(saved.mutationId, 'new');
+    },
+  );
+
+  test(
+    'equally timed operations fail instead of inventing latest order',
+    () async {
+      await expectLater(
+        repo(
+          (_) async => history([
+            {...row(), 'id': 'one', 'created_at': '2026-10-20T01:00:00Z'},
+            {...row(), 'id': 'two', 'created_at': '2026-10-20T01:00:00Z'},
+          ]),
+        ).load(target),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test('a present invalid mutation is rejected on reopening', () async {
+    await expectLater(
+      repo(
+        (_) async => history([
+          {...row(), 'mutation_id': ''},
+        ]),
+      ).load(target),
+      throwsFormatException,
+    );
+  });
+
+  test('acknowledged row from another operation is not accepted', () async {
+    final repository = repo(
+      (r) async => r.method == 'POST'
+          ? http.Response(
+              jsonEncode({
+                'contract': 1,
+                'id': 'saved',
+                'updated': false,
+                'replayed': false,
+              }),
+              200,
+            )
+          : history([
+              {...row(), 'mutation_id': 'other-operation'},
+            ]),
+    );
+    await expectLater(
+      repository.save(
+        target: target,
+        draft: const FeedbackDraft(
+          accuracy: ReadingAccuracy.partly,
+          comment: 'One exception',
+        ),
+        mutationId: 'this-operation',
+      ),
+      throwsFormatException,
+    );
+  });
 }

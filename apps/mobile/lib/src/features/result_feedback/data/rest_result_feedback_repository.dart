@@ -54,7 +54,8 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
   ) {
     if (row['id'] is! String ||
         (row['id'] as String).isEmpty ||
-        row['result_version'] != target.resultVersion) {
+        row['result_version'] != target.resultVersion ||
+        row['target'] != null) {
       throw const FormatException('Invalid saved feedback');
     }
     final accuracy = switch (row['accuracy']) {
@@ -94,11 +95,37 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
               r['target'] == null,
         )
         .toList();
-    if (rows.length > 1) throw const FormatException('Ambiguous feedback');
     if (rows.isEmpty) return null;
-    // GET currently omits mutation_id. A read-only marker cannot reconcile a
-    // lost write; never pretend it proves the submitted mutation committed.
-    return _map(target, rows.single, 'read:${rows.single['id']}');
+    final ids = <String>{};
+    final ordered = rows.map((row) {
+      final id = row['id'];
+      if (id is! String || !ids.add(id)) {
+        throw const FormatException('Ambiguous feedback identity');
+      }
+      return (
+        row: row,
+        at: DateTime.tryParse(row['created_at'] as String? ?? ''),
+      );
+    }).toList();
+    // Current persistence stores immutable operations, so a version can have
+    // several saves. Restore the newest operation, preserving older versions.
+    // A legacy single row without a timestamp remains readable.
+    if (ordered.length > 1) {
+      if (ordered.any((r) => r.at == null)) {
+        throw const FormatException('Ambiguous feedback ordering');
+      }
+      ordered.sort((a, b) => a.at!.compareTo(b.at!));
+      if (ordered.last.at == ordered[ordered.length - 2].at) {
+        throw const FormatException('Ambiguous latest feedback');
+      }
+    }
+    final row = ordered.last.row;
+    final mutation = row['mutation_id'];
+    if (mutation != null &&
+        (mutation is! String || mutation.isEmpty || mutation.length > 80)) {
+      throw const FormatException('Invalid feedback mutation');
+    }
+    return _map(target, row, mutation as String? ?? 'read:${row['id']}');
   }
 
   @override
@@ -135,6 +162,10 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
       target,
     )).where((r) => r['id'] == ack['id']).toList();
     if (rows.length != 1) throw const FormatException('Saved feedback missing');
+    if (rows.single['mutation_id'] != null &&
+        rows.single['mutation_id'] != mutationId) {
+      throw const FormatException('Saved feedback mutation changed');
+    }
     final saved = _map(target, rows.single, mutationId);
     if (saved.draft != draft) {
       throw const FormatException('Saved feedback changed');
