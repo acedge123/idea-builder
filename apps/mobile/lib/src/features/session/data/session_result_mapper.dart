@@ -41,6 +41,9 @@ SessionResult mapSessionResult(Map<String, dynamic> data) {
     supportingChoices: supports,
     tensionClaim: tension == null ? null : _text(tension['claim']),
     tensionNotes: tension?['notes'] as String?,
+    voiceVersion: data['voice_version'] as String?,
+    auditText: data['audit_text'] as String?,
+    narrationStatus: data['narration_status'] as String?,
   );
 }
 

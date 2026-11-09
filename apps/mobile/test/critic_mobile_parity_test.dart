@@ -20,7 +20,6 @@ import 'package:music_dna/src/features/session/domain/entities/session_experienc
 import 'package:music_dna/src/features/session/domain/entities/session_pairing.dart';
 import 'package:music_dna/src/features/session/presentation/cubit/session_cubit.dart';
 import 'package:music_dna/src/features/session/presentation/pages/session_stub_page.dart';
-import 'package:music_dna/src/features/session/presentation/critic_display.dart';
 import 'package:music_dna/src/features/session/presentation/widgets/session_experience_view.dart';
 import 'package:music_dna/src/features/session/presentation/widgets/session_pairing_card.dart';
 
@@ -38,41 +37,49 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  test(
-    'display preserves qualifications, punctuation and complete saved claims',
-    () {
-      const saved =
-          'Mr. Brightside over B. The evidence is contested (2 supporting, 1 against); no supported claim yet.';
-      expect(
-        criticDisplayLine(saved),
-        'Mr. Brightside over B. The evidence is contested; no supported claim yet.',
-      );
-      expect(saved, contains('(2 supporting, 1 against)'));
-      expect(
-        criticDisplayLine(
-          'A tentative lean. Not enough independent choices yet.',
+  testWidgets('compact read preserves the complete server wording', (
+    tester,
+  ) async {
+    const saved =
+        'Mr. Brightside over B. The evidence is contested (2 supporting, 1 against); no supported claim yet.';
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SessionReadView(
+            read: SessionRead(
+              thesis: saved,
+              auditText: 'Separate frozen evidence.',
+            ),
+            compact: true,
+          ),
         ),
-        'A tentative lean. Not enough independent choices yet.',
-      );
-    },
-  );
+      ),
+    );
+    expect(find.text(saved), findsOneWidget);
+    expect(find.text('Separate frozen evidence.'), findsNothing);
+  });
 
-  test(
-    'reaction acknowledgment never exposes selection rationale or invents an unknown effect',
-    () {
-      expect(reactionDisplayMessage('harder_pairing'), 'Fine. Try these.');
-      expect(
-        reactionDisplayMessage('retest_pairing'),
-        "Fair. Let's try another.",
+  testWidgets(
+    'read history retains separate audit text without process labels',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SessionReadView(
+              read: SessionRead(
+                thesis: 'The authored read.',
+                auditText: 'Separate frozen evidence.',
+                voiceVersion: 'critic-expression-v2',
+                narrationStatus: 'ok',
+              ),
+            ),
+          ),
+        ),
       );
-      expect(
-        reactionDisplayMessage('no_alternative'),
-        contains('No other matchup available'),
-      );
-      expect(
-        reactionDisplayMessage('future_server_effect'),
-        "Heard you. Let's keep going.",
-      );
+      expect(find.text('The authored read.'), findsOneWidget);
+      expect(find.text('Separate frozen evidence.'), findsOneWidget);
+      expect(find.text('critic-expression-v2'), findsNothing);
+      expect(find.text('ok'), findsNothing);
     },
   );
 

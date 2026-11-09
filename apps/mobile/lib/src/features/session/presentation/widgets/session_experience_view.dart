@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/session_experience.dart';
-import '../critic_display.dart';
 
 class SessionExperienceView extends StatelessWidget {
   const SessionExperienceView({
@@ -97,7 +96,7 @@ class SessionExperienceView extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      criticDisplayLine(latestFeedback),
+                      latestFeedback,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   )
@@ -285,7 +284,7 @@ class SessionReadView extends StatelessWidget {
           Semantics(
             liveRegion: true,
             child: Text(
-              compact ? criticDisplayLine(read.thesis) : read.thesis,
+              read.thesis,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontSize: 20,
                 height: 1.3,
@@ -298,6 +297,17 @@ class SessionReadView extends StatelessWidget {
               'Changed by ${read.changedBy}.',
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 14),
             ),
+          ],
+          if (!compact &&
+              read.auditText?.isNotEmpty == true &&
+              read.auditText != read.thesis) ...[
+            const SizedBox(height: 12),
+            Text(
+              'The choices behind the read',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(read.auditText!),
           ],
         ],
       ),

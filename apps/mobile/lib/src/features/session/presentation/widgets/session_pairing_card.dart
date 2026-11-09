@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'song_artwork_image.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/session_pairing.dart';
 
@@ -131,16 +132,7 @@ class SessionSongChoiceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (MediaQuery.textScalerOf(context).scale(16) <= 24) ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
-                          child: Image.asset(
-                            'assets/imagery/listening-record.jpg',
-                            width: 72,
-                            height: 88,
-                            fit: BoxFit.cover,
-                            excludeFromSemantics: true,
-                          ),
-                        ),
+                        SongArtworkImage(artwork: song.artwork),
                         const SizedBox(width: 16),
                       ],
                       Expanded(

@@ -25,11 +25,15 @@ class SessionRead extends Equatable {
     this.previousClaim,
     this.changedBy,
     this.newInterpretation,
+    this.voiceVersion,
+    this.auditText,
+    this.narrationStatus,
   });
   final String thesis;
   final String? tier, direction, hook, question;
   final int? supporting, contradicting, tested;
   final String? previousClaim, changedBy, newInterpretation;
+  final String? voiceVersion, auditText, narrationStatus;
   @override
   List<Object?> get props => [
     thesis,
@@ -43,6 +47,9 @@ class SessionRead extends Equatable {
     previousClaim,
     changedBy,
     newInterpretation,
+    voiceVersion,
+    auditText,
+    narrationStatus,
   ];
 }
 

@@ -1,7 +1,7 @@
 name: music_dna
 description: "MusicDNA Flutter mobile app."
 publish_to: "none"
-version: 0.1.1+5
+version: 0.1.1+6
 
 environment:
   sdk: ^3.11.4
@@ -28,4 +28,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/music-dna-logo.png
-    - assets/imagery/listening-record.jpg
+    - assets/imagery/music-dna-cover.jpg

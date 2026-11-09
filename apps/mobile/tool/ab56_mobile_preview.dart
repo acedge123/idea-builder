@@ -68,7 +68,7 @@ class _PreviewBook extends StatefulWidget {
 
 class _PreviewBookState extends State<_PreviewBook> {
   static const capture = bool.fromEnvironment('CAPTURE_REFERENCE');
-  final boundary = GlobalKey();
+  final boundary = GlobalKey(debugLabel: 'ab56-preview-canvas');
   String stage = 'pairing';
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _PreviewBookState extends State<_PreviewBook> {
 
   Future<void> _capture() async {
     await precacheImage(
-      const AssetImage('assets/imagery/listening-record.jpg'),
+      const AssetImage('assets/imagery/music-dna-cover.jpg'),
       context,
     );
     for (final value in ['pairing', 'reaction', 'reveal', 'conversation']) {
