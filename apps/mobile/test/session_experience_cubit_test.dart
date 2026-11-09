@@ -84,7 +84,7 @@ void main() {
       expect(repository.keys.length, 1);
       await cubit.react(SessionReaction.notQuite);
       expect(repository.keys[0], repository.keys[1]);
-      expect(cubit.state.reactionMessage, "Heard you. Let's keep going.");
+      expect(cubit.state.reactionMessage, 'No eligible alternative.');
       expect(cubit.pendingReaction, isNull);
       expect(cubit.state.currentRound?.pairing?.id, 'p');
     },

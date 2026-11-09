@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'session_experience.dart';
+import 'song_artwork.dart';
 
 class SessionPairingSong extends Equatable {
   const SessionPairingSong({
@@ -9,6 +10,7 @@ class SessionPairingSong extends Equatable {
     this.year,
     this.primaryLane,
     this.catalogLane,
+    this.artwork,
   });
 
   final String id;
@@ -17,6 +19,7 @@ class SessionPairingSong extends Equatable {
   final int? year;
   final String? primaryLane;
   final String? catalogLane;
+  final SongArtwork? artwork;
 
   @override
   List<Object?> get props => <Object?>[
@@ -26,6 +29,7 @@ class SessionPairingSong extends Equatable {
     year,
     primaryLane,
     catalogLane,
+    artwork,
   ];
 }
 

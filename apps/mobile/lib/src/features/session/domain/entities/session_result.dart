@@ -22,11 +22,15 @@ class SessionResult extends Equatable {
     required List<ResultSupport> supportingChoices,
     this.tensionClaim,
     this.tensionNotes,
+    this.voiceVersion,
+    this.auditText,
+    this.narrationStatus,
   }) : supportingChoices = List.unmodifiable(supportingChoices);
   final int version;
   final String outcome, headline;
   final List<ResultSupport> supportingChoices;
   final String? tensionClaim, tensionNotes;
+  final String? voiceVersion, auditText, narrationStatus;
   @override
   List<Object?> get props => [
     version,
@@ -35,6 +39,9 @@ class SessionResult extends Equatable {
     supportingChoices,
     tensionClaim,
     tensionNotes,
+    voiceVersion,
+    auditText,
+    narrationStatus,
   ];
 }
 

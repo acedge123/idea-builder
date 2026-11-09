@@ -1,4 +1,5 @@
 import '../../domain/entities/session_pairing.dart';
+import '../../domain/entities/song_artwork.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/session_experience_repository.dart';
@@ -211,6 +212,29 @@ class SessionRepositoryImpl
       year: _readIntOrNull(song['year']),
       primaryLane: song['primary_lane'] as String?,
       catalogLane: song['lane'] as String?,
+      artwork: _mapArtwork(song['artwork']),
+    );
+  }
+
+  SongArtwork? _mapArtwork(Object? value) {
+    if (value is! Map<String, dynamic>) return null;
+    final url = value['image_url'];
+    final uri = url is String ? Uri.tryParse(url) : null;
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty) {
+      return null;
+    }
+    return SongArtwork(
+      imageUrl: url as String,
+      albumTitle: value['album_title'] is String
+          ? value['album_title'] as String
+          : null,
+      attribution: value['attribution'] is String
+          ? value['attribution'] as String
+          : null,
+      source: value['source'] is String ? value['source'] as String : null,
     );
   }
 

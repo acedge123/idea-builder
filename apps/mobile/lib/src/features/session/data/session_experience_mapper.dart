@@ -43,6 +43,9 @@ SessionRead mapSessionRead(Map<String, dynamic> data) {
         ? null
         : '${changed['chosen']} over ${changed['rejected']}',
     newInterpretation: revision['new_interpretation'] as String?,
+    voiceVersion: data['voice_version'] as String?,
+    auditText: data['audit_text'] as String?,
+    narrationStatus: data['narration_status'] as String?,
   );
 }
 

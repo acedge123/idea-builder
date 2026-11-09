@@ -4,13 +4,17 @@ Use this checklist before every TestFlight or App Store build.
 
 ## Source And Build Provenance
 
-- Read the [0.1.1 build 3 baseline](release_baseline_0_1_1_build_3.md).
+- Read the [current AB-56 candidate notes](ab56-build6/README.md). Build6 is
+  uploaded for internal testing; Apple processing and device acceptance are pending.
+  Build5 is the last confirmed installed baseline.
+  The [build3 record](release_baseline_0_1_1_build_3.md) is historical.
 - Use the active `acedge123/idea-builder/apps/mobile` source, not the historical
   mobile copy in the Lovable web repository.
 - Record source SHA, branch, API origin, contract capability and catalog/policy
   versions. Verify the deployed API with an authorized test identity; source
   inspection or an unauthenticated 401 is not contract acceptance.
-- Build 3 has already been uploaded. The next upload needs a higher number.
+- Build6 has been accepted by Apple upload validation. Never reuse6 for another
+  archive intended for upload; the next new candidate needs7 or higher.
 - Record archive creation, validation and upload dates with the exact source
   SHA. Do not infer a previous archive's SHA from the current branch.
 - Preserve the original release branch until reconciliation is reviewed.
@@ -18,7 +22,9 @@ Use this checklist before every TestFlight or App Store build.
 ## Preconditions
 
 - Work from a clean branch or detached checkout of the intended merge target.
-- Confirm `config/prod.local.json` has the correct production:
+- Choose the intended config: `config/beta.local.json` for the isolated internal
+  TestFlight candidate, or `config/prod.local.json` only for an approved production
+  release. Confirm:
   - `API_BASE_URL`
   - `SUPABASE_URL`
   - `SUPABASE_ANON_KEY`
@@ -32,10 +38,12 @@ From [`/Users/rastakit/tga-workspace/idea-builder/apps/mobile`](/Users/rastakit/
 flutter pub get
 flutter analyze
 flutter test
-flutter build ios --release --dart-define-from-file=config/prod.local.json
+flutter build ios --release --dart-define-from-file=config/beta.local.json
 ```
 
-Archive from `ios/Runner.xcworkspace`.
+These commands target the current internal beta release. Use `config/prod.local.json`
+only after an explicit production API release decision. Archive from
+`ios/Runner.xcworkspace` in the same clean checkout; do not archive an older copy.
 
 ## Core QA Pass
 

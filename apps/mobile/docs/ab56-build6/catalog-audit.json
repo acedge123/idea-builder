@@ -1,0 +1,22 @@
+{
+  "ticket": "AB-56",
+  "evidence_class": "live_read_only_numeric_catalog_metadata",
+  "catalog_songs": 494,
+  "active_pairings": 159,
+  "captured_at_utc": "2026-11-09T23:21:49.764821+00:00",
+  "active_pairings_by_lane": {
+    "pop": 25,
+    "metal": 9,
+    "country": 14,
+    "hip_hop": 14,
+    "r_and_b": 7,
+    "electronic": 11,
+    "alternative": 61,
+    "classic_rock": 18
+  },
+  "songs_in_active_pairings": 259,
+  "songs_without_active_pairings": 235,
+  "interpretation": "235 existing songs have no active matchup globally. Per-user lane/used-pair eligibility can narrow the reachable pool further; this is not a count of what any particular user was offered.",
+  "next_step": "Prioritize a small reviewed coverage-only pairing batch using existing songs, especially sparse lanes, before bulk song imports. Preserve scores, frozen evidence and existing experimental pins; require validation and owner review before activation.",
+  "changes_performed": 0
+}

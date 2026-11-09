@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
-import '../critic_display.dart';
 
 class SessionResultView extends StatelessWidget {
   const SessionResultView({
@@ -34,10 +33,7 @@ class SessionResultView extends StatelessWidget {
           style: theme.textTheme.labelSmall,
         ),
         const SizedBox(height: 12),
-        Text(
-          criticDisplayLine(result.headline),
-          style: theme.textTheme.headlineMedium,
-        ),
+        Text(result.headline, style: theme.textTheme.headlineMedium),
         if (result.supportingChoices.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('The choices behind it', style: theme.textTheme.titleMedium),
@@ -160,6 +156,17 @@ class _FullReading extends StatelessWidget {
           ],
         ],
         Text(reveal.interpretation),
+        if (reveal.result?.auditText?.isNotEmpty == true &&
+            reveal.result!.auditText != reveal.result!.headline &&
+            reveal.result!.auditText != reveal.interpretation) ...[
+          const SizedBox(height: 12),
+          Text(
+            'The choices behind the read',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(reveal.result!.auditText!),
+        ],
         for (final claim in reveal.allowedClaims) ...[
           const SizedBox(height: 12),
           Text(claim.tradeoff),
