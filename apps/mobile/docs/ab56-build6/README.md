@@ -65,6 +65,16 @@ from this QA release. AB-56 stays open until acceptance; catalog reachability,
 editorial quality and occasional deterministic fallback remain separate product
 limitations, not claimed solved by the native port.
 
+## Remaining song coverage
+
+The [read-only catalog audit](catalog-audit.json) found494 songs but only159 active
+pairings covering259 songs. **235 existing songs have no active matchup.** Lane and
+used-pair filters can reduce the pool further. This supports the reported limited
+choice variety; it is shared catalog/selector availability, not a missing Flutter
+artwork field. A small reviewed coverage-only pairing batch should reuse existing
+songs before bulk imports. No pairings, scores, catalog rows or activation flags
+were changed in this mobile release.
+
 ## Actual release receipt
 
 Build6 was archived, distribution-exported, validated by Apple and uploaded for
