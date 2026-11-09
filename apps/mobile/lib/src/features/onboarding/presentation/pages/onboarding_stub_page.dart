@@ -100,7 +100,8 @@ class _OnboardingStubPageState extends State<OnboardingStubPage> {
                 state.stage != OnboardingStage.success;
 
             return ListView(
-              padding: const EdgeInsets.fromLTRB(28, 28, 28, 52),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
               children: <Widget>[
                 Text('THE INTERVIEW', style: theme.textTheme.labelSmall),
                 if (bootingAnonymousSession) ...<Widget>[
@@ -112,9 +113,27 @@ class _OnboardingStubPageState extends State<OnboardingStubPage> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 44),
+                const SizedBox(height: 24),
+                Text(
+                  'YOUR SONGS · ${showInput ? currentIndex + 1 : 3} / 3',
+                  style: theme.textTheme.labelSmall,
+                ),
+                const SizedBox(height: 24),
+                if (lockedSongCount > 1)
+                  ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    title: Text('Earlier songs (${lockedSongCount - 1})'),
+                    children: [
+                      for (var i = 0; i < lockedSongCount - 1; i++) ...[
+                        _SongEntryRow(index: i, song: state.songs[i]),
+                        if (i < state.reactions.length)
+                          _CriticLine(text: state.reactions[i].reaction),
+                        const SizedBox(height: 16),
+                      ],
+                    ],
+                  ),
                 for (
-                  var index = 0;
+                  var index = lockedSongCount > 0 ? lockedSongCount - 1 : 0;
                   index < lockedSongCount;
                   index++
                 ) ...<Widget>[
@@ -269,7 +288,7 @@ class _SongEntryRow extends StatelessWidget {
         const SizedBox(width: 18),
         Expanded(
           child: Text(
-            song.toLowerCase(),
+            song,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontFamily: 'monospace',
               letterSpacing: 0.3,
@@ -315,8 +334,8 @@ class _CriticLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 68),
-      child: Text(text, style: Theme.of(context).textTheme.headlineLarge),
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(text, style: Theme.of(context).textTheme.headlineSmall),
     );
   }
 }
@@ -339,13 +358,16 @@ class _ContinueButton extends StatelessWidget {
           padding: EdgeInsets.zero,
           backgroundColor: const Color(0xFF7B241E),
         ),
-        child: busy
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.arrow_forward, size: 28),
+        child: Semantics(
+          label: 'Continue with this song',
+          child: busy
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.arrow_forward, size: 28),
+        ),
       ),
     );
   }

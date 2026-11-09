@@ -189,6 +189,9 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('goldens/tga315-read-small-phone-large-text.png'),
     );
+    await tester.ensureVisible(find.text('Want to challenge the read?'));
+    await tester.tap(find.text('Want to challenge the read?'));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Not quite'));
     await tester.tap(find.text('Not quite'));
     expect(chosen, SessionReaction.notQuite);

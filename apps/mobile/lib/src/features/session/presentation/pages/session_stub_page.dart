@@ -95,11 +95,15 @@ class _SessionStubPageState extends State<SessionStubPage> {
                 children: <Widget>[
                   Text('THE INTERVIEW', style: theme.textTheme.labelSmall),
                   if (startedSession != null) ...<Widget>[
-                    const SizedBox(height: 34),
-                    _OpeningTranscript(session: startedSession),
-                    const SizedBox(height: 34),
-                    _CriticBridge(hypothesis: startedSession.hypothesis),
-                    const SizedBox(height: 26),
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: const Text('Your opening songs'),
+                      children: [
+                        _OpeningTranscript(session: startedSession),
+                        _CriticBridge(hypothesis: startedSession.hypothesis),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ],
                   if (showFeedback)
                     _FeedbackCard(feedback: state.lastFeedback!),
@@ -107,6 +111,10 @@ class _SessionStubPageState extends State<SessionStubPage> {
                   if (context.read<SessionCubit>().hasExperience)
                     SessionExperienceView(
                       activeExchangeKey: _activeExchangeKey,
+                      showReactionControls: false,
+                      showCurrentRead:
+                          state.status != SessionStatus.revealed &&
+                          state.status != SessionStatus.revealing,
                       exchanges: state.exchanges,
                       read: state.read,
                       busy: isBusy || state.status != SessionStatus.ready,
@@ -116,7 +124,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                           .pendingReaction,
                       onReaction: context.read<SessionCubit>().react,
                     ),
-                  if (state.errorMessage != null)
+                  if (state.errorMessage != null &&
+                      state.status != SessionStatus.failure)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(
@@ -184,6 +193,20 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                     ),
                                     onSkip: () => _skipPairing(context),
                                   ),
+                                  if (context
+                                      .read<SessionCubit>()
+                                      .hasExperience)
+                                    SessionReactionControls(
+                                      exchanges: state.exchanges,
+                                      read: state.read,
+                                      busy: isBusy,
+                                      pendingReaction: context
+                                          .read<SessionCubit>()
+                                          .pendingReaction,
+                                      onReaction: context
+                                          .read<SessionCubit>()
+                                          .react,
+                                    ),
                                 ],
                               ),
                       SessionStatus.completed => _FallbackCard(
@@ -485,16 +508,28 @@ class _PairingIntro extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'ROUND ${(round?.round ?? 1).toString().padLeft(2, '0')} / ${round?.maxAnswered ?? SessionCubit.maxPairingRounds}',
+          '${round?.experienceVersion == true ? 'CHOICE' : 'ROUND'} ${(round?.round ?? 1).toString().padLeft(2, '0')} / ${round?.maxAnswered ?? SessionCubit.maxPairingRounds}',
           style: theme.textTheme.labelSmall?.copyWith(
             color: AppTheme.mutedForeground,
           ),
         ),
+        if (round?.experienceVersion == true) ...[
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            backgroundColor: AppTheme.borderStrong,
+            value:
+                ((round!.round - 1) /
+                        (round!.maxAnswered ?? SessionCubit.maxPairingRounds))
+                    .clamp(0, 1),
+            semanticsLabel:
+                '${round!.round - 1} of ${round!.maxAnswered ?? SessionCubit.maxPairingRounds} choices completed',
+          ),
+        ],
         const SizedBox(height: 12),
         Text(
-          round?.experienceVersion == true
-              ? round?.prompt ?? 'Which one would you keep?'
-              : pairing.whyGood ?? 'Which one would you keep?',
+          (round?.round ?? 1) == 1
+              ? 'Pick one. First instinct.'
+              : 'Which one would you keep?',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: AppTheme.mutedForeground,
           ),

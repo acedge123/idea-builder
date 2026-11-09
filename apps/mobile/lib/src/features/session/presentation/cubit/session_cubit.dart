@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../critic_display.dart';
+
 import '../../../../core/logging/app_logger.dart';
 import '../../../../core/network/app_api_exception.dart';
 import '../../../onboarding/domain/entities/started_music_session.dart';
@@ -669,7 +671,7 @@ class SessionCubit extends Cubit<SessionState> {
       emit(
         state.copyWith(
           reacting: false,
-          reactionMessage: effect.message,
+          reactionMessage: reactionDisplayMessage(effect.effect),
           currentRound: effect.next,
           exchanges: experience.exchanges,
           read: experience.latestRead,

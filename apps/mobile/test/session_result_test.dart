@@ -192,9 +192,9 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Push back'));
+      await tester.ensureVisible(find.text('Argue with me'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Push back'));
+      await tester.tap(find.text('Argue with me'));
       await tester.pumpAndSettle();
       expect(received!.original, same(reveal));
       expect(received!.resultVersion, result.version);
@@ -521,8 +521,8 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text(result.headline), findsOneWidget);
       expect(find.byTooltip('Copy share link'), findsNothing);
-      await tester.ensureVisible(find.text('Publish this read'));
-      await tester.tap(find.text('Publish this read'));
+      await tester.ensureVisible(find.text('Share this read'));
+      await tester.tap(find.text('Share this read'));
       expect(publishes, 1);
       await tester.ensureVisible(find.text('Full reading'));
       await tester.tap(find.text('Full reading'));

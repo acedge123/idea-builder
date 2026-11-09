@@ -14,6 +14,7 @@ class ContinuationPage extends StatefulWidget {
 class _ContinuationPageState extends State<ContinuationPage> {
   late final TextEditingController _draft;
   final _scroll = ScrollController();
+  List<ConversationMessage>? _shownMessages;
 
   @override
   void initState() {
@@ -43,7 +44,7 @@ class _ContinuationPageState extends State<ContinuationPage> {
   Widget build(BuildContext context) {
     final cubit = context.read<ContinuationCubit>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Push back')),
+      appBar: AppBar(title: const Text('You & the critic')),
       body: SafeArea(
         child: BlocConsumer<ContinuationCubit, ContinuationState>(
           listener: (context, state) {
@@ -53,7 +54,9 @@ class _ContinuationPageState extends State<ContinuationPage> {
                 selection: TextSelection.collapsed(offset: state.draft.length),
               );
             }
-            if (state.status == ContinuationStatus.ready) {
+            if (state.status == ContinuationStatus.ready &&
+                !identical(_shownMessages, state.messages)) {
+              _shownMessages = state.messages;
               _showLatest();
             }
           },
@@ -62,17 +65,29 @@ class _ContinuationPageState extends State<ContinuationPage> {
               Expanded(
                 child: ListView(
                   controller: _scroll,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.all(16),
                   children: [
-                    Text(
-                      'Original reading',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      title: const Text('Original reading'),
+                      subtitle: cubit.context.resultVersion == null
+                          ? null
+                          : Text('Version ${cubit.context.resultVersion}'),
+                      children: [
+                        SelectableText(cubit.context.original.interpretation),
+                      ],
                     ),
-                    if (cubit.context.resultVersion != null)
-                      Text('Version ${cubit.context.resultVersion}'),
-                    const SizedBox(height: 8),
-                    SelectableText(cubit.context.original.interpretation),
-                    const Divider(height: 32),
+                    const SizedBox(height: 16),
+                    if (state.messages.isEmpty && !state.busy)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          'What did I miss?',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
                     if (state.versions.isNotEmpty)
                       ExpansionTile(
                         title: const Text('Result versions'),
@@ -107,11 +122,41 @@ class _ContinuationPageState extends State<ContinuationPage> {
                             Text(
                               message.role == ConversationRole.user
                                   ? 'You'
-                                  : 'MusicDNA',
+                                  : 'The critic',
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             const SizedBox(height: 4),
                             SelectableText(message.content),
+                            if (message.role == ConversationRole.assistant &&
+                                message.content.startsWith(
+                                  "I couldn't ground that reply",
+                                )) ...[
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Your message is saved. A reply was not available. You can add what mattered to you.',
+                              ),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final prompt in const {
+                                    'The voice':
+                                        'It is the voice that matters to me because ',
+                                    'The context':
+                                        'The context behind my choice is ',
+                                  }.entries)
+                                    OutlinedButton(
+                                      onPressed:
+                                          state.busy ||
+                                              state.uncertainDelivery ||
+                                              state.draft.isNotEmpty
+                                          ? null
+                                          : () => cubit.editDraft(prompt.value),
+                                      child: Text(prompt.key),
+                                    ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

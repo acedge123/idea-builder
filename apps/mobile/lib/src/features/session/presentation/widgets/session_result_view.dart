@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
+import '../critic_display.dart';
 
 class SessionResultView extends StatelessWidget {
   const SessionResultView({
@@ -33,10 +34,13 @@ class SessionResultView extends StatelessWidget {
           style: theme.textTheme.labelSmall,
         ),
         const SizedBox(height: 12),
-        Text(result.headline, style: theme.textTheme.headlineSmall),
+        Text(
+          criticDisplayLine(result.headline),
+          style: theme.textTheme.headlineMedium,
+        ),
         if (result.supportingChoices.isNotEmpty) ...[
           const SizedBox(height: 24),
-          Text('Evidence', style: theme.textTheme.titleMedium),
+          Text('The choices behind it', style: theme.textTheme.titleMedium),
           for (final support in result.supportingChoices.take(2))
             Padding(
               padding: const EdgeInsets.only(top: 12),
@@ -44,13 +48,19 @@ class SessionResultView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(support.tradeoff, style: theme.textTheme.bodyLarge),
-                  Text(
-                    '${support.supporting} supporting choices · ${support.tested} tested',
-                  ),
-                  for (final example in support.examples) Text(example),
+                  for (final example in support.examples.toSet().take(2))
+                    Text(example),
                 ],
               ),
             ),
+        ],
+        if (!result.supportingChoices.any(
+          (support) => support.examples.isNotEmpty,
+        )) ...[
+          const SizedBox(height: 16),
+          const Text(
+            'No supporting song examples were included with this saved reading.',
+          ),
         ],
         if (result.tensionClaim != null) ...[
           const SizedBox(height: 24),
@@ -66,16 +76,16 @@ class SessionResultView extends StatelessWidget {
           runSpacing: 8,
           children: [
             if (onPushBack != null)
-              TextButton.icon(
+              FilledButton.icon(
                 onPressed: onPushBack,
                 icon: const Icon(Icons.chat_bubble_outline),
-                label: const Text('Push back'),
+                label: const Text('Argue with me'),
               ),
             if (shareUrl == null && state.publication?.isPublic != true)
-              FilledButton.icon(
+              OutlinedButton.icon(
                 onPressed: state.sharing ? null : onPublish,
                 icon: const Icon(Icons.ios_share),
-                label: const Text('Publish this read'),
+                label: const Text('Share this read'),
               ),
             if (shareUrl != null)
               IconButton.filledTonal(
@@ -139,6 +149,16 @@ class _FullReading extends StatelessWidget {
             reveal.archetypeName!,
             style: Theme.of(context).textTheme.titleMedium,
           ),
+        if (reveal.result != null) ...[
+          Text(reveal.result!.headline),
+          for (final support in reveal.result!.supportingChoices) ...[
+            Text(support.tradeoff),
+            Text(
+              '${support.supporting} supporting choices · ${support.tested} tested',
+            ),
+            for (final example in support.examples) Text(example),
+          ],
+        ],
         Text(reveal.interpretation),
         for (final claim in reveal.allowedClaims) ...[
           const SizedBox(height: 12),
