@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/session_experience.dart';
+import '../critic_display.dart';
 
 class SessionExperienceView extends StatelessWidget {
   const SessionExperienceView({
@@ -13,6 +14,8 @@ class SessionExperienceView extends StatelessWidget {
     this.reactionMessage,
     this.pendingReaction,
     this.activeExchangeKey,
+    this.showReactionControls = true,
+    this.showCurrentRead = true,
   });
   final List<SessionExchange> exchanges;
   final SessionRead? read;
@@ -21,69 +24,159 @@ class SessionExperienceView extends StatelessWidget {
   final String? reactionMessage;
   final SessionReaction? pendingReaction;
   final Key? activeExchangeKey;
+  final bool showReactionControls;
+  final bool showCurrentRead;
 
   @override
   Widget build(BuildContext context) {
     final groups = groupSessionExchanges(exchanges);
     final latest = groups.lastOrNull;
-    final historyHasRead = exchanges.any((e) => e.read != null);
-    final canReact = read != null && latest?.hasReaction != true;
+    final currentRead =
+        read ?? exchanges.where((e) => e.read != null).lastOrNull?.read;
+    final latestFeedback = latest?.exchanges
+        .where((e) => e.feedback?.isNotEmpty == true)
+        .lastOrNull
+        ?.feedback;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (groups.length > 1)
-          ExpansionTile(
-            key: const PageStorageKey('session-exchanges'),
-            tilePadding: EdgeInsets.zero,
-            title: Text('Earlier choices (${groups.length - 1})'),
-            children: [
-              for (final group in groups.take(groups.length - 1))
-                SessionExchangeView(group: group),
-            ],
-          ),
-        if (latest != null)
-          SessionExchangeView(key: activeExchangeKey, group: latest),
-        if (latest == null) SizedBox(key: activeExchangeKey),
-        if (read != null && !historyHasRead) SessionReadView(read: read!),
-        if (canReact) ...[
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final reaction in SessionReaction.values)
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(44, 44),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  onPressed:
-                      busy ||
-                          (pendingReaction != null &&
-                              pendingReaction != reaction)
-                      ? null
-                      : () => onReaction(reaction),
-                  child: Text(
-                    pendingReaction == reaction
-                        ? 'Retry ${reactionLabel(reaction.wireName)}'
-                        : reactionLabel(reaction.wireName),
+        if (groups.isNotEmpty || currentRead != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              icon: const Icon(Icons.history, size: 18),
+              label: const Text('Interview history'),
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                showDragHandle: true,
+                builder: (context) => FractionallySizedBox(
+                  heightFactor: 0.85,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(child: Text('Interview history')),
+                          IconButton(
+                            tooltip: 'Close history',
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                      for (final group in groups)
+                        SessionExchangeView(group: group),
+                      if (currentRead != null &&
+                          !exchanges.any((e) => e.read == currentRead))
+                        SessionReadView(read: currentRead),
+                    ],
                   ),
                 ),
-            ],
+              ),
+            ),
           ),
-        ],
-        if (reactionMessage?.isNotEmpty == true)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Semantics(liveRegion: true, child: Text(reactionMessage!)),
+        if (showCurrentRead)
+          KeyedSubtree(
+            key: activeExchangeKey,
+            child: reactionMessage?.isNotEmpty == true
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        reactionMessage!,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                  )
+                : currentRead != null
+                ? SessionReadView(read: currentRead, compact: true)
+                : latestFeedback != null
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      criticDisplayLine(latestFeedback),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        if (showCurrentRead &&
+            latest?.hasReaction == true &&
+            reactionMessage?.isNotEmpty != true)
+          Text(
+            reactionLabel(
+              latest!.exchanges.lastWhere((e) => e.type == 'reaction').reaction,
+            ),
+          ),
+        if (showReactionControls)
+          SessionReactionControls(
+            exchanges: exchanges,
+            read: read,
+            busy: busy,
+            pendingReaction: pendingReaction,
+            onReaction: onReaction,
           ),
         const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+/// Secondary to the current song choice; opening this never submits feedback.
+class SessionReactionControls extends StatelessWidget {
+  const SessionReactionControls({
+    super.key,
+    required this.exchanges,
+    required this.read,
+    required this.busy,
+    required this.onReaction,
+    this.pendingReaction,
+  });
+  final List<SessionExchange> exchanges;
+  final SessionRead? read;
+  final bool busy;
+  final SessionReaction? pendingReaction;
+  final ValueChanged<SessionReaction> onReaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final latest = groupSessionExchanges(exchanges).lastOrNull;
+    if (read == null || latest?.hasReaction == true) {
+      return const SizedBox.shrink();
+    }
+    return ExpansionTile(
+      key: ValueKey(('react', latest?.exchanges.first.at, pendingReaction)),
+      tilePadding: EdgeInsets.zero,
+      initiallyExpanded: pendingReaction != null,
+      title: const Text('Want to challenge the read?'),
+      subtitle: const Text('Optional — you can keep choosing songs.'),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final reaction in SessionReaction.values)
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                ),
+                onPressed:
+                    busy ||
+                        (pendingReaction != null && pendingReaction != reaction)
+                    ? null
+                    : () => onReaction(reaction),
+                child: Text(
+                  pendingReaction == reaction
+                      ? 'Retry ${reactionLabel(reaction.wireName)}'
+                      : reactionLabel(reaction.wireName),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -92,7 +185,7 @@ class SessionExperienceView extends StatelessWidget {
 String reactionLabel(String? kind) => switch (kind) {
   'thats_me' => "That's me",
   'not_quite' => 'Not quite',
-  'harder' => 'Give me a harder one',
+  'harder' => 'Prove it',
   _ => 'Reaction recorded',
 };
 
@@ -148,8 +241,9 @@ class SessionExchangeView extends StatelessWidget {
 }
 
 class SessionReadView extends StatelessWidget {
-  const SessionReadView({super.key, required this.read});
+  const SessionReadView({super.key, required this.read, this.compact = false});
   final SessionRead read;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -172,10 +266,14 @@ class SessionReadView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(
-            header: true,
-            child: Text(label.toUpperCase(), style: theme.textTheme.labelSmall),
-          ),
+          if (!compact)
+            Semantics(
+              header: true,
+              child: Text(
+                label.toUpperCase(),
+                style: theme.textTheme.labelSmall,
+              ),
+            ),
           const SizedBox(height: 12),
           if (read.previousClaim?.isNotEmpty == true) ...[
             Text(
@@ -187,7 +285,7 @@ class SessionReadView extends StatelessWidget {
           Semantics(
             liveRegion: true,
             child: Text(
-              read.thesis,
+              compact ? criticDisplayLine(read.thesis) : read.thesis,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontSize: 20,
                 height: 1.3,
@@ -198,13 +296,6 @@ class SessionReadView extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               'Changed by ${read.changedBy}.',
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 14),
-            ),
-          ],
-          if (read.question?.isNotEmpty == true) ...[
-            const SizedBox(height: 12),
-            Text(
-              read.question!,
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 14),
             ),
           ],

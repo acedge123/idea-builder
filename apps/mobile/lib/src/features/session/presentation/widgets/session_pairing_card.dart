@@ -121,38 +121,63 @@ class SessionSongChoiceCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(3),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 112),
                 child: AnimatedOpacity(
                   duration: duration,
                   opacity: isDimmed ? 0.48 : 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          isSelected
-                              ? '✓ Your choice'
-                              : song.year?.toString() ?? 'Song',
-                          style: theme.textTheme.labelSmall,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (MediaQuery.textScalerOf(context).scale(16) <= 24) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: Image.asset(
+                            'assets/imagery/listening-record.jpg',
+                            width: 72,
+                            height: 88,
+                            fit: BoxFit.cover,
+                            excludeFromSemantics: true,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Text(
+                                isSelected
+                                    ? '✓ Your choice'
+                                    : song.year?.toString() ?? 'Song',
+                                style: theme.textTheme.labelSmall,
+                              ),
+                            ),
+                            Text(
+                              song.title,
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w400,
+                                height: 1.15,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              song.artist,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppTheme.mutedForeground,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        song.title,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                          height: 1.15,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        song.artist,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.mutedForeground,
-                        ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        isSelected ? Icons.check : Icons.north_east,
+                        size: 18,
                       ),
                     ],
                   ),

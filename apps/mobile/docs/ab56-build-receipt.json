@@ -1,0 +1,14 @@
+{
+  "CFBundleIdentifier": "fm.musicdna.app",
+  "CFBundleShortVersionString": "0.1.1",
+  "CFBundleVersion": "5",
+  "MinimumOSVersion": "15.0",
+  "api_origin": "https://musicdna-beta-alan-edgetts-projects.vercel.app",
+  "share_origin": "https://musicdna-beta-alan-edgetts-projects.vercel.app",
+  "experience_v1": "true",
+  "public_configuration_sha256": "e8b51e262e77969c6dabf9780744ba83decbc65bdb60fe1f86c14db3f0c48aa8",
+  "compiled_api_origin_present": true,
+  "compiled_server_key_identifiers_present": false,
+  "signed": false,
+  "uploaded": false
+}

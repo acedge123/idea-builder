@@ -129,7 +129,8 @@ void main() {
     final y = tester.getTopLeft(find.text('Latest saved feedback')).dy;
     expect(y, greaterThanOrEqualTo(0));
     expect(y, lessThan(300));
-    expect(find.text('The actual next question'), findsOneWidget);
+    expect(find.text('The actual next question'), findsNothing);
+    expect(find.text('Which one would you keep?'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -196,7 +197,7 @@ void main() {
   });
 
   testWidgets(
-    'latest feedback and read stay visible once; older choices expand',
+    'one current read; full feedback and older choices remain in history',
     (tester) async {
       final at = DateTime.utc(2026, 10, 20);
       const latest = SessionRead(thesis: 'Exact saved theory', tier: 'theory');
@@ -228,12 +229,14 @@ void main() {
         ),
       );
       expect(find.text('Exact saved theory'), findsOneWidget);
-      expect(find.text('Latest verdict'), findsOneWidget);
+      expect(find.text('Latest verdict'), findsNothing);
       expect(find.text('Earlier verdict'), findsNothing);
-      await tester.tap(find.text('Earlier choices (1)'));
+      await tester.tap(find.text('Interview history'));
       await tester.pumpAndSettle();
       expect(find.text('Earlier verdict'), findsOneWidget);
       expect(find.text('Earlier theory'), findsOneWidget);
+      expect(find.text('Latest verdict'), findsOneWidget);
+      expect(find.text('Exact saved theory'), findsNWidgets(2));
     },
   );
 
@@ -263,29 +266,30 @@ void main() {
     },
   );
 
-  testWidgets('revision exposes provenance and the stored follow-up', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      host(
-        const SessionReadView(
-          read: SessionRead(
-            thesis: 'Exact changed interpretation',
-            direction: 'revising',
-            previousClaim: 'Earlier claim',
-            changedBy: 'A over B',
-            question: 'Old question must not drive the next pairing',
-            supporting: 3,
-            tested: 4,
+  testWidgets(
+    'revision preserves provenance without exposing the stored test prompt',
+    (tester) async {
+      await tester.pumpWidget(
+        host(
+          const SessionReadView(
+            read: SessionRead(
+              thesis: 'Exact changed interpretation',
+              direction: 'revising',
+              previousClaim: 'Earlier claim',
+              changedBy: 'A over B',
+              question: 'Old question must not drive the next pairing',
+              supporting: 3,
+              tested: 4,
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.text('REVISING THE READ'), findsOneWidget);
-    expect(find.text('Earlier: Earlier claim'), findsOneWidget);
-    expect(find.text('Changed by A over B.'), findsOneWidget);
-    expect(find.textContaining('Old question'), findsOneWidget);
-  });
+      );
+      expect(find.text('REVISING THE READ'), findsOneWidget);
+      expect(find.text('Earlier: Earlier claim'), findsOneWidget);
+      expect(find.text('Changed by A over B.'), findsOneWidget);
+      expect(find.textContaining('Old question'), findsNothing);
+    },
+  );
 
   testWidgets(
     'selected card is semantic, retained and alternative disabled at 320px/200%',

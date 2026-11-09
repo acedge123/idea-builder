@@ -126,7 +126,9 @@ class SessionRemoteDataSource {
         throw AppApiException(
           kind: _mapErrorKind(code),
           statusCode: response.statusCode,
-          message: message?.isNotEmpty == true
+          message: code == 'EXPERIENCE_DISABLED'
+              ? 'This version of the interview is temporarily unavailable. Please try again later.'
+              : message?.isNotEmpty == true
               ? message!
               : 'Something went wrong.',
         );
