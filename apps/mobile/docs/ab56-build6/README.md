@@ -64,3 +64,17 @@ AB-52 invitations retain old source pins; no experimental assignment is inferred
 from this QA release. AB-56 stays open until acceptance; catalog reachability,
 editorial quality and occasional deterministic fallback remain separate product
 limitations, not claimed solved by the native port.
+
+## Actual release receipt
+
+Build6 was archived, distribution-exported, validated by Apple and uploaded for
+**internal TestFlight only** on November9 at **3:18PM Pacific**. Apple reported the
+package processing; processing completion and installability are not yet verified.
+The binary source is58f0d08d18705e97cb15f954eeed8e0231e8272a; later changes in this
+PR record release documentation only. Build6 is consumed: future upload candidates
+need7 or higher. See [the sanitized release receipt](release-receipt.json).
+
+After installing0.1.1(6), Alan should verify actual artwork/fallbacks, exact shared
+reaction wording, start/choose/skip/reveal, resume/history and full evidence, saved
+conversation and sharing, plus error recovery. No public App Store release or
+production V1 activation occurred. The code PRs remain open for normal review/merge.
