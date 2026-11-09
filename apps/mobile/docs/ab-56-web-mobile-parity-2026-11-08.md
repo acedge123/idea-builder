@@ -5,7 +5,8 @@ November 8, 2026. [AB-56](https://youtrack.thegig.agency/issue/AB-56) remains op
 ## Reviewed baseline
 
 - Web: `acedge123/music-dna@2dfa9c0b8756188b3b9656b24cc52afce27d50ae`. Vercel confirms www.musicdna.fm READY on `dpl_AEgKfrqkY1hJCg7ck4n7gHfKxRwH`. Reviewed critic-first components, hook, display helper, presentation/coverage notes and the subsequent hidden-rationale update.
-- Mobile: `The-Gig-Agency/idea-builder@83700acc452dab640589ed4be98a574fa1b5cf00`, `apps/mobile`. Installed baseline is TestFlight 0.1.1 (4); candidate is 0.1.1 (5).
+- Mobile: `acedge123/idea-builder@83700acc452dab640589ed4be98a574fa1b5cf00`, `apps/mobile`. Installed baseline is TestFlight 0.1.1 (4); candidate is 0.1.1 (5).
+- Mobile PR: [idea-builder #17](https://github.com/acedge123/idea-builder/pull/17). The legacy local remote under The-Gig-Agency redirects to acedge123/idea-builder.
 - Earlier web PR #27 is not included. Lovable's main implementation supersedes that proposed presentation.
 
 Lovable replaced the growing active transcript with one current response, a history drawer, illustrated song rows, inline reaction acknowledgments, expandable evidence and a conversation with the original read collapsed. The latest update hides selection rationale and test prompts. Saved readings and server-selected pairings remain intact.
