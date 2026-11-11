@@ -223,6 +223,10 @@ class _AuthStubPageState extends State<AuthStubPage> {
                                 child: const Text('Go to onboarding'),
                               ),
                               OutlinedButton(
+                                onPressed: () => context.go('/ai-permission'),
+                                child: const Text('AI permission'),
+                              ),
+                              OutlinedButton(
                                 onPressed: () =>
                                     context.read<AuthCubit>().signOut(),
                                 child: const Text('Sign out'),

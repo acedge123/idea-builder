@@ -237,7 +237,7 @@ class SessionCubit extends Cubit<SessionState> {
   static const int maxPairingRounds = 6;
   static const int maxMsToDecide = 600000;
 
-  Future<void> initialize() async {
+  Future<void> initialize({bool savedOnly = false}) async {
     var sessionId = state.sessionId;
     if ((sessionId == null || sessionId.isEmpty) && _resumeStore != null) {
       final resumedSession = await _resumeStore.load();
@@ -273,6 +273,51 @@ class SessionCubit extends Cubit<SessionState> {
         requiresReauthentication: false,
       ),
     );
+
+    if (savedOnly) {
+      // Declining AI permission must not hide an existing reading. Only read
+      // the saved version; never ask for a matchup, preparation or reveal.
+      try {
+        final saved = await _savedReadingRepository?.fetchSavedReading(
+          sessionId: sessionId,
+        );
+        if (isClosed) return;
+        if (saved == null) {
+          throw const AppApiException(
+            kind: AppApiErrorKind.invalidInput,
+            message: 'This saved reading is no longer available.',
+          );
+        }
+        final experience = await _experienceRepository?.fetchExperience(
+          sessionId: sessionId,
+        );
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            status: SessionStatus.revealed,
+            reveal: saved,
+            exchanges: experience?.exchanges,
+            mode: experience?.mode,
+            decade: experience?.decade,
+            parentSessionId: experience?.parentSessionId,
+            publication: experience?.publication,
+            shareMayBePublic: experience?.publication?.isPublic == true,
+            read: experience?.latestRead,
+            clearErrorMessage: true,
+          ),
+        );
+      } catch (error) {
+        if (isClosed) return;
+        _logger.event('session.saved_only_load_failed');
+        emit(
+          state.copyWith(
+            status: SessionStatus.failure,
+            errorMessage: _readableError(error),
+          ),
+        );
+      }
+      return;
+    }
 
     await _loadNextPairing(
       sessionId: sessionId,
