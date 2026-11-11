@@ -32,7 +32,7 @@ class MusicDnaApiClient {
     Map<String, String> headers = const {},
   }) async {
     try {
-      return _httpClient
+      return await _httpClient
           .get(buildUri(path), headers: {...await _headers(), ...headers})
           .timeout(_requestTimeout);
     } on TimeoutException {
@@ -60,7 +60,7 @@ class MusicDnaApiClient {
     Duration timeout = _requestTimeout,
   }) async {
     try {
-      return _httpClient
+      return await _httpClient
           .post(
             buildUri(path),
             headers: {...await _headers(), ...headers},
@@ -87,7 +87,7 @@ class MusicDnaApiClient {
 
   Future<http.Response> delete(String path) async {
     try {
-      return _httpClient
+      return await _httpClient
           .delete(buildUri(path), headers: await _headers())
           .timeout(_requestTimeout);
     } on TimeoutException {

@@ -12,6 +12,8 @@ import '../../features/onboarding/presentation/cubit/onboarding_cubit.dart';
 import '../../features/onboarding/presentation/pages/onboarding_stub_page.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
 import '../../features/session/presentation/pages/session_stub_page.dart';
+import '../../features/readings/presentation/reading_library_page.dart';
+import '../../features/auth/presentation/cubit/auth_cubit.dart';
 
 GoRouter buildAppRouter(AppDependencies dependencies) {
   return GoRouter(
@@ -19,6 +21,7 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
     redirect: (context, state) {
       final hasSession = dependencies.authRouterNotifier.isAuthenticated;
       final isProtectedRoute =
+          state.matchedLocation == '/readings' ||
           state.matchedLocation == '/session' ||
           state.matchedLocation.startsWith('/session/');
 
@@ -31,10 +34,28 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
     routes: <RouteBase>[
       GoRoute(
         path: '/',
-        builder: (context, state) =>
-            FoundationHomePage(config: dependencies.config),
+        builder: (context, state) => FoundationHomePage(
+          config: dependencies.config,
+          createLibraryCubit: dependencies.createReadingLibraryCubit,
+        ),
       ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthStubPage()),
+      GoRoute(
+        path: '/readings',
+        builder: (context, state) => BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, auth) {
+            if (auth.user == null || auth.user!.isAnonymous) {
+              return const AuthStubPage();
+            }
+            return BlocProvider(
+              key: ValueKey(auth.user!.id),
+              create: (_) => dependencies.createReadingLibraryCubit()..load(),
+              child: const ReadingLibraryPage(),
+            );
+          },
+        ),
+      ),
+
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => BlocProvider<OnboardingCubit>(
@@ -70,6 +91,33 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
         ),
       ),
       GoRoute(
+        path: '/session/:sessionId',
+        builder: (context, state) => BlocProvider<SessionCubit>(
+          key: ValueKey((
+            dependencies.authRepository.currentUser?.id,
+            state.pathParameters['sessionId'],
+          )),
+          create: (_) => dependencies.createSessionCubit(
+            startedSession: StartedMusicSession.reference(
+              state.pathParameters['sessionId']!,
+            ),
+          )..initialize(),
+          child: SessionStubPage(
+            ownerId: dependencies.authRepository.currentUser?.id,
+            createFeedbackCubit: dependencies.hasResultFeedback
+                ? dependencies.createResultFeedbackCubit
+                : null,
+            createExploreCubit: dependencies.config.experienceV1
+                ? dependencies.createExploreCubit
+                : null,
+            shareBaseUrl: dependencies.config.shareBaseUrl,
+            startedSession: StartedMusicSession.reference(
+              state.pathParameters['sessionId']!,
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/session',
         builder: (context, state) => BlocProvider<SessionCubit>(
           create: (_) => dependencies.createSessionCubit(
@@ -81,6 +129,9 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
             ownerId: dependencies.authRepository.currentUser?.id,
             createFeedbackCubit: dependencies.hasResultFeedback
                 ? dependencies.createResultFeedbackCubit
+                : null,
+            createExploreCubit: dependencies.config.experienceV1
+                ? dependencies.createExploreCubit
                 : null,
             shareBaseUrl: dependencies.config.shareBaseUrl,
             startedSession: state.extra is StartedMusicSession

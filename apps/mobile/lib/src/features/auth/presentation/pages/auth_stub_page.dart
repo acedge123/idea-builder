@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../readings/presentation/app_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,6 +33,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: const AppNavigation(index: 2),
       body: SafeArea(
         child: BlocConsumer<AuthCubit, AuthState>(
           listenWhen: (previous, current) =>
@@ -58,144 +60,147 @@ class _AuthStubPageState extends State<AuthStubPage> {
             }
           },
           builder: (context, state) {
+            final hasAccount =
+                state.status == AuthStatus.authenticated &&
+                state.user?.isAnonymous == false;
             final isSubmitting =
                 state.submissionStatus == AuthSubmissionStatus.submitting;
 
             return ListView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
               children: <Widget>[
-                TextButton(
-                  onPressed: () => context.go('/'),
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    alignment: Alignment.centerLeft,
-                  ),
-                  child: const Text('← Back'),
-                ),
-                const SizedBox(height: 12),
                 Image.asset(
                   'assets/branding/music-dna-logo.png',
-                  width: 170,
+                  height: 56,
+                  fit: BoxFit.contain,
                   alignment: Alignment.centerLeft,
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 16),
                 Text(
-                  _mode == _AuthFormMode.signIn
-                      ? 'Continue your MusicDNA.'
+                  hasAccount
+                      ? 'Your account'
+                      : _mode == _AuthFormMode.signIn
+                      ? 'Sign in to MusicDNA'
                       : 'Begin your MusicDNA.',
-                  style: theme.textTheme.displayMedium,
+                  style: theme.textTheme.headlineLarge,
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: 8),
                 Text(
-                  _mode == _AuthFormMode.signIn
-                      ? 'Your readings persist across sessions. Sign in and pick up where your taste left off.'
+                  hasAccount
+                      ? 'Manage your account and return to your saved readings.'
+                      : _mode == _AuthFormMode.signIn
+                      ? 'Pick up your saved readings.'
                       : 'Email and a password. No social, no ceremony. We will move straight into the opening interview.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.mutedForeground,
                   ),
                 ),
-                const SizedBox(height: 28),
-                _ModeToggle(
-                  mode: _mode,
-                  onChanged: (mode) {
-                    context.read<AuthCubit>().clearFeedback();
-                    setState(() => _mode = mode);
-                  },
-                ),
+                const SizedBox(height: 16),
+                if (!hasAccount)
+                  _ModeToggle(
+                    mode: _mode,
+                    onChanged: (mode) {
+                      context.read<AuthCubit>().clearFeedback();
+                      setState(() => _mode = mode);
+                    },
+                  ),
                 const SizedBox(height: 20),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text('Account', style: theme.textTheme.labelSmall),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            autofillHints: const <String>[AutofillHints.email],
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
+                if (!hasAccount)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text('Account', style: theme.textTheme.labelSmall),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const <String>[
+                                AutofillHints.email,
+                              ],
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                              ),
+                              validator: (value) {
+                                final email = value?.trim() ?? '';
+                                if (email.isEmpty) {
+                                  return 'Email is required.';
+                                }
+                                if (!email.contains('@')) {
+                                  return 'Enter a valid email address.';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              final email = value?.trim() ?? '';
-                              if (email.isEmpty) {
-                                return 'Email is required.';
-                              }
-                              if (!email.contains('@')) {
-                                return 'Enter a valid email address.';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            autofillHints: _mode == _AuthFormMode.signIn
-                                ? const <String>[AutofillHints.password]
-                                : const <String>[AutofillHints.newPassword],
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              autofillHints: _mode == _AuthFormMode.signIn
+                                  ? const <String>[AutofillHints.password]
+                                  : const <String>[AutofillHints.newPassword],
+                              decoration: const InputDecoration(
+                                labelText: 'Password',
+                              ),
+                              validator: (value) {
+                                final password = value ?? '';
+                                if (password.isEmpty) {
+                                  return 'Password is required.';
+                                }
+                                if (_mode == _AuthFormMode.signUp &&
+                                    password.length < 8) {
+                                  return 'Use at least 8 characters.';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              final password = value ?? '';
-                              if (password.isEmpty) {
-                                return 'Password is required.';
-                              }
-                              if (_mode == _AuthFormMode.signUp &&
-                                  password.length < 8) {
-                                return 'Use at least 8 characters.';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: isSubmitting ? null : _submit,
-                              child: Text(
-                                isSubmitting
-                                    ? 'Working...'
-                                    : _mode == _AuthFormMode.signIn
-                                    ? 'Sign in'
-                                    : 'Create account',
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: isSubmitting ? null : _submit,
+                                child: Text(
+                                  isSubmitting
+                                      ? 'Working...'
+                                      : _mode == _AuthFormMode.signIn
+                                      ? 'Sign in'
+                                      : 'Create account',
+                                ),
                               ),
                             ),
-                          ),
-                          if (state.errorMessage != null) ...<Widget>[
-                            const SizedBox(height: 14),
-                            Text(
-                              state.errorMessage!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
+                            if (state.errorMessage != null) ...<Widget>[
+                              const SizedBox(height: 14),
+                              Text(
+                                state.errorMessage!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.error,
+                                ),
                               ),
-                            ),
+                            ],
+                            if (state.infoMessage != null) ...<Widget>[
+                              const SizedBox(height: 14),
+                              Text(
+                                state.infoMessage!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppTheme.mutedForeground,
+                                ),
+                              ),
+                            ],
                           ],
-                          if (state.infoMessage != null) ...<Widget>[
-                            const SizedBox(height: 14),
-                            Text(
-                              state.infoMessage!,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppTheme.mutedForeground,
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
                 if (state.status == AuthStatus.authenticated &&
                     state.user != null) ...<Widget>[
                   const SizedBox(height: 20),
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -208,7 +213,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
                             state.user?.email ?? state.user!.id,
                             style: theme.textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 8),
                           Wrap(
                             spacing: 12,
                             runSpacing: 12,

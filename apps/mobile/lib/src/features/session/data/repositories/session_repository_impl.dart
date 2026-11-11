@@ -1,3 +1,5 @@
+import '../../domain/repositories/saved_reading_repository.dart';
+import '../../../../core/network/app_api_exception.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/song_artwork.dart';
 import '../../domain/entities/session_reveal.dart';
@@ -16,7 +18,8 @@ class SessionRepositoryImpl
         SessionRepository,
         SessionExperienceRepository,
         SessionResultRepository,
-        SessionPreparationRepository {
+        SessionPreparationRepository,
+        SavedReadingRepository {
   SessionRepositoryImpl(this._remoteDataSource);
 
   final SessionRemoteDataSource _remoteDataSource;
@@ -129,6 +132,12 @@ class SessionRepositoryImpl
       sessionId: sessionId,
       finishEarly: finishEarly,
     );
+    if (_remoteDataSource.experienceV1 &&
+        response['contract'] == 1 &&
+        response.containsKey('result_version') &&
+        response['result_version'] == null) {
+      throw const ReadingPendingException();
+    }
     final result = _remoteDataSource.experienceV1
         ? mapSessionResult(response)
         : null;
@@ -141,6 +150,53 @@ class SessionRepositoryImpl
       allowedClaims: _readAllowedClaims(full['allowed_claims']),
       counterarguments: _readCounterarguments(full['counterarguments']),
       shareToken: result == null ? response['share_token'] as String? : null,
+      result: result,
+    );
+  }
+
+  @override
+  Future<SessionReveal?> fetchSavedReading({required String sessionId}) async {
+    final data = await _remoteDataSource.fetchSavedReading(
+      sessionId: sessionId,
+    );
+    requireExperienceVersion(data);
+    if (data['session_id'] != sessionId || data['result_versions'] is! List) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'Your saved reading could not be verified.',
+      );
+    }
+    final rows = (data['result_versions'] as List)
+        .map(experienceObject)
+        .where((v) => v['source'] == 'pairings')
+        .toList();
+    if (rows.isEmpty) return null;
+    rows.sort((a, b) => (a['version'] as int).compareTo(b['version'] as int));
+    final row = rows.first;
+    final content = experienceObject(row['content']);
+    final supports = content['kept_choosing'];
+    final counters = content['counter_reads'];
+    final result = mapSessionResult({
+      'contract': 1,
+      'result_version': row['version'],
+      'outcome': supports is List && supports.isNotEmpty
+          ? 'supported'
+          : 'insufficient_evidence',
+      'headline': content['synthesis'],
+      'supporting_choices': supports ?? [],
+      'tension': counters is List && counters.isNotEmpty
+          ? counters.first
+          : null,
+      'reveal': content['reveal'],
+      'voice_version': content['voice_version'],
+      'audit_text': content['audit_text'],
+      'narration_status': content['narration_status'],
+    });
+    return SessionReveal(
+      interpretation: result.headline,
+      vector: const {},
+      allowedClaims: const [],
+      counterarguments: const [],
       result: result,
     );
   }

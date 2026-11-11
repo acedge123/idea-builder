@@ -106,6 +106,9 @@ SessionExperience mapSessionExperience(
   });
   return SessionExperience(
     sessionId: sessionId,
+    mode: data['mode'] as String? ?? 'discover',
+    decade: data['decade'] as int?,
+    parentSessionId: data['parent_session_id'] as String?,
     milestone: data['milestone'] == null
         ? null
         : mapSessionMilestone(data['milestone']),

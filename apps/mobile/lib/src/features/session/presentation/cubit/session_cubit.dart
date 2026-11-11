@@ -9,6 +9,7 @@ import '../../data/session_resume_store.dart';
 import '../../domain/entities/session_pairing.dart';
 import '../../domain/entities/session_reveal.dart';
 import '../../domain/repositories/session_repository.dart';
+import '../../domain/repositories/saved_reading_repository.dart';
 import '../../domain/repositories/session_experience_repository.dart';
 import '../../domain/entities/session_experience.dart';
 import '../../domain/entities/session_result.dart';
@@ -23,6 +24,7 @@ enum SessionStatus {
   submitting,
   completed,
   revealing,
+  waitingForReading,
   revealed,
   failure,
   missingSession,
@@ -51,6 +53,9 @@ class SessionState extends Equatable {
     this.milestone,
     this.dismissedMilestones = const [],
     this.finishEarlyRequested = false,
+    this.mode = 'discover',
+    this.decade,
+    this.parentSessionId,
   });
 
   final SessionStatus status;
@@ -71,6 +76,9 @@ class SessionState extends Equatable {
   final SessionMilestone? milestone;
   final List<int> dismissedMilestones;
   final bool finishEarlyRequested;
+  final String mode;
+  final int? decade;
+  final String? parentSessionId;
   SessionMilestone? get visibleMilestone =>
       status == SessionStatus.ready &&
           !reacting &&
@@ -115,6 +123,9 @@ class SessionState extends Equatable {
     bool clearMilestone = false,
     List<int>? dismissedMilestones,
     bool? finishEarlyRequested,
+    String? mode,
+    int? decade,
+    String? parentSessionId,
   }) {
     return SessionState(
       status: status ?? this.status,
@@ -157,6 +168,9 @@ class SessionState extends Equatable {
           ? this.dismissedMilestones
           : List.unmodifiable(dismissedMilestones),
       finishEarlyRequested: finishEarlyRequested ?? this.finishEarlyRequested,
+      mode: mode ?? this.mode,
+      decade: decade ?? this.decade,
+      parentSessionId: parentSessionId ?? this.parentSessionId,
     );
   }
 
@@ -183,6 +197,9 @@ class SessionState extends Equatable {
     milestone,
     dismissedMilestones,
     finishEarlyRequested,
+    mode,
+    decade,
+    parentSessionId,
   ];
 }
 
@@ -195,11 +212,13 @@ class SessionCubit extends Cubit<SessionState> {
     SessionExperienceRepository? experienceRepository,
     SessionResultRepository? resultRepository,
     SessionPreparationRepository? preparationRepository,
+    SavedReadingRepository? savedReadingRepository,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
        _experienceRepository = experienceRepository,
        _resultRepository = resultRepository,
        _preparationRepository = preparationRepository,
+       _savedReadingRepository = savedReadingRepository,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
@@ -208,6 +227,7 @@ class SessionCubit extends Cubit<SessionState> {
   final SessionResultRepository? _resultRepository;
   final SessionExperienceRepository? _experienceRepository;
   final SessionPreparationRepository? _preparationRepository;
+  final SavedReadingRepository? _savedReadingRepository;
   final _preparedPairings = <String>{};
   String? _reactionMutationId;
   SessionReaction? _pendingReaction;
@@ -438,7 +458,8 @@ class SessionCubit extends Cubit<SessionState> {
     final repository = _preparationRepository;
     final sessionId = state.sessionId;
     final pairing = state.currentRound?.pairing;
-    if (repository == null ||
+    if (state.mode == 'explore' ||
+        repository == null ||
         sessionId == null ||
         pairing?.exposureId == null ||
         state.status != SessionStatus.ready ||
@@ -496,10 +517,17 @@ class SessionCubit extends Cubit<SessionState> {
     );
 
     try {
-      final reveal = await _repository.revealSession(
+      final saved = await _savedReadingRepository?.fetchSavedReading(
         sessionId: sessionId,
-        finishEarly: requestedEarly,
       );
+      if (isClosed) return;
+      final reveal =
+          saved ??
+          await _repository.revealSession(
+            sessionId: sessionId,
+            finishEarly: requestedEarly,
+          );
+      if (isClosed) return;
       SharedReveal? sharedReveal;
       if (reveal.result == null &&
           reveal.shareToken != null &&
@@ -531,6 +559,42 @@ class SessionCubit extends Cubit<SessionState> {
         ),
       );
     } catch (error) {
+      if (isClosed) return;
+      if (error is ReadingPendingException ||
+          error is AppApiException && error.kind == AppApiErrorKind.network) {
+        // A lost response does not establish failure. Read once before offering retry.
+        try {
+          final saved = await _savedReadingRepository?.fetchSavedReading(
+            sessionId: sessionId,
+          );
+          if (isClosed) return;
+          if (saved != null) {
+            emit(
+              state.copyWith(
+                status: SessionStatus.revealed,
+                reveal: saved,
+                clearErrorMessage: true,
+                requiresReauthentication: false,
+              ),
+            );
+            _logger.event('session.saved_reading_recovered', {
+              'sessionId': sessionId,
+            });
+            return;
+          }
+        } catch (_) {
+          // Leave outcome uncertain; never retry a model in the background.
+        }
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            status: SessionStatus.waitingForReading,
+            clearReveal: true,
+            clearErrorMessage: true,
+          ),
+        );
+        return;
+      }
       _logger.error('session.reveal_failed', error, <String, Object?>{
         'sessionId': sessionId,
       });
@@ -698,6 +762,9 @@ class SessionCubit extends Cubit<SessionState> {
           clearErrorMessage: true,
           requiresReauthentication: false,
           exchanges: experience?.exchanges,
+          mode: experience?.mode,
+          decade: experience?.decade,
+          parentSessionId: experience?.parentSessionId,
           publication: experience?.publication,
           clearPublication: experience?.publication == null,
           shareMayBePublic: experience?.publication?.isPublic == true,

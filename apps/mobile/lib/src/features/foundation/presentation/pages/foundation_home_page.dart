@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../readings/presentation/reading_library_page.dart';
+import '../../../readings/presentation/reading_library_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,9 +10,14 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../features/auth/presentation/cubit/auth_cubit.dart';
 
 class FoundationHomePage extends StatelessWidget {
-  const FoundationHomePage({required this.config, super.key});
+  const FoundationHomePage({
+    required this.config,
+    this.createLibraryCubit,
+    super.key,
+  });
 
   final AppConfig config;
+  final ReadingLibraryCubit Function()? createLibraryCubit;
   static final Uri _privacyUri = Uri.parse('https://www.musicdna.fm/privacy');
   static final Uri _termsUri = Uri.parse('https://www.musicdna.fm/terms');
 
@@ -30,105 +37,107 @@ class FoundationHomePage extends StatelessWidget {
             final hasAccount =
                 hasSession && !(state.user?.isAnonymous ?? false);
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            if (hasAccount && createLibraryCubit != null) {
+              return BlocProvider(
+                key: ValueKey(state.user!.id),
+                create: (_) => createLibraryCubit!()..load(),
+                child: const ReadingLibraryPage(home: true),
+              );
+            }
+            return Stack(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 172),
                   children: <Widget>[
-                    const Expanded(child: _MusicDnaWordmark()),
-                    if (!hasAccount)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: TextButton(
-                          onPressed: () => context.go('/auth'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppTheme.foreground,
-                            textStyle: theme.textTheme.labelSmall,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                          ),
-                          child: const Text('Sign in'),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Why do you love the songs you love?',
-                  style: theme.textTheme.displayMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  hasAccount
-                      ? 'The songs you choose tell a story.\nWe\'re just here to read it.'
-                      : 'The songs you choose tell a story.\nWe\'re just here to read it.',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppTheme.mutedForeground,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                _PrimaryCalloutCard(
-                  title: hasAccount
-                      ? 'Give me three songs you love...'
-                      : 'Give me three songs you love...',
-                  body: hasAccount
-                      ? 'Songs that never leave your playlist. Songs that still hit you years later.'
-                      : 'Songs that never leave your playlist. Songs that still hit you years later.',
-                  primaryLabel: hasAccount
-                      ? 'Start your MusicDNA'
-                      : 'Start your MusicDNA',
-                  primaryAction: () => context.go('/onboarding'),
-                  footnote: 'Free · No signup required',
-                ),
-                const SizedBox(height: 28),
-                _SectionCard(
-                  eyebrow: 'How it works',
-                  title: 'Not genres. Not playlists. Just choices.',
-                  body:
-                      'You start with three songs that feel undeniably yours. We react to each one, build a working read, then use head-to-head pairings to figure out what keeps pulling you back.',
-                  child: const _HowItWorksSteps(),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: OutlinedButton(
-                    onPressed: () => context.go('/auth'),
-                    child: Text(hasAccount ? 'Manage account' : 'Sign in'),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: () => _openExternalLink(_privacyUri),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.mutedForeground,
-                        textStyle: theme.textTheme.labelSmall,
-                      ),
-                      child: const Text('Privacy Policy'),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Expanded(child: _MusicDnaWordmark()),
+                      ],
                     ),
+                    const SizedBox(height: 20),
                     Text(
-                      '·',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      'Why do you love the songs you love?',
+                      style: theme.textTheme.displayMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      hasAccount
+                          ? 'The songs you choose tell a story.\nWe\'re just here to read it.'
+                          : 'The songs you choose tell a story.\nWe\'re just here to read it.',
+                      style: theme.textTheme.bodyLarge?.copyWith(
                         color: AppTheme.mutedForeground,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    TextButton(
-                      onPressed: () => _openExternalLink(_termsUri),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.mutedForeground,
-                        textStyle: theme.textTheme.labelSmall,
+                    const SizedBox(height: 20),
+                    _PrimaryCalloutCard(
+                      title: hasAccount
+                          ? 'Give me three songs you love...'
+                          : 'Give me three songs you love...',
+                      body: hasAccount
+                          ? 'Songs that never leave your playlist. Songs that still hit you years later.'
+                          : 'Songs that never leave your playlist. Songs that still hit you years later.',
+                      primaryLabel: hasAccount
+                          ? 'Start your MusicDNA'
+                          : 'Start your MusicDNA',
+                      primaryAction: () => context.go('/onboarding'),
+                      showAction: false,
+                      footnote: 'Free · No signup required',
+                    ),
+                    const SizedBox(height: 28),
+                    _SectionCard(
+                      eyebrow: 'How it works',
+                      title: 'Not genres. Not playlists. Just choices.',
+                      body:
+                          'You start with three songs that feel undeniably yours. We react to each one, build a working read, then use head-to-head pairings to figure out what keeps pulling you back.',
+                      child: const _HowItWorksSteps(),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: OutlinedButton(
+                        onPressed: () => context.go('/auth'),
+                        child: Text(hasAccount ? 'Manage account' : 'Sign in'),
                       ),
-                      child: const Text('Terms of Service'),
+                    ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () => _openExternalLink(_privacyUri),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppTheme.mutedForeground,
+                            textStyle: theme.textTheme.labelSmall,
+                          ),
+                          child: const Text('Privacy Policy'),
+                        ),
+                        Text(
+                          '·',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppTheme.mutedForeground,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => _openExternalLink(_termsUri),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppTheme.mutedForeground,
+                            textStyle: theme.textTheme.labelSmall,
+                          ),
+                          child: const Text('Terms of Service'),
+                        ),
+                      ],
                     ),
                   ],
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _WelcomeActions(),
                 ),
               ],
             );
@@ -162,6 +171,7 @@ class _PrimaryCalloutCard extends StatelessWidget {
     required this.primaryLabel,
     required this.primaryAction,
     this.footnote,
+    this.showAction = true,
   });
 
   final String title;
@@ -169,6 +179,7 @@ class _PrimaryCalloutCard extends StatelessWidget {
   final String primaryLabel;
   final VoidCallback primaryAction;
   final String? footnote;
+  final bool showAction;
 
   @override
   Widget build(BuildContext context) {
@@ -193,12 +204,13 @@ class _PrimaryCalloutCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            Center(
-              child: FilledButton(
-                onPressed: primaryAction,
-                child: Text(primaryLabel),
+            if (showAction)
+              Center(
+                child: FilledButton(
+                  onPressed: primaryAction,
+                  child: Text(primaryLabel),
+                ),
               ),
-            ),
             if (footnote != null) ...<Widget>[
               const SizedBox(height: 12),
               Text(
@@ -335,4 +347,50 @@ class _HowItWorksSteps extends StatelessWidget {
           .toList(growable: false),
     );
   }
+}
+
+class _WelcomeActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          AppTheme.background.withValues(alpha: 0),
+          AppTheme.background,
+          AppTheme.background,
+        ],
+      ),
+    ),
+    padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+    child: SafeArea(
+      top: false,
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => context.go('/auth'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 52),
+                foregroundColor: AppTheme.foreground,
+                side: const BorderSide(color: AppTheme.foreground),
+                backgroundColor: AppTheme.surfaceRaised,
+              ),
+              child: const Text('Sign in'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: FilledButton(
+              onPressed: () => context.go('/onboarding'),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
+              child: const Text('Start reading'),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

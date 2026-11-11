@@ -28,7 +28,8 @@ class _MusicDnaMobileAppState extends State<MusicDnaMobileApp> {
   @override
   void dispose() {
     _authCubit.close();
-    widget.dependencies.authRouterNotifier.dispose();
+    router.dispose();
+    widget.dependencies.dispose();
     super.dispose();
   }
 

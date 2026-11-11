@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../readings/presentation/app_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,6 +45,7 @@ class _ContinuationPageState extends State<ContinuationPage> {
   Widget build(BuildContext context) {
     final cubit = context.read<ContinuationCubit>();
     return Scaffold(
+      bottomNavigationBar: const AppNavigation(index: 1),
       appBar: AppBar(title: const Text('You & the critic')),
       body: SafeArea(
         child: BlocConsumer<ContinuationCubit, ContinuationState>(
