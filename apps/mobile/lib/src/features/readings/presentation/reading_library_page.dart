@@ -108,6 +108,10 @@ class ReadingListTile extends StatelessWidget {
     final date = MaterialLocalizations.of(
       context,
     ).formatMediumDate(reading.startedAt.toLocal());
+    final time = MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(reading.startedAt.toLocal()),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
     return ListTile(
       contentPadding: EdgeInsets.symmetric(
         horizontal: reading.isExplore ? 12 : 0,
@@ -118,7 +122,7 @@ class ReadingListTile extends StatelessWidget {
       ),
       title: Text(reading.label),
       subtitle: Text(
-        '$date · ${reading.completed ? 'Open reading' : 'In progress'}',
+        '$date · $time\n${reading.completed ? 'Open reading' : 'In progress'}',
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => context.go('/session/${Uri.encodeComponent(reading.id)}'),

@@ -1,5 +1,5 @@
 {
-  "status": "capture_pending_native_acceptance",
+  "status": "partial_native_capture_authenticated_story_pending",
   "source": "actual production-backed native build8; no fixture screenshots for submission",
   "official_spec": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/",
   "verified_date_pacific": "2026-11-11",
@@ -62,5 +62,35 @@
     "Capture final accepted UI with non-personal QA content",
     "Keep screenshot UI truthful; do not illustrate unimplemented features",
     "No App Store upload/public submission without Alan approval"
+  ],
+  "additional_native_captures": [
+    {
+      "file": "build8-home-iphone.png",
+      "width": 1206,
+      "height": 2622,
+      "screen": "public Home"
+    },
+    {
+      "file": "build8-signin-iphone.png",
+      "width": 1206,
+      "height": 2622,
+      "screen": "compact sign-in"
+    },
+    {
+      "file": "build8-home-ipad.png",
+      "width": 2064,
+      "height": 2752,
+      "screen": "public Home"
+    },
+    {
+      "file": "build8-signin-ipad.png",
+      "width": 2064,
+      "height": 2752,
+      "screen": "compact sign-in"
+    }
+  ],
+  "qa_only_captures": [
+    "qa-decade-read-mirroring.png",
+    "qa-decade-comparison-mirroring.png"
   ]
 }
