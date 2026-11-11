@@ -57,3 +57,25 @@ revisions and sanitized failure categories. AB-63's other acceptance checks and
 Alan's TestFlight visual acceptance remain open.
 
 Validation: Flutter analysis clean;172 tests passed,1 optional live-contract capture skipped. Production-configured iOS compile and development-signing build succeeded. The compiled plist reports0.1.1(9), minimum iOS15 and ITSAppUsesNonExemptEncryption=false. No dependencies/lockfiles changed. The local development-signed release-mode build9 was installed successfully on the connected iPhone14. The retained login loaded Home and opened the saved1980s reading at version1 with its unchanged text. Further cold-expiry/offline acceptance remains pending; no build9 TestFlight upload.
+
+## November 11 follow-up: completed-reading controls
+
+Alan subsequently approved the internal build9 upload; Apple accepted it at
+17:58:21 UTC. Upload acceptance is not confirmation of processing or tester access.
+The signed archive remains unchanged by this follow-up.
+
+A separate screenshot walkthrough with a dedicated normal reviewer account found
+a debug Flutter assertion when opening a completed original reading. The feedback
+and Decades `BlocProvider` siblings both used `(sessionId, resultVersion)` as their
+key. With both factories enabled, the parent Column rejected the duplicate keys.
+This is a confirmed widget identity defect; a debug assertion is not evidence of
+a production crash. The earlier standalone panel tests did not mount both panels
+on the signed-in result page together.
+
+Each key now additionally includes its panel purpose, retaining session/version
+identity while keeping the siblings distinct. A full-page signed-in widget
+regression reproduced the assertion on merged source and passes after the fix;
+it also scrolls to both controls. Analysis is clean and the full suite passes
+173 tests, with one optional live-contract capture skipped. No dependency,
+backend, data, auth policy, learning consent or build-number changes are included.
+This fix needs its own merge and a later native build; it is not in uploaded build9.
