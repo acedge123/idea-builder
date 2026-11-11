@@ -228,8 +228,10 @@ class _PreviewSessionRepository implements SessionRepository {
     required int msToDecide,
   }) async => _offline();
   @override
-  Future<SessionReveal> revealSession({required String sessionId}) async =>
-      _offline();
+  Future<SessionReveal> revealSession({
+    required String sessionId,
+    bool finishEarly = false,
+  }) async => _offline();
   @override
   Future<SharedReveal> fetchSharedReveal({required String token}) async =>
       _offline();

@@ -94,7 +94,10 @@ class ResultRepository extends FakeSessionRepository
   String publicSessionId = 'session-1';
   int? publishedResultVersion;
   @override
-  Future<SessionReveal> revealSession({required String sessionId}) async {
+  Future<SessionReveal> revealSession({
+    required String sessionId,
+    bool finishEarly = false,
+  }) async {
     revealCalls++;
     return reveal;
   }

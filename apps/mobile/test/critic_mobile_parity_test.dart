@@ -37,7 +37,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  testWidgets('compact read preserves the complete server wording', (
+  testWidgets('compact read omits audit counts; history preserves frozen wording', (
     tester,
   ) async {
     const saved =
@@ -55,8 +55,22 @@ void main() {
         ),
       ),
     );
-    expect(find.text(saved), findsOneWidget);
+    expect(
+      find.text(
+        'Mr. Brightside over B. The evidence is contested; no supported claim yet.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(saved), findsNothing);
     expect(find.text('Separate frozen evidence.'), findsNothing);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SessionReadView(read: SessionRead(thesis: saved)),
+        ),
+      ),
+    );
+    expect(find.text(saved), findsOneWidget);
   });
 
   testWidgets(

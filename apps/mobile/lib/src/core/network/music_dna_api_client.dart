@@ -18,6 +18,8 @@ class MusicDnaApiClient {
        _httpClient = httpClient ?? http.Client();
 
   static const Duration _requestTimeout = Duration(seconds: 20);
+  // Same bounded wait as the web reader; a timeout leaves writes uncertain.
+  static const Duration criticRequestTimeout = Duration(seconds: 45);
 
   final Uri _baseUri;
   final AccessTokenProvider _accessTokenProvider;
@@ -55,6 +57,7 @@ class MusicDnaApiClient {
     String path, {
     Map<String, dynamic>? body,
     Map<String, String> headers = const {},
+    Duration timeout = _requestTimeout,
   }) async {
     try {
       return _httpClient
@@ -63,7 +66,7 @@ class MusicDnaApiClient {
             headers: {...await _headers(), ...headers},
             body: body == null ? null : jsonEncode(body),
           )
-          .timeout(_requestTimeout);
+          .timeout(timeout);
     } on TimeoutException {
       throw AppApiException(
         kind: AppApiErrorKind.network,

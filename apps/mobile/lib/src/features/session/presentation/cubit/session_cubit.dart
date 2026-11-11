@@ -13,6 +13,8 @@ import '../../domain/repositories/session_experience_repository.dart';
 import '../../domain/entities/session_experience.dart';
 import '../../domain/entities/session_result.dart';
 import '../../domain/repositories/session_result_repository.dart';
+import '../../domain/repositories/session_preparation_repository.dart';
+import '../../domain/entities/session_milestone.dart';
 
 enum SessionStatus {
   initial,
@@ -46,6 +48,9 @@ class SessionState extends Equatable {
     this.shareVerified = false,
     this.shareMayBePublic = false,
     this.shareError,
+    this.milestone,
+    this.dismissedMilestones = const [],
+    this.finishEarlyRequested = false,
   });
 
   final SessionStatus status;
@@ -63,6 +68,16 @@ class SessionState extends Equatable {
   final SharePublication? publication;
   final bool sharing, shareVerified, shareMayBePublic;
   final String? shareError;
+  final SessionMilestone? milestone;
+  final List<int> dismissedMilestones;
+  final bool finishEarlyRequested;
+  SessionMilestone? get visibleMilestone =>
+      status == SessionStatus.ready &&
+          !reacting &&
+          selectedSongId == null &&
+          !dismissedMilestones.contains(milestone?.answered)
+      ? milestone
+      : null;
 
   String? get sessionId => startedSession?.sessionId ?? currentRound?.sessionId;
 
@@ -96,6 +111,10 @@ class SessionState extends Equatable {
     bool? shareMayBePublic,
     String? shareError,
     bool clearShareError = false,
+    SessionMilestone? milestone,
+    bool clearMilestone = false,
+    List<int>? dismissedMilestones,
+    bool? finishEarlyRequested,
   }) {
     return SessionState(
       status: status ?? this.status,
@@ -133,6 +152,11 @@ class SessionState extends Equatable {
       shareVerified: shareVerified ?? this.shareVerified,
       shareMayBePublic: shareMayBePublic ?? this.shareMayBePublic,
       shareError: clearShareError ? null : shareError ?? this.shareError,
+      milestone: clearMilestone ? null : milestone ?? this.milestone,
+      dismissedMilestones: dismissedMilestones == null
+          ? this.dismissedMilestones
+          : List.unmodifiable(dismissedMilestones),
+      finishEarlyRequested: finishEarlyRequested ?? this.finishEarlyRequested,
     );
   }
 
@@ -156,6 +180,9 @@ class SessionState extends Equatable {
     shareVerified,
     shareMayBePublic,
     shareError,
+    milestone,
+    dismissedMilestones,
+    finishEarlyRequested,
   ];
 }
 
@@ -167,10 +194,12 @@ class SessionCubit extends Cubit<SessionState> {
     AppLogger? logger,
     SessionExperienceRepository? experienceRepository,
     SessionResultRepository? resultRepository,
+    SessionPreparationRepository? preparationRepository,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
        _experienceRepository = experienceRepository,
        _resultRepository = resultRepository,
+       _preparationRepository = preparationRepository,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
@@ -178,6 +207,8 @@ class SessionCubit extends Cubit<SessionState> {
   final SessionResumeStore? _resumeStore;
   final SessionResultRepository? _resultRepository;
   final SessionExperienceRepository? _experienceRepository;
+  final SessionPreparationRepository? _preparationRepository;
+  final _preparedPairings = <String>{};
   String? _reactionMutationId;
   SessionReaction? _pendingReaction;
   String? _reactionPairingId;
@@ -382,8 +413,64 @@ class SessionCubit extends Cubit<SessionState> {
     );
   }
 
-  Future<void> revealSession() async {
+  void continueInterview() {
+    final milestone = state.visibleMilestone;
+    if (milestone == null || _pendingReaction != null) return;
+    _logger.event('session.milestone_continued', {
+      'answered': milestone.answered,
+    });
+    emit(
+      state.copyWith(
+        dismissedMilestones: [...state.dismissedMilestones, milestone.answered],
+      ),
+    );
+  }
+
+  Future<void> finishEarly() async {
+    if (state.visibleMilestone?.canFinish != true || _pendingReaction != null) {
+      return;
+    }
+    await revealSession(finishEarly: true);
+  }
+
+  /// Dispatched after the active pairing has actually been rendered.
+  Future<void> prepareCurrentPairing() async {
+    final repository = _preparationRepository;
+    final sessionId = state.sessionId;
+    final pairing = state.currentRound?.pairing;
+    if (repository == null ||
+        sessionId == null ||
+        pairing?.exposureId == null ||
+        state.status != SessionStatus.ready ||
+        state.visibleMilestone != null ||
+        state.reacting ||
+        _pendingReaction != null) {
+      return;
+    }
+    final key = '$sessionId:${pairing!.id}:${pairing.exposureId}';
+    if (!_preparedPairings.add(key)) return;
+    try {
+      await repository.prepare(
+        sessionId: sessionId,
+        pairingId: pairing.id,
+        exposureId: pairing.exposureId!,
+      );
+      _logger.event('session.preparation_finished', {
+        'sessionId': sessionId,
+        'pairingId': pairing.id,
+      });
+    } catch (_) {
+      // Optional speed work must never block a pick, retry a model, or replace a read.
+      _logger.event('session.preparation_unavailable', {
+        'sessionId': sessionId,
+        'pairingId': pairing.id,
+      });
+    }
+  }
+
+  Future<void> revealSession({bool finishEarly = false}) async {
     if (state.status == SessionStatus.revealing || state.sharing) return;
+    final requestedEarly = finishEarly || state.finishEarlyRequested;
     final sessionId = state.sessionId;
     _logger.event('session.reveal_requested', <String, Object?>{
       'sessionId': sessionId,
@@ -402,13 +489,17 @@ class SessionCubit extends Cubit<SessionState> {
     emit(
       state.copyWith(
         status: SessionStatus.revealing,
+        finishEarlyRequested: requestedEarly,
         clearErrorMessage: true,
         requiresReauthentication: false,
       ),
     );
 
     try {
-      final reveal = await _repository.revealSession(sessionId: sessionId);
+      final reveal = await _repository.revealSession(
+        sessionId: sessionId,
+        finishEarly: requestedEarly,
+      );
       SharedReveal? sharedReveal;
       if (reveal.result == null &&
           reveal.shareToken != null &&
@@ -613,6 +704,8 @@ class SessionCubit extends Cubit<SessionState> {
           shareVerified: false,
           clearShareError: true,
           read: experience?.latestRead,
+          milestone: experience?.milestone,
+          clearMilestone: experience?.milestone == null,
           clearRead: experience != null && experience.latestRead == null,
           clearSelection:
               nextRound.pairing?.id != state.currentRound?.pairing?.id,

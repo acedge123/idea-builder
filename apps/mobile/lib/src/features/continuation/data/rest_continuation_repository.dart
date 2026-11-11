@@ -82,6 +82,7 @@ class RestContinuationRepository implements ContinuationRepository {
       final data = _decode(
         await _client.post(
           _path(context),
+          timeout: MusicDnaApiClient.criticRequestTimeout,
           headers: _headers,
           body: {'message': message, 'mutation_id': mutationId},
         ),

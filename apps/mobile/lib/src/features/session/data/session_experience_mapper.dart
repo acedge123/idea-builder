@@ -1,6 +1,7 @@
 import '../../../core/network/app_api_exception.dart';
 import '../domain/entities/session_experience.dart';
 import '../domain/entities/session_result.dart';
+import '../domain/entities/session_milestone.dart';
 
 Map<String, dynamic> experienceObject(Object? value) {
   if (value is Map<String, dynamic>) return value;
@@ -105,6 +106,9 @@ SessionExperience mapSessionExperience(
   });
   return SessionExperience(
     sessionId: sessionId,
+    milestone: data['milestone'] == null
+        ? null
+        : mapSessionMilestone(data['milestone']),
     exchanges: indexed.map((e) => e.exchange).toList(),
     publication: data['is_public'] is bool
         ? SharePublication(
@@ -114,5 +118,29 @@ SessionExperience mapSessionExperience(
                 : null,
           )
         : null,
+  );
+}
+
+SessionMilestone mapSessionMilestone(Object? value) {
+  final data = experienceObject(value);
+  if (data['answered'] is! int ||
+      !const [3, 4].contains(data['answered']) ||
+      data['can_finish'] is! bool ||
+      (data['can_finish'] == true && data['answered'] != 4) ||
+      ['title', 'summary', 'continue_label'].any(
+        (key) => data[key] is! String || (data[key] as String).trim().isEmpty,
+      )) {
+    throw const AppApiException(
+      kind: AppApiErrorKind.upstream,
+      message:
+          'The interview guidance changed. Please retry or update the app.',
+    );
+  }
+  return SessionMilestone(
+    answered: data['answered'] as int,
+    title: data['title'] as String,
+    summary: data['summary'] as String,
+    continueLabel: data['continue_label'] as String,
+    canFinish: data['can_finish'] as bool,
   );
 }

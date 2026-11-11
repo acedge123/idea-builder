@@ -12,6 +12,7 @@ import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
 import '../widgets/session_pairing_card.dart';
 import '../widgets/session_result_view.dart';
+import '../widgets/session_milestone_view.dart';
 import '../../../result_feedback/presentation/result_feedback_cubit.dart';
 import '../../../result_feedback/presentation/result_feedback_view.dart';
 
@@ -68,7 +69,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
               previous.currentRound?.pairing?.id !=
                   current.currentRound?.pairing?.id ||
               previous.exchanges != current.exchanges ||
-              previous.status != current.status,
+              previous.status != current.status ||
+              previous.visibleMilestone != current.visibleMilestone,
           listener: (context, state) {
             _syncStopwatch(state.currentRound?.pairing?.id);
             _scrollToActive(state);
@@ -76,6 +78,15 @@ class _SessionStubPageState extends State<SessionStubPage> {
           builder: (context, state) {
             final round = state.currentRound;
             final pairing = round?.pairing;
+            if (state.status == SessionStatus.ready &&
+                state.visibleMilestone == null &&
+                pairing != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  context.read<SessionCubit>().prepareCurrentPairing();
+                }
+              });
+            }
             final startedSession =
                 state.startedSession ?? widget.startedSession;
             final isBusy =
@@ -114,7 +125,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       showReactionControls: false,
                       showCurrentRead:
                           state.status != SessionStatus.revealed &&
-                          state.status != SessionStatus.revealing,
+                          state.status != SessionStatus.revealing &&
+                          state.visibleMilestone == null,
                       exchanges: state.exchanges,
                       read: state.read,
                       busy: isBusy || state.status != SessionStatus.ready,
@@ -172,6 +184,19 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                 primaryLabel: 'Try again',
                                 onPrimary: () =>
                                     context.read<SessionCubit>().initialize(),
+                              )
+                            : state.visibleMilestone != null
+                            ? SessionMilestoneView(
+                                milestone: state.visibleMilestone!,
+                                onContinue: () {
+                                  _stopwatch?.reset();
+                                  context
+                                      .read<SessionCubit>()
+                                      .continueInterview();
+                                },
+                                onFinish: context
+                                    .read<SessionCubit>()
+                                    .finishEarly,
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,10 +324,14 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             body:
                                 state.errorMessage ??
                                 'We could not continue the pairing loop right now.',
-                            primaryLabel: state.currentRound?.done == true
+                            primaryLabel:
+                                state.currentRound?.done == true ||
+                                    state.finishEarlyRequested
                                 ? 'Try reveal again'
                                 : 'Retry session',
-                            onPrimary: () => state.currentRound?.done == true
+                            onPrimary: () =>
+                                state.currentRound?.done == true ||
+                                    state.finishEarlyRequested
                                 ? context.read<SessionCubit>().revealSession()
                                 : context.read<SessionCubit>().initialize(),
                             secondaryLabel: state.requiresReauthentication

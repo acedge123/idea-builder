@@ -451,7 +451,10 @@ class FakeSessionRepository implements SessionRepository {
   }
 
   @override
-  Future<SessionReveal> revealSession({required String sessionId}) async {
+  Future<SessionReveal> revealSession({
+    required String sessionId,
+    bool finishEarly = false,
+  }) async {
     return reveal;
   }
 

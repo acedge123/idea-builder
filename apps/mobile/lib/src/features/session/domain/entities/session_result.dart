@@ -25,12 +25,14 @@ class SessionResult extends Equatable {
     this.voiceVersion,
     this.auditText,
     this.narrationStatus,
+    this.reveal,
   }) : supportingChoices = List.unmodifiable(supportingChoices);
   final int version;
   final String outcome, headline;
   final List<ResultSupport> supportingChoices;
   final String? tensionClaim, tensionNotes;
   final String? voiceVersion, auditText, narrationStatus;
+  final ResultReveal? reveal;
   @override
   List<Object?> get props => [
     version,
@@ -42,7 +44,21 @@ class SessionResult extends Equatable {
     voiceVersion,
     auditText,
     narrationStatus,
+    reveal,
   ];
+}
+
+class ResultReveal extends Equatable {
+  const ResultReveal({
+    required this.answered,
+    required this.challenge,
+    this.twist,
+  });
+  final int answered;
+  final String challenge;
+  final String? twist;
+  @override
+  List<Object?> get props => [answered, challenge, twist];
 }
 
 class SharePublication extends Equatable {
