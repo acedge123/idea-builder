@@ -103,6 +103,20 @@ only after an explicit production API release decision. Archive from
 
 ## Release Gate
 
+### TestFlight handoff
+
+- After processing and export compliance, verify the uploaded build explicitly
+  lists the existing internal group **Friends of Music**. Upload success alone is
+  not proof that the group received the build; add it if necessary.
+- On November 11, 2026, that group's setting was **Automatic for Xcode Builds**.
+  Build 8 listed the group in its build details. The group had one tester;
+  never infer membership or invite another person without Alan's instruction.
+- Save concise **What to Test** notes and confirm group access before reporting
+  a build ready. Internal testing does not require submitting a public release.
+- [Apple's internal-testing guidance](https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers)
+  explains automatic distribution and manual assignment, including the separate
+  behavior of Xcode Cloud builds.
+
 Do not upload if any of these fail:
 
 - `flutter analyze`
