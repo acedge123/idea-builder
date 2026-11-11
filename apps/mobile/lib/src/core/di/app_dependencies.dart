@@ -7,6 +7,7 @@ import '../../features/readings/presentation/reading_library_cubit.dart';
 
 import '../../app/router/auth_router_notifier.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
+import '../../features/auth/data/datasources/supabase_access_token_provider.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/entities/auth_user.dart' as music_auth;
@@ -45,8 +46,7 @@ class AppDependencies {
   }) {
     apiClient = MusicDnaApiClient(
       baseUrl: config.apiBaseUrl,
-      accessTokenProvider: () async =>
-          supabase.auth.currentSession?.accessToken,
+      accessTokenProvider: SupabaseAccessTokenProvider(supabase.auth).call,
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
     authRepository = AuthRepositoryImpl(authRemoteDataSource);

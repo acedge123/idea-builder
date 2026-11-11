@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/network/app_api_exception.dart';
 import '../../../../core/network/music_dna_api_client.dart';
+import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/auth_user.dart' as domain;
 
 abstract class AuthRemoteDataSource {
@@ -40,9 +41,16 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
 
   @override
   Stream<domain.AuthUser?> observeAuthState() {
-    return _supabase.auth.onAuthStateChange.map(
-      (AuthState authState) => _mapUser(authState.session?.user),
-    );
+    return _supabase.auth.onAuthStateChange
+        .map((AuthState authState) => _mapUser(authState.session?.user))
+        .handleError((Object error) {
+          // Retryable refresh failures are stream errors, not sign-out events.
+          // Preserve the owner; consumers must not get an unhandled zone error.
+          // Never log the SDK's exception text, which can contain request data.
+          const AppLogger().event('auth.state_error', {
+            'errorType': error.runtimeType.toString(),
+          });
+        });
   }
 
   @override
