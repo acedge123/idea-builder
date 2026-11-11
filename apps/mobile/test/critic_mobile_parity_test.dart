@@ -127,7 +127,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Earlier verbose feedback'), findsNothing);
       expect(find.text('Not quite'), findsNothing);
-      final optional = find.text('Want to challenge the read?');
+      final optional = find.text('React to the Critic');
       expect(
         tester.getTopLeft(find.byType(SessionSongChoiceCard).last).dy,
         lessThan(tester.getTopLeft(optional).dy),
@@ -173,17 +173,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester
-            .widget<OutlinedButton>(
-              find.widgetWithText(OutlinedButton, "That's me"),
-            )
+            .widget<TextButton>(find.widgetWithText(TextButton, "That's me"))
             .onPressed,
         isNull,
       );
       expect(
         tester
-            .widget<OutlinedButton>(
-              find.widgetWithText(OutlinedButton, 'Prove it'),
-            )
+            .widget<TextButton>(find.widgetWithText(TextButton, 'Prove it'))
             .onPressed,
         isNull,
       );

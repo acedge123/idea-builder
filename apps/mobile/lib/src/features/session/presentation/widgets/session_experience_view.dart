@@ -146,36 +146,55 @@ class SessionReactionControls extends StatelessWidget {
     if (read == null || latest?.hasReaction == true) {
       return const SizedBox.shrink();
     }
+    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
+      color: AppTheme.mutedForeground,
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+    );
     return ExpansionTile(
       key: ValueKey(('react', latest?.exchanges.first.at, pendingReaction)),
       tilePadding: EdgeInsets.zero,
+      dense: true,
+      minTileHeight: 48,
+      shape: const Border(),
+      collapsedShape: const Border(),
+      textColor: AppTheme.mutedForeground,
+      collapsedTextColor: AppTheme.mutedForeground,
+      iconColor: AppTheme.mutedForeground,
+      collapsedIconColor: AppTheme.mutedForeground,
       initiallyExpanded: pendingReaction != null,
-      title: const Text('Want to challenge the read?'),
-      subtitle: const Text('Optional — you can keep choosing songs.'),
+      title: Text('React to the Critic', style: labelStyle),
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final reaction in SessionReaction.values)
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(48, 48),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              for (final reaction in SessionReaction.values)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.mutedForeground,
+                    textStyle: labelStyle,
+                    minimumSize: const Size(48, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  onPressed:
+                      busy ||
+                          (pendingReaction != null &&
+                              pendingReaction != reaction)
+                      ? null
+                      : () => onReaction(reaction),
+                  child: Text(
+                    pendingReaction == reaction
+                        ? 'Retry ${reactionLabel(reaction.wireName)}'
+                        : reactionLabel(reaction.wireName),
+                  ),
                 ),
-                onPressed:
-                    busy ||
-                        (pendingReaction != null && pendingReaction != reaction)
-                    ? null
-                    : () => onReaction(reaction),
-                child: Text(
-                  pendingReaction == reaction
-                      ? 'Retry ${reactionLabel(reaction.wireName)}'
-                      : reactionLabel(reaction.wireName),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
       ],
     );
   }
