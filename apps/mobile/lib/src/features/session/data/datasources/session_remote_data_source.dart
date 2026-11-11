@@ -61,6 +61,7 @@ class SessionRemoteDataSource {
   }) async {
     final response = await _apiClient.post(
       '/api/v1/session/$sessionId/choice',
+      timeout: MusicDnaApiClient.criticRequestTimeout,
       headers: _experienceHeaders,
       body: <String, dynamic>{
         'pairing_id': pairingId,
@@ -89,12 +90,30 @@ class SessionRemoteDataSource {
 
   Future<Map<String, dynamic>> revealSession({
     required String sessionId,
+    bool finishEarly = false,
   }) async {
     final response = await _apiClient.post(
       '/api/v1/session/$sessionId/reveal',
+      timeout: MusicDnaApiClient.criticRequestTimeout,
       headers: _experienceHeaders,
+      body: finishEarly ? {'finish_early': true} : null,
     );
     return _decodeJson(response);
+  }
+
+  Future<void> prepare({
+    required String sessionId,
+    required String pairingId,
+    required String exposureId,
+  }) async {
+    _decodeJson(
+      await _apiClient.post(
+        '/api/v1/session/$sessionId/prepare',
+        timeout: MusicDnaApiClient.criticRequestTimeout,
+        headers: _experienceHeaders,
+        body: {'pairing_id': pairingId, 'exposure_id': exposureId},
+      ),
+    );
   }
 
   Future<Map<String, dynamic>> fetchSharedReveal({

@@ -44,6 +44,18 @@ SessionResult mapSessionResult(Map<String, dynamic> data) {
     voiceVersion: data['voice_version'] as String?,
     auditText: data['audit_text'] as String?,
     narrationStatus: data['narration_status'] as String?,
+    reveal: data['reveal'] == null ? null : _mapReveal(data['reveal']),
+  );
+}
+
+ResultReveal _mapReveal(Object? value) {
+  final data = experienceObject(value);
+  final twist = data['twist'];
+  if (twist != null && twist is! String) _invalid();
+  return ResultReveal(
+    answered: _count(data['answered']),
+    challenge: _text(data['challenge']),
+    twist: twist as String?,
   );
 }
 

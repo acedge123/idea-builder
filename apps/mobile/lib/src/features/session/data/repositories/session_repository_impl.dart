@@ -8,13 +8,15 @@ import '../session_experience_mapper.dart';
 import '../session_result_mapper.dart';
 import '../../domain/entities/session_result.dart';
 import '../../domain/repositories/session_result_repository.dart';
+import '../../domain/repositories/session_preparation_repository.dart';
 import '../datasources/session_remote_data_source.dart';
 
 class SessionRepositoryImpl
     implements
         SessionRepository,
         SessionExperienceRepository,
-        SessionResultRepository {
+        SessionResultRepository,
+        SessionPreparationRepository {
   SessionRepositoryImpl(this._remoteDataSource);
 
   final SessionRemoteDataSource _remoteDataSource;
@@ -119,9 +121,13 @@ class SessionRepositoryImpl
   }
 
   @override
-  Future<SessionReveal> revealSession({required String sessionId}) async {
+  Future<SessionReveal> revealSession({
+    required String sessionId,
+    bool finishEarly = false,
+  }) async {
     final response = await _remoteDataSource.revealSession(
       sessionId: sessionId,
+      finishEarly: finishEarly,
     );
     final result = _remoteDataSource.experienceV1
         ? mapSessionResult(response)
@@ -138,6 +144,17 @@ class SessionRepositoryImpl
       result: result,
     );
   }
+
+  @override
+  Future<void> prepare({
+    required String sessionId,
+    required String pairingId,
+    required String exposureId,
+  }) => _remoteDataSource.prepare(
+    sessionId: sessionId,
+    pairingId: pairingId,
+    exposureId: exposureId,
+  );
 
   @override
   Future<SharedReveal> fetchSharedReveal({required String token}) async {
@@ -201,6 +218,7 @@ class SessionRepositoryImpl
       whyGood: pairing['why_good'] as String?,
       diagnosticWeight: _readIntOrNull(pairing['diagnostic_weight']),
       lane: pairing['lane'] as String?,
+      exposureId: pairing['exposure_id'] as String?,
     );
   }
 

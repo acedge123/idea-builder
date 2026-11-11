@@ -17,7 +17,10 @@ abstract class SessionRepository {
     required int msToDecide,
   });
 
-  Future<SessionReveal> revealSession({required String sessionId});
+  Future<SessionReveal> revealSession({
+    required String sessionId,
+    bool finishEarly = false,
+  });
 
   Future<SharedReveal> fetchSharedReveal({required String token});
 }

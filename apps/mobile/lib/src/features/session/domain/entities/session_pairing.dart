@@ -43,6 +43,7 @@ class SessionPairing extends Equatable {
     this.whyGood,
     this.diagnosticWeight,
     this.lane,
+    this.exposureId,
   });
 
   final String id;
@@ -53,6 +54,7 @@ class SessionPairing extends Equatable {
   final String? whyGood;
   final int? diagnosticWeight;
   final String? lane;
+  final String? exposureId;
 
   @override
   List<Object?> get props => <Object?>[
@@ -64,6 +66,7 @@ class SessionPairing extends Equatable {
     whyGood,
     diagnosticWeight,
     lane,
+    exposureId,
   ];
 }
 

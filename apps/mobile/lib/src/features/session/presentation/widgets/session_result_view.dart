@@ -33,8 +33,26 @@ class SessionResultView extends StatelessWidget {
           style: theme.textTheme.labelSmall,
         ),
         const SizedBox(height: 12),
-        Text(result.headline, style: theme.textTheme.headlineMedium),
-        if (result.supportingChoices.isNotEmpty) ...[
+        Text(
+          result.headline,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: 26,
+            height: 1.35,
+          ),
+        ),
+        if (result.reveal != null) ...[
+          if (result.reveal!.twist?.isNotEmpty == true) ...[
+            const SizedBox(height: 24),
+            Text('The twist', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Text(result.reveal!.twist!, style: theme.textTheme.bodyLarge),
+          ],
+          const SizedBox(height: 24),
+          Text('The challenge', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(result.reveal!.challenge, style: theme.textTheme.bodyLarge),
+        ],
+        if (result.reveal == null && result.supportingChoices.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('The choices behind it', style: theme.textTheme.titleMedium),
           for (final support in result.supportingChoices.take(2))
@@ -50,15 +68,16 @@ class SessionResultView extends StatelessWidget {
               ),
             ),
         ],
-        if (!result.supportingChoices.any(
-          (support) => support.examples.isNotEmpty,
-        )) ...[
+        if (result.reveal == null &&
+            !result.supportingChoices.any(
+              (support) => support.examples.isNotEmpty,
+            )) ...[
           const SizedBox(height: 16),
           const Text(
             'No supporting song examples were included with this saved reading.',
           ),
         ],
-        if (result.tensionClaim != null) ...[
+        if (result.reveal == null && result.tensionClaim != null) ...[
           const SizedBox(height: 24),
           Text('Still unresolved', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -123,7 +142,7 @@ class SessionResultView extends StatelessWidget {
         const SizedBox(height: 16),
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
-          title: const Text('Full reading'),
+          title: Text(result.reveal == null ? 'Full reading' : 'The receipts'),
           children: [_FullReading(reveal: reveal)],
         ),
       ],
@@ -146,6 +165,10 @@ class _FullReading extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
         if (reveal.result != null) ...[
+          if (reveal.result!.reveal != null)
+            Text(
+              '${reveal.result!.reveal!.answered} answered pairings. Skips are not evidence; each trait counts only its declared tests.',
+            ),
           Text(reveal.result!.headline),
           for (final support in reveal.result!.supportingChoices) ...[
             Text(support.tradeoff),

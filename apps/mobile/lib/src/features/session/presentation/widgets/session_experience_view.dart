@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/session_experience.dart';
+import '../critic_display.dart';
 
 class SessionExperienceView extends StatelessWidget {
   const SessionExperienceView({
@@ -303,7 +304,7 @@ class SessionReadView extends StatelessWidget {
           Semantics(
             liveRegion: true,
             child: Text(
-              read.thesis,
+              compact ? compactCriticRead(read.thesis) : read.thesis,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontSize: 20,
                 height: 1.3,
