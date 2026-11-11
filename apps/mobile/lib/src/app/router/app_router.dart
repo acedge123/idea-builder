@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/di/app_dependencies.dart';
+import '../../features/ai_permission/presentation/ai_permission_gate.dart';
 import '../../features/auth/presentation/pages/auth_stub_page.dart';
 import '../../features/continuation/domain/continuation_repository.dart';
 import '../../features/continuation/presentation/continuation_page.dart';
@@ -41,6 +42,11 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
       ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthStubPage()),
       GoRoute(
+        path: '/ai-permission',
+        builder: (context, state) =>
+            AiPermissionGate(createCubit: dependencies.createAiPermissionCubit),
+      ),
+      GoRoute(
         path: '/readings',
         builder: (context, state) => BlocBuilder<AuthCubit, AuthState>(
           builder: (context, auth) {
@@ -58,88 +64,113 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
 
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => BlocProvider<OnboardingCubit>(
-          create: (_) => dependencies.createOnboardingCubit(),
-          child: const OnboardingStubPage(),
+        builder: (context, state) => AiPermissionGate(
+          createCubit: dependencies.createAiPermissionCubit,
+          childBuilder: (context) => BlocProvider<OnboardingCubit>(
+            create: (_) => dependencies.createOnboardingCubit(),
+            child: const OnboardingStubPage(),
+          ),
         ),
       ),
       GoRoute(
         path: '/session/:sessionId/continuation',
-        builder: (context, state) => AnimatedBuilder(
-          animation: dependencies.authRouterNotifier,
-          builder: (context, _) {
-            final saved = state.extra;
-            if (!dependencies.config.experienceV1 ||
-                saved is! ContinuationContext ||
-                saved.ownerId != dependencies.authRepository.currentUser?.id ||
-                saved.sessionId != state.pathParameters['sessionId']) {
-              return Scaffold(
-                appBar: AppBar(title: const Text('Conversation unavailable')),
-                body: const SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('Open your saved reading to continue.'),
+        builder: (context, state) => AiPermissionGate(
+          createCubit: dependencies.createAiPermissionCubit,
+          childBuilder: (context) => AnimatedBuilder(
+            animation: dependencies.authRouterNotifier,
+            builder: (context, _) {
+              final saved = state.extra;
+              if (!dependencies.config.experienceV1 ||
+                  saved is! ContinuationContext ||
+                  saved.ownerId !=
+                      dependencies.authRepository.currentUser?.id ||
+                  saved.sessionId != state.pathParameters['sessionId']) {
+                return Scaffold(
+                  appBar: AppBar(title: const Text('Conversation unavailable')),
+                  body: const SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text('Open your saved reading to continue.'),
+                    ),
                   ),
-                ),
+                );
+              }
+              return BlocProvider.value(
+                value: dependencies.continuationFor(saved),
+                child: const ContinuationPage(),
               );
-            }
-            return BlocProvider.value(
-              value: dependencies.continuationFor(saved),
-              child: const ContinuationPage(),
-            );
-          },
+            },
+          ),
         ),
       ),
       GoRoute(
         path: '/session/:sessionId',
-        builder: (context, state) => BlocProvider<SessionCubit>(
-          key: ValueKey((
-            dependencies.authRepository.currentUser?.id,
-            state.pathParameters['sessionId'],
-          )),
-          create: (_) => dependencies.createSessionCubit(
-            startedSession: StartedMusicSession.reference(
-              state.pathParameters['sessionId']!,
-            ),
-          )..initialize(),
-          child: SessionStubPage(
-            ownerId: dependencies.authRepository.currentUser?.id,
-            createFeedbackCubit: dependencies.hasResultFeedback
-                ? dependencies.createResultFeedbackCubit
-                : null,
-            createExploreCubit: dependencies.config.experienceV1
-                ? dependencies.createExploreCubit
-                : null,
-            shareBaseUrl: dependencies.config.shareBaseUrl,
-            startedSession: StartedMusicSession.reference(
-              state.pathParameters['sessionId']!,
-            ),
-          ),
-        ),
+        builder: (context, state) {
+          final sessionId = state.pathParameters['sessionId']!;
+          return AiPermissionGate(
+            createCubit: () =>
+                dependencies.createSavedReadingPermissionCubit(sessionId),
+            childBuilder: (_) => _sessionPage(dependencies, sessionId),
+            readOnlyBuilder: (_) =>
+                _sessionPage(dependencies, sessionId, savedOnly: true),
+          );
+        },
       ),
       GoRoute(
         path: '/session',
-        builder: (context, state) => BlocProvider<SessionCubit>(
-          create: (_) => dependencies.createSessionCubit(
-            startedSession: state.extra is StartedMusicSession
-                ? state.extra as StartedMusicSession
-                : null,
-          )..initialize(),
-          child: SessionStubPage(
-            ownerId: dependencies.authRepository.currentUser?.id,
-            createFeedbackCubit: dependencies.hasResultFeedback
-                ? dependencies.createResultFeedbackCubit
-                : null,
-            createExploreCubit: dependencies.config.experienceV1
-                ? dependencies.createExploreCubit
-                : null,
-            shareBaseUrl: dependencies.config.shareBaseUrl,
-            startedSession: state.extra is StartedMusicSession
-                ? state.extra as StartedMusicSession
-                : null,
+        builder: (context, state) => AiPermissionGate(
+          createCubit: dependencies.createAiPermissionCubit,
+          childBuilder: (context) => BlocProvider<SessionCubit>(
+            create: (_) => dependencies.createSessionCubit(
+              startedSession: state.extra is StartedMusicSession
+                  ? state.extra as StartedMusicSession
+                  : null,
+            )..initialize(),
+            child: SessionStubPage(
+              ownerId: dependencies.authRepository.currentUser?.id,
+              createFeedbackCubit: dependencies.hasResultFeedback
+                  ? dependencies.createResultFeedbackCubit
+                  : null,
+              createExploreCubit: dependencies.config.experienceV1
+                  ? dependencies.createExploreCubit
+                  : null,
+              shareBaseUrl: dependencies.config.shareBaseUrl,
+              startedSession: state.extra is StartedMusicSession
+                  ? state.extra as StartedMusicSession
+                  : null,
+            ),
           ),
         ),
       ),
     ],
+  );
+}
+
+Widget _sessionPage(
+  AppDependencies dependencies,
+  String sessionId, {
+  bool savedOnly = false,
+}) {
+  final reference = StartedMusicSession.reference(sessionId);
+  return BlocProvider<SessionCubit>(
+    key: ValueKey((
+      dependencies.authRepository.currentUser?.id,
+      sessionId,
+      savedOnly,
+    )),
+    create: (_) =>
+        dependencies.createSessionCubit(startedSession: reference)
+          ..initialize(savedOnly: savedOnly),
+    child: SessionStubPage(
+      ownerId: dependencies.authRepository.currentUser?.id,
+      createFeedbackCubit: dependencies.hasResultFeedback
+          ? dependencies.createResultFeedbackCubit
+          : null,
+      createExploreCubit: dependencies.config.experienceV1
+          ? dependencies.createExploreCubit
+          : null,
+      shareBaseUrl: dependencies.config.shareBaseUrl,
+      startedSession: reference,
+    ),
   );
 }

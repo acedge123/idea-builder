@@ -8,13 +8,19 @@ import 'app_api_exception.dart';
 
 typedef AccessTokenProvider = Future<String?> Function();
 
+/// Resolve permission before credentials, then validate synchronously at send.
+typedef RequestPermissionGuard =
+    Future<void Function()> Function(String method, String path);
+
 class MusicDnaApiClient {
   MusicDnaApiClient({
     required String baseUrl,
     required AccessTokenProvider accessTokenProvider,
     http.Client? httpClient,
+    RequestPermissionGuard? permissionGuard,
   }) : _baseUri = Uri.parse(baseUrl),
        _accessTokenProvider = accessTokenProvider,
+       _permissionGuard = permissionGuard,
        _httpClient = httpClient ?? http.Client();
 
   static const Duration _requestTimeout = Duration(seconds: 20);
@@ -23,6 +29,7 @@ class MusicDnaApiClient {
 
   final Uri _baseUri;
   final AccessTokenProvider _accessTokenProvider;
+  final RequestPermissionGuard? _permissionGuard;
   final http.Client _httpClient;
 
   Uri buildUri(String path) => _baseUri.resolve(path);
@@ -32,8 +39,11 @@ class MusicDnaApiClient {
     Map<String, String> headers = const {},
   }) async {
     try {
+      final validate = await _permissionGuard?.call('GET', path);
+      final requestHeaders = {...await _headers(), ...headers};
+      validate?.call();
       return await _httpClient
-          .get(buildUri(path), headers: {...await _headers(), ...headers})
+          .get(buildUri(path), headers: requestHeaders)
           .timeout(_requestTimeout);
     } on TimeoutException {
       throw AppApiException(
@@ -60,10 +70,13 @@ class MusicDnaApiClient {
     Duration timeout = _requestTimeout,
   }) async {
     try {
+      final validate = await _permissionGuard?.call('POST', path);
+      final requestHeaders = {...await _headers(), ...headers};
+      validate?.call();
       return await _httpClient
           .post(
             buildUri(path),
-            headers: {...await _headers(), ...headers},
+            headers: requestHeaders,
             body: body == null ? null : jsonEncode(body),
           )
           .timeout(timeout);

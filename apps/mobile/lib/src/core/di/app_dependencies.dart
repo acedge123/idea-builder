@@ -1,4 +1,8 @@
 import 'dart:async';
+import '../../features/ai_permission/data/ai_permission_data_source.dart';
+import '../../features/ai_permission/data/local_ai_permission_repository.dart';
+import '../../features/ai_permission/domain/ai_permission_service.dart';
+import '../../features/ai_permission/presentation/ai_permission_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/readings/domain/reading_library.dart';
 import '../../features/readings/presentation/explore_cubit.dart';
@@ -47,6 +51,8 @@ class AppDependencies {
     apiClient = MusicDnaApiClient(
       baseUrl: config.apiBaseUrl,
       accessTokenProvider: SupabaseAccessTokenProvider(supabase.auth).call,
+      permissionGuard: (method, path) =>
+          aiPermissionService.authorizeRequest(method, path),
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
     authRepository = AuthRepositoryImpl(authRemoteDataSource);
@@ -104,6 +110,23 @@ class AppDependencies {
     _continuations[context] = cubit;
     return cubit;
   }
+
+  late final AiPermissionService aiPermissionService = AiPermissionService(
+    LocalAiPermissionRepository(AiPermissionDataSource()),
+    authRepository,
+  );
+  AiPermissionCubit createAiPermissionCubit() =>
+      AiPermissionCubit(aiPermissionService, logger: logger);
+
+  AiPermissionCubit createSavedReadingPermissionCubit(String sessionId) =>
+      AiPermissionCubit(
+        aiPermissionService,
+        logger: logger,
+        canReadWithoutPermission: () async =>
+            await (sessionRepository as SavedReadingRepository)
+                .fetchSavedReading(sessionId: sessionId) !=
+            null,
+      );
 
   late final AppLogger logger = const AppLogger();
   late final AuthRemoteDataSource authRemoteDataSource;
