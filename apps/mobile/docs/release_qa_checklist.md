@@ -32,6 +32,31 @@ Use this checklist before every TestFlight or App Store build.
 
 ## Verification Commands
 
+### Encryption declaration
+
+`ios/Runner/Info.plist` declares `ITSAppUsesNonExemptEncryption` as Boolean
+`false`. MusicDNA uses transport encryption for its backend connections and
+authentication hashing/signature verification; it does not offer general-purpose
+encryption, encrypted storage, a VPN, or custom cryptographic protocols. The
+declaration covers exempt encryption, not an absence of HTTPS.
+
+Apple reads this from the uploaded binary, so it must be present before archiving;
+adding it during export cannot update a build already uploaded. Check the archived
+app's effective plist before every export (substitute the actual archive path):
+
+```bash
+plutil -extract ITSAppUsesNonExemptEncryption raw -o - \
+  /path/to/MusicDNA.xcarchive/Products/Applications/Runner.app/Info.plist
+```
+
+The output must be `false`. Reassess this declaration if encryption-related
+features or dependencies change. Do not add an invented
+`ITSEncryptionExportComplianceCode` or use this key to change App Store territory
+availability; there is no separate France-distribution plist switch here.
+
+References: [Apple's declaration guidance](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations)
+and [the Info.plist key](https://developer.apple.com/documentation/bundleresources/information-property-list/itsappusesnonexemptencryption).
+
 From [`/Users/rastakit/tga-workspace/idea-builder/apps/mobile`](/Users/rastakit/tga-workspace/idea-builder/apps/mobile):
 
 ```bash
@@ -77,6 +102,20 @@ only after an explicit production API release decision. Archive from
 - `Copy share link` places a URL on the clipboard.
 
 ## Release Gate
+
+### TestFlight handoff
+
+- After processing and export compliance, verify the uploaded build explicitly
+  lists the existing internal group **Friends of Music**. Upload success alone is
+  not proof that the group received the build; add it if necessary.
+- On November 11, 2026, that group's setting was **Automatic for Xcode Builds**.
+  Build 8 listed the group in its build details. The group had one tester;
+  never infer membership or invite another person without Alan's instruction.
+- Save concise **What to Test** notes and confirm group access before reporting
+  a build ready. Internal testing does not require submitting a public release.
+- [Apple's internal-testing guidance](https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers)
+  explains automatic distribution and manual assignment, including the separate
+  behavior of Xcode Cloud builds.
 
 Do not upload if any of these fail:
 
