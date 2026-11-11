@@ -24,6 +24,49 @@ class SessionRemoteDataSource {
     );
   }
 
+  Future<Map<String, dynamic>> fetchSavedReading({
+    required String sessionId,
+  }) async => _decodeJson(
+    await _apiClient.get(
+      '/api/v1/session/$sessionId/chat?limit=1',
+      headers: _experienceHeaders,
+    ),
+  );
+
+  Future<Map<String, dynamic>> fetchReadings({
+    String? cursor,
+  }) async => _decodeJson(
+    await _apiClient.get(
+      '/api/v1/sessions?limit=30${cursor == null ? '' : '&cursor=${Uri.encodeQueryComponent(cursor)}'}',
+      headers: _experienceHeaders,
+    ),
+  );
+  Future<Map<String, dynamic>> fetchExploreOptions(String sessionId) async =>
+      _decodeJson(
+        await _apiClient.get(
+          '/api/v1/session/$sessionId/explore',
+          headers: _experienceHeaders,
+        ),
+      );
+  Future<Map<String, dynamic>> startExplore({
+    required String sessionId,
+    required int decade,
+    required String mutationId,
+  }) async => _decodeJson(
+    await _apiClient.post(
+      '/api/v1/session/$sessionId/explore',
+      headers: _experienceHeaders,
+      body: {'decade': decade, 'operation_id': mutationId},
+    ),
+  );
+  Future<Map<String, dynamic>> fetchComparison(String sessionId) async =>
+      _decodeJson(
+        await _apiClient.get(
+          '/api/v1/session/$sessionId/comparison',
+          headers: _experienceHeaders,
+        ),
+      );
+
   Future<Map<String, dynamic>> react({
     required String sessionId,
     required String kind,

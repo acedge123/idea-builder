@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../readings/presentation/explore_cubit.dart';
+import '../../../readings/presentation/explore_view.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../readings/presentation/app_navigation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +27,14 @@ class SessionStubPage extends StatefulWidget {
     this.startedSession,
     this.ownerId,
     this.createFeedbackCubit,
+    this.createExploreCubit,
   });
 
+  final ExploreCubit Function({
+    required String sessionId,
+    required bool isExplore,
+  })?
+  createExploreCubit;
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
   final String? ownerId;
@@ -63,6 +73,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: const AppNavigation(index: 1),
       body: SafeArea(
         child: BlocConsumer<SessionCubit, SessionState>(
           listenWhen: (previous, current) =>
@@ -104,8 +115,21 @@ class _SessionStubPageState extends State<SessionStubPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('THE INTERVIEW', style: theme.textTheme.labelSmall),
-                  if (startedSession != null) ...<Widget>[
+                  Text(
+                    state.mode == 'explore'
+                        ? 'EXPLORE YOUR DNA · ${state.decade}s'
+                        : 'THE INTERVIEW',
+                    style: theme.textTheme.labelSmall,
+                  ),
+                  if (state.parentSessionId != null)
+                    TextButton(
+                      onPressed: () => context.go(
+                        '/session/${Uri.encodeComponent(state.parentSessionId!)}',
+                      ),
+                      child: const Text('← Back to your original reading'),
+                    ),
+                  if (startedSession != null &&
+                      startedSession.songs.isNotEmpty) ...<Widget>[
                     ExpansionTile(
                       tilePadding: EdgeInsets.zero,
                       title: const Text('Your opening songs'),
@@ -126,6 +150,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       showCurrentRead:
                           state.status != SessionStatus.revealed &&
                           state.status != SessionStatus.revealing &&
+                          state.status != SessionStatus.waitingForReading &&
                           state.visibleMilestone == null,
                       exchanges: state.exchanges,
                       read: state.read,
@@ -251,6 +276,14 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         primaryEnabled: false,
                         busy: true,
                       ),
+                      SessionStatus.waitingForReading => _FallbackCard(
+                        title: 'Your reading is still finishing',
+                        body:
+                            'Your choices are saved. Check again to open the finished reading.',
+                        primaryLabel: 'Check my reading',
+                        onPrimary: () =>
+                            context.read<SessionCubit>().revealSession(),
+                      ),
                       SessionStatus.revealed =>
                         state.reveal == null
                             ? _FallbackCard(
@@ -368,6 +401,23 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       child: ResultFeedbackView(
                         onSignIn: () => context.push('/auth'),
                       ),
+                    ),
+                  if (state.status == SessionStatus.revealed &&
+                      state.reveal?.result != null &&
+                      widget.createExploreCubit != null &&
+                      state.sessionId != null &&
+                      context.read<AuthCubit>().state.user?.isAnonymous ==
+                          false)
+                    BlocProvider(
+                      key: ValueKey((
+                        state.sessionId,
+                        state.reveal!.result!.version,
+                      )),
+                      create: (_) => widget.createExploreCubit!(
+                        sessionId: state.sessionId!,
+                        isExplore: state.mode == 'explore',
+                      )..load(),
+                      child: const ExploreView(),
                     ),
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../readings/presentation/app_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -58,6 +59,7 @@ class _OnboardingStubPageState extends State<OnboardingStubPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      bottomNavigationBar: const AppNavigation(index: 0),
       body: SafeArea(
         child: BlocConsumer<OnboardingCubit, OnboardingState>(
           listenWhen: (previous, current) =>

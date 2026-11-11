@@ -1,0 +1,66 @@
+{
+  "status": "capture_pending_native_acceptance",
+  "source": "actual production-backed native build8; no fixture screenshots for submission",
+  "official_spec": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/",
+  "verified_date_pacific": "2026-11-11",
+  "sets": [
+    {
+      "family": "iPhone Dynamic Island medium",
+      "width": 1206,
+      "height": 2622,
+      "format": "PNG",
+      "required": true
+    },
+    {
+      "family": "iPad 13-inch",
+      "width": 2064,
+      "height": 2752,
+      "format": "PNG",
+      "required": "if shipping binary supports iPad"
+    }
+  ],
+  "screens": [
+    {
+      "id": "01-opening",
+      "headline": "Three songs. Your story.",
+      "native_screen": "opening songs",
+      "captured_files": []
+    },
+    {
+      "id": "02-choices",
+      "headline": "Which one stays?",
+      "native_screen": "active choice with Critic",
+      "captured_files": []
+    },
+    {
+      "id": "03-reading",
+      "headline": "Meet your music critic.",
+      "native_screen": "completed final reading",
+      "captured_files": []
+    },
+    {
+      "id": "04-conversation",
+      "headline": "A take worth arguing with.",
+      "native_screen": "saved conversation",
+      "captured_files": []
+    },
+    {
+      "id": "05-decades",
+      "headline": "Same instincts. Different decade.",
+      "native_screen": "ready Decades / supported comparison",
+      "captured_files": []
+    },
+    {
+      "id": "06-library",
+      "headline": "Your readings. Ready when you are.",
+      "native_screen": "signed-in reading library",
+      "captured_files": []
+    }
+  ],
+  "image_rules": [
+    "Use original native pixels; no Mirroring window frame or upscaled QA screenshot",
+    "Capture final accepted UI with non-personal QA content",
+    "Keep screenshot UI truthful; do not illustrate unimplemented features",
+    "No App Store upload/public submission without Alan approval"
+  ]
+}

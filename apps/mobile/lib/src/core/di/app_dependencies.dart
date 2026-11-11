@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../features/readings/domain/reading_library.dart';
+import '../../features/readings/presentation/explore_cubit.dart';
+import '../../features/readings/data/rest_reading_library_repository.dart';
+import '../../features/readings/presentation/reading_library_cubit.dart';
 
 import '../../app/router/auth_router_notifier.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/entities/auth_user.dart' as music_auth;
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../../features/continuation/domain/continuation_repository.dart';
 import '../../features/continuation/data/rest_continuation_repository.dart';
@@ -20,6 +26,7 @@ import '../../features/session/domain/repositories/session_repository.dart';
 import '../../features/session/domain/repositories/session_experience_repository.dart';
 import '../../features/session/domain/repositories/session_result_repository.dart';
 import '../../features/session/domain/repositories/session_preparation_repository.dart';
+import '../../features/session/domain/repositories/saved_reading_repository.dart';
 import '../../features/session/presentation/cubit/session_cubit.dart';
 import '../../features/result_feedback/data/unavailable_result_feedback_repository.dart';
 import '../../features/result_feedback/data/rest_result_feedback_repository.dart';
@@ -43,6 +50,15 @@ class AppDependencies {
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
     authRepository = AuthRepositoryImpl(authRemoteDataSource);
+    _ownerChanges = authRepository.observeAuthState().listen((user) {
+      if (_continuationOwner != null && user?.id != _continuationOwner) {
+        for (final cubit in _continuations.values) {
+          cubit.close();
+        }
+        _continuations.clear();
+        _continuationOwner = null;
+      }
+    });
     this.continuationRepository =
         continuationRepository ??
         (config.experienceV1
@@ -55,6 +71,15 @@ class AppDependencies {
   late final ContinuationRepository continuationRepository;
   final Map<ContinuationContext, ContinuationCubit> _continuations = {};
   String? _continuationOwner;
+  late final StreamSubscription<music_auth.AuthUser?> _ownerChanges;
+  void dispose() {
+    _ownerChanges.cancel();
+    for (final cubit in _continuations.values) {
+      cubit.close();
+    }
+    _continuations.clear();
+    authRouterNotifier.dispose();
+  }
 
   ContinuationCubit continuationFor(ContinuationContext context) {
     final owner = authRepository.currentUser?.id;
@@ -96,7 +121,16 @@ class AppDependencies {
   late final SessionRepository sessionRepository = SessionRepositoryImpl(
     sessionRemoteDataSource,
   );
-  late final SessionResumeStore sessionResumeStore = SessionResumeStore();
+  late final SessionResumeStore sessionResumeStore = SessionResumeStore(
+    currentOwner: () => authRepository.currentUser?.id,
+  );
+  late final ReadingLibraryRepository readingLibraryRepository =
+      RestReadingLibraryRepository(sessionRemoteDataSource);
+  ReadingLibraryCubit createReadingLibraryCubit() => ReadingLibraryCubit(
+    readingLibraryRepository,
+    ownerId: authRepository.currentUser!.id,
+    currentOwner: () => authRepository.currentUser?.id,
+  );
   late final ResultFeedbackRepository resultFeedbackRepository =
       config.experienceV1
       ? RestResultFeedbackRepository(apiClient)
@@ -118,6 +152,17 @@ class AppDependencies {
     currentOwnerId: () => authRepository.currentUser?.id,
     ownerChanges: authRepository.observeAuthState().map((user) => user?.id),
     logger: logger,
+  );
+
+  ExploreCubit createExploreCubit({
+    required String sessionId,
+    required bool isExplore,
+  }) => ExploreCubit(
+    readingLibraryRepository,
+    sessionId: sessionId,
+    isExplore: isExplore,
+    ownerId: authRepository.currentUser!.id,
+    currentOwner: () => authRepository.currentUser?.id,
   );
 
   AuthCubit createAuthCubit() {
@@ -143,6 +188,9 @@ class AppDependencies {
           : null,
       preparationRepository: config.experienceV1
           ? sessionRepository as SessionPreparationRepository
+          : null,
+      savedReadingRepository: config.experienceV1
+          ? sessionRepository as SavedReadingRepository
           : null,
       startedSession: startedSession,
       resumeStore: sessionResumeStore,

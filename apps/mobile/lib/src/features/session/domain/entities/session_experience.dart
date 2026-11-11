@@ -90,8 +90,14 @@ class SessionExperience {
     required List<SessionExchange> exchanges,
     this.publication,
     this.milestone,
+    this.mode = 'discover',
+    this.decade,
+    this.parentSessionId,
   }) : exchanges = List.unmodifiable(exchanges);
   final String sessionId;
+  final String mode;
+  final int? decade;
+  final String? parentSessionId;
   final List<SessionExchange> exchanges;
   final SharePublication? publication;
   final SessionMilestone? milestone;

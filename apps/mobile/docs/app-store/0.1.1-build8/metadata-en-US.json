@@ -1,0 +1,22 @@
+{
+  "status": "draft_pending_build8_native_acceptance",
+  "locale": "en-US",
+  "name": "MusicDNA",
+  "subtitle": "Your taste. A critic’s take.",
+  "promotional_text": "Three songs. A few tough choices. One opinionated Critic. Explore your taste, challenge the reading and take it into another decade.",
+  "description": "Why do you love the songs you love?\n\nStart with three songs that matter to you. Make a few tough choices. Meet a music critic with a point of view about what you keep choosing.\n\nPICK BY INSTINCT\nChoose the song you would keep. Skip a matchup when you don’t know the songs. The Critic follows your choices, notices patterns and makes room for exceptions.\n\nGET A READ WORTH ARGUING WITH\nSee an initial reading after four answered choices, or keep going for the full interview. Explore the songs behind the interpretation, react when a take lands or misses, and tell the Critic what it overlooked.\n\nSAME INSTINCTS. DIFFERENT DECADE.\nAfter your original reading, explore an available decade. New song choices reveal what held up, what changed and where there still isn’t enough evidence. Your original reading stays as it was.\n\nKEEP THE CONVERSATION GOING\nSign in to reopen your readings, resume an unfinished interview and return to your decade explorations. Share a reading only when you choose to publish it.\n\nYour music is the starting point. The conversation is yours.",
+  "keywords": "music,taste,discovery,songs,critic,decades,interview,listening",
+  "whats_new": "A more complete MusicDNA experience.\n\n• Home, My readings and Account navigation.\n• Reopen saved readings and continue unfinished interviews.\n• Explore your DNA through available decades.\n• A shared final-reading pipeline and clearer recovery when a reading is still finishing.\n• Quieter reaction controls that keep the Critic and songs in focus.",
+  "marketing_url": "https://www.musicdna.fm",
+  "privacy_policy_url": "https://www.musicdna.fm/privacy",
+  "support_url": null,
+  "support_url_status": "verify public support destination before submission",
+  "review_notes": "Start an interview with three songs. Choose between offered songs or skip unfamiliar matchups. Request the initial reading after four answered choices or continue to completion. Sign in for My readings and the optional post-reading decade explorations; only sufficiently covered decades are offered. Sharing requires an explicit publish action. Add review credentials securely in App Store Connect if required, never in this repository.",
+  "release_approval": "Alan; TestFlight upload and public distribution are separate approvals",
+  "claims_to_verify_before_submission": [
+    "reopen and restart resume",
+    "available decade exploration and frozen original",
+    "chat and explicit sharing/revoke",
+    "fresh final-reading latency and recovery"
+  ]
+}

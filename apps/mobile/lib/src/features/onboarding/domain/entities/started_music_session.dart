@@ -14,6 +14,20 @@ class StartedMusicSession extends Equatable {
     required this.songs,
   });
 
+  factory StartedMusicSession.reference(String sessionId) =>
+      StartedMusicSession(
+        sessionId: sessionId,
+        sessionLane: '',
+        sessionLaneConfidence: 0,
+        analysisLane: '',
+        analysisConfidence: 0,
+        hypothesis: '',
+        reaction: '',
+        reasoning: const [],
+        secondaryLanes: const [],
+        songs: const [],
+      );
+
   final String sessionId;
   final String sessionLane;
   final double sessionLaneConfidence;
