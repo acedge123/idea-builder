@@ -56,8 +56,12 @@ class ReadingLibraryPage extends StatelessWidget {
                 if (state.error != null) ...[
                   Text(state.error!, semanticsLabel: state.error),
                   TextButton(
-                    onPressed: () => context.read<ReadingLibraryCubit>().load(),
-                    child: const Text('Try again'),
+                    onPressed: state.signInRequired
+                        ? () => context.go('/auth')
+                        : () => context.read<ReadingLibraryCubit>().load(),
+                    child: Text(
+                      state.signInRequired ? 'Open account' : 'Try again',
+                    ),
                   ),
                 ],
                 if (!state.loading && state.error == null && state.rows.isEmpty)
