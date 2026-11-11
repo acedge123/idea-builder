@@ -10,4 +10,4 @@ Before submission: verify public privacy/support destinations and actual privacy
 
 Native Home/sign-in captures are included for iPhone and iPad; the six authenticated storyboard scenes remain pending. The two `qa-*-mirroring.png` files in the local delivery folder are QA evidence only, excluded from store submission assets.
 
-The local archive succeeded for fm.musicdna.app0.1.1(8), minimum iOS15, families1/2. App Store export failed with Xcode “No Accounts” / no distribution certificate; no IPA was exported or uploaded. Reauthenticate the existing EK Enterprises account in Xcode, then retry export. Local archive: /tmp/musicdna-build8-release.xcarchive.
+The local archive succeeded for fm.musicdna.app0.1.1(8), minimum iOS15, families1/2. The first export failed with Xcode “No Accounts” / no distribution certificate. After Alan signed into Xcode, the retry succeeded and exported /tmp/musicdna-build8-export/MusicDNA.ipa; hash is in build-receipt.json. Nothing was uploaded. Local archive: /tmp/musicdna-build8-release.xcarchive.

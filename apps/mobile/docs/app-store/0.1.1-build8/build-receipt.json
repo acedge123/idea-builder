@@ -7,7 +7,7 @@
   "api_origin": "https://www.musicdna.fm",
   "archive": "/tmp/musicdna-build8-release.xcarchive",
   "archive_status": "succeeded",
-  "app_store_export_status": "blocked_no_xcode_account_or_distribution_certificate",
+  "app_store_export_status": "succeeded_after_owner_xcode_sign_in",
   "uploaded": false,
   "phone_install": "development_signed_release_mode_succeeded",
   "tests": {
@@ -39,5 +39,10 @@
       "file": "build8-signin-iphone.png",
       "sha256": "b67590702dbaf1b3c505d2757c34135c46d66ffccbc15c2eaa42a70231c361be"
     }
-  ]
+  ],
+  "ipa": "/tmp/musicdna-build8-export/MusicDNA.ipa",
+  "ipa_sha256": "cd91c4ac74b104e5fd8870cdf84bb974be615aa03ddae1146c814771b15784d0",
+  "distribution_signature_verification": "codesign deep strict succeeded with macOS trust access",
+  "distribution_signing": "Cloud Managed Apple Distribution",
+  "distribution_profile_expiry": "2027-07-17"
 }
