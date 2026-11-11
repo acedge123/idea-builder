@@ -1,0 +1,48 @@
+{
+  "version": "0.1.1",
+  "build": "8",
+  "bundle_id": "fm.musicdna.app",
+  "native_code_commit": "51ee91714dd382e4954bbf5b66c9969939b9900c",
+  "base_main_merge": "cbc3ad1fc77e5105155e621d9c63e917f94569f8",
+  "api_origin": "https://www.musicdna.fm",
+  "archive": "/tmp/musicdna-build8-release.xcarchive",
+  "archive_status": "succeeded",
+  "app_store_export_status": "succeeded_after_owner_xcode_sign_in",
+  "uploaded": false,
+  "phone_install": "development_signed_release_mode_succeeded",
+  "tests": {
+    "passed": 163,
+    "skipped": 1,
+    "analysis": "clean"
+  },
+  "fresh_decade_qa": "six_choices_saved_compared_and_reopened",
+  "accuracy_rating_submitted": false,
+  "final_read_observation_seconds": {
+    "absent_at": 25,
+    "visible_by": 46,
+    "exact_latency": null
+  },
+  "screenshots": [
+    {
+      "file": "build8-home-ipad.png",
+      "sha256": "6210c7baa1d3308a1f5644d7842094725c0a7b0b6db27b84cfdb91a759bd9b22"
+    },
+    {
+      "file": "build8-home-iphone.png",
+      "sha256": "6c2d1f02930db49be29b40bc250c4921e0dba2c2e038d335ddfaf9aa0cc8e729"
+    },
+    {
+      "file": "build8-signin-ipad.png",
+      "sha256": "e9c8081d888c91ff31e4cc4be3abc4334ec931006a98d6f3d400f26e7bc9dac0"
+    },
+    {
+      "file": "build8-signin-iphone.png",
+      "sha256": "b67590702dbaf1b3c505d2757c34135c46d66ffccbc15c2eaa42a70231c361be"
+    }
+  ],
+  "ipa": "/tmp/musicdna-build8-export/MusicDNA.ipa",
+  "ipa_sha256": "cd91c4ac74b104e5fd8870cdf84bb974be615aa03ddae1146c814771b15784d0",
+  "distribution_signature_verification": "codesign deep strict succeeded with macOS trust access",
+  "distribution_signing": "Cloud Managed Apple Distribution",
+  "distribution_profile_expiry": "2027-07-17"
+}

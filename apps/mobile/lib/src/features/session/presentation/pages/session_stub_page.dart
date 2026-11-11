@@ -439,7 +439,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
         if (target != null) {
           Scrollable.ensureVisible(
             target,
-            alignment: 0.02,
+            alignment: state.status == SessionStatus.revealed ? 0 : 0.02,
             duration: MediaQuery.disableAnimationsOf(context)
                 ? Duration.zero
                 : const Duration(milliseconds: 250),

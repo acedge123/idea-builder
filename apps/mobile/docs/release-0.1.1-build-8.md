@@ -21,14 +21,14 @@ Lovable source19a198e includes the Decades replay start operation_id, shared pla
 ## Validation / acceptance status
 
 - Flutter analysis clean; final rerun recorded in the PR validation.
-- Full baseline plus recovery regressions159 passed; one optional deployed-contract capture skipped.
-- Four additional widget/contract checks pass (including above-fold sign-in and persistent signed-out home actions): large-text private child navigation, saved Decades visibility when no era is ready, and stable operation_id payloads. Final aggregate validation is recorded in the PR.
-- Native simulator and unsigned production iOS release builds succeed. A local development-signed phone build also succeeds with existing Xcode signing. Actual signed-in device/simulator walkthrough, fresh reveal latency and screenshots are pending owner login.
-- No TestFlight upload or App Store submission has occurred for build8. Build7 is consumed; confirm8 remains unused before upload. Alan merges native PR and authorizes a concrete signed candidate for upload.
+- Full suite: 163 passed; one optional deployed-contract capture skipped.
+- Widget/contract checks pass (including above-fold sign-in and persistent signed-out home actions): large-text private child navigation, saved Decades visibility when no era is ready, and stable operation_id payloads. Final aggregate validation is recorded in the PR.
+- Native simulator and unsigned production iOS release builds succeed. A local development-signed phone build also succeeds with existing Xcode signing. A release-mode development-signed build8 was installed on Alan’s iPhone14; the existing login was retained. Saved original and decade readings, six-choice 1980s exploration, server comparison, and grouped library reopen passed the actual phone walkthrough. Final read was absent at25 seconds and visible at46 seconds after the final pick (coarse observation window, not exact latency). No accuracy rating was submitted in this run. Sharing/revoke, conversation, repeated skips and force-quit resume remain outside this walkthrough.
+- No TestFlight upload or App Store submission has occurred for build8. Build7 is consumed; confirm8 remains unused before upload. Native PR22 merged ascbc3ad1fc77e5105155e621d9c63e917f94569f8. Two device-found presentation fixes are in a separate follow-up: include reading times and align the top of long saved results. Alan merges that follow-up and authorizes a concrete signed candidate for upload.
 
 ## Store package
 
-Draft copy, six-screen storyboard and exact target sizes are in docs/app-store/0.1.1-build8/. Actual accepted native captures remain pending. Required target sets: iPhone1206×2622; iPad2064×2752 because the current binary supports device families1,2. Existing app icon is1024×1024.
+Draft copy, six-screen storyboard and exact target sizes are in docs/app-store/0.1.1-build8/. Native Home/sign-in captures were saved at1206×2622 and2064×2752. Authenticated six-scene marketing captures remain pending simulator sign-in; Mirroring evidence is QA-only. Required target sets: iPhone1206×2622; iPad2064×2752 because the current binary supports device families1,2. Existing app icon is1024×1024.
 
 Never substitute rendered test fixtures or scaled Mac/Mirroring screenshots for full-resolution native App Store images. Final listing/review access/privacy/support checks and public-distribution approval remain separate from internal TestFlight delivery.
 
