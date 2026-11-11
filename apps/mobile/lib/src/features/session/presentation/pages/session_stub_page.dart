@@ -391,6 +391,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       widget.createFeedbackCubit != null)
                     BlocProvider<ResultFeedbackCubit>(
                       key: ValueKey((
+                        'result-feedback',
                         state.sessionId,
                         state.reveal!.result!.version,
                       )),
@@ -410,6 +411,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                           false)
                     BlocProvider(
                       key: ValueKey((
+                        'decade-exploration',
                         state.sessionId,
                         state.reveal!.result!.version,
                       )),
