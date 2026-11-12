@@ -1,3 +1,5 @@
+import '../widgets/session_pushback_link.dart';
+import '../widgets/session_critic_stage.dart';
 import '../widgets/session_critic_response.dart';
 import '../../../../core/widgets/music_thinking_view.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +112,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
             final isBusy =
                 state.status == SessionStatus.loading ||
                 state.status == SessionStatus.submitting ||
-                state.reacting;
+                state.reacting ||
+                state.pushbackSaving;
 
             final showFeedback =
                 state.lastFeedback != null &&
@@ -150,7 +153,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                   if (showFeedback)
                     _FeedbackCard(feedback: state.lastFeedback!),
                   if (showFeedback) const SizedBox(height: 16),
-                  if (context.read<SessionCubit>().hasExperience)
+                  if (context.read<SessionCubit>().hasExperience &&
+                      state.status == SessionStatus.ready)
                     SessionExperienceView(
                       showReactionControls: false,
                       showCurrentRead: false,
@@ -179,11 +183,20 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         ? _resultKey
                         : _pairingKey,
                     child: switch (state.status) {
-                      SessionStatus.initial || SessionStatus.loading =>
-                        const PairingThinkingView(savingChoice: false),
-                      SessionStatus.submitting => PairingThinkingView(
-                        savingChoice: state.selectedSongId != null,
-                      ),
+                      SessionStatus.initial ||
+                      SessionStatus.loading ||
+                      SessionStatus.submitting ||
+                      SessionStatus.critic =>
+                        context.read<SessionCubit>().hasExperience
+                            ? SessionCriticStage(
+                                state: state,
+                                onRetryNext: context
+                                    .read<SessionCubit>()
+                                    .retryNextMatchup,
+                              )
+                            : PairingThinkingView(
+                                savingChoice: state.selectedSongId != null,
+                              ),
                       SessionStatus.ready =>
                         pairing == null
                             ? _FallbackCard(
@@ -197,6 +210,15 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
+                                  if (context
+                                      .read<SessionCubit>()
+                                      .hasExperience)
+                                    SessionCriticResponse(
+                                      state: state,
+                                      onReaction: context
+                                          .read<SessionCubit>()
+                                          .react,
+                                    ),
                                   _PairingIntro(pairing: pairing, round: round),
                                   const SizedBox(height: 18),
                                   SessionPairingCard(
@@ -214,14 +236,13 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                     ),
                                     onSkip: () => _skipPairing(context),
                                   ),
-                                  if (context
-                                      .read<SessionCubit>()
-                                      .hasExperience)
-                                    SessionCriticResponse(
+                                  if (round?.round == 4 &&
+                                      context.read<SessionCubit>().hasPushback)
+                                    SessionPushbackLink(
                                       state: state,
-                                      onReaction: context
+                                      onSubmit: context
                                           .read<SessionCubit>()
-                                          .react,
+                                          .submitPushback,
                                     ),
                                   if (context
                                       .read<SessionCubit>()

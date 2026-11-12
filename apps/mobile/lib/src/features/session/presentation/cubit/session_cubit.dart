@@ -1,3 +1,5 @@
+import '../../domain/repositories/session_pushback_repository.dart';
+import '../../domain/entities/critic_stage_policy.dart';
 import 'dart:async';
 import '../../domain/repositories/session_critic_repository.dart';
 import 'package:equatable/equatable.dart';
@@ -24,6 +26,7 @@ enum SessionStatus {
   loading,
   ready,
   submitting,
+  critic,
   completed,
   revealing,
   waitingForReading,
@@ -46,6 +49,15 @@ class SessionState extends Equatable {
     this.read,
     this.criticPending = false,
     this.criticMessage,
+    this.criticSettled = false,
+    this.criticWaitLine,
+    this.skipping = false,
+    this.pushbackSaving = false,
+    this.pushbackReply,
+    this.pushbackError,
+    this.prefetchedRound,
+    this.nextPairingError,
+    this.nextPairingLoading = false,
     this.selectedSongId,
     this.reacting = false,
     this.reactionMessage,
@@ -74,6 +86,12 @@ class SessionState extends Equatable {
   final SessionRead? read;
   final bool criticPending;
   final String? criticMessage;
+  final bool criticSettled, nextPairingLoading;
+  final bool skipping;
+  final bool pushbackSaving;
+  final String? pushbackReply, pushbackError;
+  final String? criticWaitLine, nextPairingError;
+  final SessionRoundState? prefetchedRound;
   final String? selectedSongId, reactionMessage;
   final bool reacting;
   final SharePublication? publication;
@@ -111,6 +129,19 @@ class SessionState extends Equatable {
     bool? criticPending,
     String? criticMessage,
     bool clearCriticMessage = false,
+    bool? criticSettled,
+    bool? skipping,
+    bool? pushbackSaving,
+    String? pushbackReply,
+    String? pushbackError,
+    bool clearPushbackError = false,
+    String? criticWaitLine,
+    bool clearCriticWaitLine = false,
+    SessionRoundState? prefetchedRound,
+    bool clearPrefetchedRound = false,
+    String? nextPairingError,
+    bool clearNextPairingError = false,
+    bool? nextPairingLoading,
     String? selectedSongId,
     bool clearSelection = false,
     bool? reacting,
@@ -159,6 +190,23 @@ class SessionState extends Equatable {
       criticMessage: clearCriticMessage
           ? null
           : criticMessage ?? this.criticMessage,
+      criticSettled: criticSettled ?? this.criticSettled,
+      skipping: skipping ?? this.skipping,
+      pushbackSaving: pushbackSaving ?? this.pushbackSaving,
+      pushbackReply: pushbackReply ?? this.pushbackReply,
+      pushbackError: clearPushbackError
+          ? null
+          : pushbackError ?? this.pushbackError,
+      criticWaitLine: clearCriticWaitLine
+          ? null
+          : criticWaitLine ?? this.criticWaitLine,
+      prefetchedRound: clearPrefetchedRound
+          ? null
+          : prefetchedRound ?? this.prefetchedRound,
+      nextPairingError: clearNextPairingError
+          ? null
+          : nextPairingError ?? this.nextPairingError,
+      nextPairingLoading: nextPairingLoading ?? this.nextPairingLoading,
       selectedSongId: clearSelection
           ? null
           : selectedSongId ?? this.selectedSongId,
@@ -196,6 +244,15 @@ class SessionState extends Equatable {
     read,
     criticPending,
     criticMessage,
+    criticSettled,
+    criticWaitLine,
+    skipping,
+    pushbackSaving,
+    pushbackReply,
+    pushbackError,
+    prefetchedRound,
+    nextPairingError,
+    nextPairingLoading,
     selectedSongId,
     reacting,
     reactionMessage,
@@ -221,6 +278,8 @@ class SessionCubit extends Cubit<SessionState> {
     AppLogger? logger,
     SessionExperienceRepository? experienceRepository,
     SessionCriticRepository? criticRepository,
+    SessionPushbackRepository? pushbackRepository,
+    Future<CriticFillers> Function()? loadCriticCopy,
     SessionResultRepository? resultRepository,
     SessionPreparationRepository? preparationRepository,
     SavedReadingRepository? savedReadingRepository,
@@ -228,6 +287,8 @@ class SessionCubit extends Cubit<SessionState> {
        _resumeStore = resumeStore,
        _experienceRepository = experienceRepository,
        _criticRepository = criticRepository,
+       _pushbackRepository = pushbackRepository,
+       _loadCriticCopy = loadCriticCopy,
        _resultRepository = resultRepository,
        _preparationRepository = preparationRepository,
        _savedReadingRepository = savedReadingRepository,
@@ -239,7 +300,15 @@ class SessionCubit extends Cubit<SessionState> {
   final SessionResultRepository? _resultRepository;
   final SessionExperienceRepository? _experienceRepository;
   final SessionCriticRepository? _criticRepository;
+  final SessionPushbackRepository? _pushbackRepository;
+  String? _pushbackText, _pushbackMutationId;
+  bool get hasPushback => _pushbackRepository != null;
   int _flowRevision = 0;
+  Timer? _criticDeadlineTimer, _criticFillerTimer;
+  final Future<CriticFillers> Function()? _loadCriticCopy;
+  CriticFillers? _fillers;
+  List<String> _waitingLines = const [];
+  int _waitingIndex = 0, _skipCount = 0;
   final SessionPreparationRepository? _preparationRepository;
   final SavedReadingRepository? _savedReadingRepository;
   final _preparedPairings = <String>{};
@@ -254,6 +323,7 @@ class SessionCubit extends Cubit<SessionState> {
   bool _savedOnly = false;
   int? _savedResultVersion;
   Future<void> initialize({bool? savedOnly, int? resultVersion}) async {
+    _cancelCriticTimers();
     _flowRevision++;
     _savedOnly = savedOnly ?? _savedOnly;
     _savedResultVersion = resultVersion ?? _savedResultVersion;
@@ -358,6 +428,11 @@ class SessionCubit extends Cubit<SessionState> {
       }
     }
 
+    if (_fillers == null && _loadCriticCopy != null) {
+      _fillers = await _loadCriticCopy();
+      if (isClosed) return;
+    }
+    _beginWaitingCopy(wait: 0, revision: _flowRevision);
     await _loadNextPairing(
       sessionId: sessionId,
       keepFeedback: state.lastFeedback != null,
@@ -369,6 +444,7 @@ class SessionCubit extends Cubit<SessionState> {
     required int msToDecide,
   }) async {
     if (state.status != SessionStatus.ready ||
+        state.pushbackSaving ||
         state.reacting ||
         _pendingReaction != null) {
       return;
@@ -399,11 +475,18 @@ class SessionCubit extends Cubit<SessionState> {
       return;
     }
 
+    _cancelCriticTimers();
     final revision = ++_flowRevision;
     emit(
       state.copyWith(
         status: SessionStatus.submitting,
+        skipping: false,
+        clearRead: true,
         criticPending: false,
+        criticSettled: false,
+        clearPrefetchedRound: true,
+        clearNextPairingError: true,
+        clearCriticWaitLine: true,
         clearCriticMessage: true,
         clearErrorMessage: true,
         selectedSongId: chosenSongId,
@@ -412,6 +495,11 @@ class SessionCubit extends Cubit<SessionState> {
       ),
     );
 
+    _beginWaitingCopy(
+      wait: state.currentRound!.round,
+      revision: revision,
+      pairing: pairing,
+    );
     try {
       final feedback = await _repository.submitChoice(
         sessionId: sessionId,
@@ -424,16 +512,58 @@ class SessionCubit extends Cubit<SessionState> {
         'sessionId': sessionId,
         'pairingId': pairingId,
       });
-      // Paint the next pairing and this acknowledgement together. Never emit
-      // new Critic prose over the just-selected previous pairing.
-      await _loadNextPairing(
-        sessionId: sessionId,
-        keepFeedback: true,
-        feedback: feedback,
-        afterPairingId: feedback.readPending ? pairingId : null,
-      );
+      if (hasExperience) {
+        final answered = state.currentRound!.round;
+        final finalPick =
+            answered >= (state.currentRound!.maxAnswered ?? maxPairingRounds);
+        final pending =
+            !finalPick && feedback.readPending && _criticRepository != null;
+        if (_waitingIndex == 0) {
+          _waitingLines =
+              _fillers?.waitingLines(
+                answered,
+                hunch: feedback.hunch ?? 'early',
+                pairing: pairing,
+              ) ??
+              const [];
+        }
+        emit(
+          state.copyWith(
+            status: SessionStatus.critic,
+            lastFeedback: feedback,
+            read: feedback.read,
+            clearRead: feedback.read == null,
+            criticPending: pending,
+            criticSettled: !pending,
+            nextPairingLoading: true,
+            criticMessage: !pending && !finalPick && feedback.read == null
+                ? CriticStagePolicy.unavailable
+                : null,
+            clearCriticMessage: pending || feedback.read != null || finalPick,
+          ),
+        );
+        if (pending) {
+          _startCriticDeadline(revision);
+          unawaited(
+            _deliverCriticRead(
+              sessionId: sessionId,
+              afterPairingId: pairingId,
+              answered: answered,
+              revision: revision,
+            ),
+          );
+        }
+        await _prefetchCriticNext(sessionId: sessionId, revision: revision);
+      } else {
+        await _loadNextPairing(
+          sessionId: sessionId,
+          keepFeedback: true,
+          feedback: feedback,
+        );
+      }
     } catch (error) {
       if (isClosed || revision != _flowRevision) return;
+      _cancelCriticTimers();
       _logger.error('session.choice_failed', error, <String, Object?>{
         'sessionId': sessionId,
         'pairingId': pairingId,
@@ -452,6 +582,7 @@ class SessionCubit extends Cubit<SessionState> {
   Future<void> skipPairing({required int msToDecide}) async {
     if (state.selectedSongId != null) return;
     if (state.status != SessionStatus.ready ||
+        state.pushbackSaving ||
         state.reacting ||
         _pendingReaction != null) {
       return;
@@ -474,10 +605,15 @@ class SessionCubit extends Cubit<SessionState> {
       return;
     }
 
+    _cancelCriticTimers();
     final revision = ++_flowRevision;
+    final skippedPairing = state.currentRound!.pairing!;
     emit(
       state.copyWith(
         status: SessionStatus.submitting,
+        skipping: true,
+        clearRead: true,
+        criticWaitLine: _fillers?.skipLine(_skipCount++, skippedPairing),
         criticPending: false,
         clearCriticMessage: true,
         clearLastFeedback: true,
@@ -499,6 +635,7 @@ class SessionCubit extends Cubit<SessionState> {
       await _loadNextPairing(sessionId: sessionId, keepFeedback: false);
     } catch (error) {
       if (isClosed || revision != _flowRevision) return;
+      _cancelCriticTimers();
       _logger.error('session.skip_failed', error, <String, Object?>{
         'sessionId': sessionId,
         'pairingId': pairingId,
@@ -586,6 +723,7 @@ class SessionCubit extends Cubit<SessionState> {
 
   Future<void> revealSession({bool finishEarly = false}) async {
     if (state.status == SessionStatus.revealing || state.sharing) return;
+    _cancelCriticTimers();
     _flowRevision++;
     final requestedEarly = finishEarly || state.finishEarlyRequested;
     final sessionId = state.sessionId;
@@ -858,7 +996,8 @@ class SessionCubit extends Cubit<SessionState> {
         'done': isComplete,
         'criticPending': pending,
       });
-      // First paint is independent of history and model latency.
+      _cancelCriticTimers();
+      // Pairing paint is independent of optional history latency.
       emit(
         state.copyWith(
           status: isComplete ? SessionStatus.completed : SessionStatus.ready,
@@ -868,6 +1007,8 @@ class SessionCubit extends Cubit<SessionState> {
           read: feedback?.read,
           clearRead: afterPairingId != null,
           criticPending: pending,
+          skipping: false,
+          clearCriticWaitLine: true,
           clearCriticMessage: true,
           clearReveal: true,
           clearSharedReveal: true,
@@ -888,16 +1029,6 @@ class SessionCubit extends Cubit<SessionState> {
         }
         return;
       }
-      if (pending) {
-        unawaited(
-          _deliverCriticRead(
-            sessionId: sessionId,
-            afterPairingId: afterPairingId,
-            answered: nextRound.round - 1,
-            revision: revision,
-          ),
-        );
-      }
       await _refreshExperience(sessionId: sessionId, revision: revision);
     } catch (error) {
       if (isClosed || revision != _flowRevision) return;
@@ -914,6 +1045,167 @@ class SessionCubit extends Cubit<SessionState> {
         ),
       );
     }
+  }
+
+  void _cancelCriticTimers() {
+    _criticDeadlineTimer?.cancel();
+    _criticFillerTimer?.cancel();
+  }
+
+  void _beginWaitingCopy({
+    required int wait,
+    required int revision,
+    SessionPairing? pairing,
+  }) {
+    _waitingIndex = 0;
+    _waitingLines = _fillers?.waitingLines(wait, pairing: pairing) ?? const [];
+    if (_waitingLines.isEmpty) return;
+    emit(state.copyWith(criticWaitLine: _waitingLines.first));
+    _criticFillerTimer = Timer.periodic(CriticStagePolicy.fillerInterval, (
+      timer,
+    ) {
+      if (isClosed ||
+          revision != _flowRevision ||
+          ![
+            SessionStatus.loading,
+            SessionStatus.submitting,
+            SessionStatus.critic,
+          ].contains(state.status)) {
+        timer.cancel();
+        return;
+      }
+      if (_waitingIndex >= _waitingLines.length - 1) {
+        timer.cancel();
+        return;
+      }
+      emit(state.copyWith(criticWaitLine: _waitingLines[++_waitingIndex]));
+    });
+  }
+
+  void _startCriticDeadline(int revision) {
+    _criticDeadlineTimer = Timer(CriticStagePolicy.readDeadline, () {
+      if (isClosed ||
+          revision != _flowRevision ||
+          state.status != SessionStatus.critic ||
+          !state.criticPending) {
+        return;
+      }
+      _cancelCriticTimers();
+      emit(
+        state.copyWith(
+          criticSettled: true,
+          criticPending: false,
+          clearCriticWaitLine: true,
+          criticMessage: CriticStagePolicy.unavailable,
+        ),
+      );
+      _logger.event('session.critic_wait_elapsed');
+      _releaseCriticWhenReady();
+    });
+  }
+
+  Future<void> _prefetchCriticNext({
+    required String sessionId,
+    required int revision,
+  }) async {
+    try {
+      final next = await _repository.fetchNextPairing(sessionId: sessionId);
+      if (isClosed ||
+          revision != _flowRevision ||
+          state.status != SessionStatus.critic) {
+        return;
+      }
+      if (next.done || (!next.experienceVersion && next.pairing == null)) {
+        _cancelCriticTimers();
+        emit(
+          state.copyWith(
+            status: SessionStatus.completed,
+            currentRound: next,
+            criticPending: false,
+            nextPairingLoading: false,
+            clearSelection: true,
+          ),
+        );
+        if (_resultRepository != null) {
+          await revealSession();
+          if (!isClosed) {
+            await _refreshExperience(
+              sessionId: sessionId,
+              revision: _flowRevision,
+              includeRead: false,
+            );
+          }
+        }
+        return;
+      }
+      emit(
+        state.copyWith(
+          prefetchedRound: next,
+          nextPairingLoading: false,
+          clearNextPairingError: true,
+        ),
+      );
+      _releaseCriticWhenReady();
+      unawaited(
+        _refreshExperience(
+          sessionId: sessionId,
+          revision: _flowRevision,
+          includeRead: false,
+        ),
+      );
+    } catch (_) {
+      if (isClosed ||
+          revision != _flowRevision ||
+          state.status != SessionStatus.critic) {
+        return;
+      }
+      emit(
+        state.copyWith(
+          nextPairingLoading: false,
+          nextPairingError:
+              'Your choice is saved. The next matchup couldn’t load.',
+        ),
+      );
+      _logger.event('session.next_pairing_unavailable');
+    }
+  }
+
+  Future<void> retryNextMatchup() async {
+    final sessionId = state.sessionId;
+    final pairingId = state.currentRound?.pairing?.id;
+    if (state.status != SessionStatus.critic ||
+        state.nextPairingLoading ||
+        sessionId == null ||
+        pairingId == null) {
+      return;
+    }
+    emit(state.copyWith(nextPairingLoading: true, clearNextPairingError: true));
+    await _prefetchCriticNext(sessionId: sessionId, revision: _flowRevision);
+  }
+
+  void _releaseCriticWhenReady() {
+    final next = state.prefetchedRound;
+    if (state.status != SessionStatus.critic ||
+        !state.criticSettled ||
+        state.reacting ||
+        _pendingReaction != null ||
+        next == null) {
+      return;
+    }
+    _cancelCriticTimers();
+    _flowRevision++;
+    emit(
+      state.copyWith(
+        status: SessionStatus.ready,
+        currentRound: next,
+        clearSelection: true,
+        clearPrefetchedRound: true,
+        criticPending: false,
+        criticSettled: false,
+        clearCriticWaitLine: true,
+      ),
+    );
+    _logger.event('session.critic_pairing_revealed');
   }
 
   Future<void> _refreshExperience({
@@ -964,32 +1256,89 @@ class SessionCubit extends Cubit<SessionState> {
       );
       if (isClosed ||
           revision != _flowRevision ||
-          state.status != SessionStatus.ready) {
+          state.status != SessionStatus.critic ||
+          !state.criticPending) {
         return;
       }
+      _cancelCriticTimers();
       emit(
         state.copyWith(
           read: read,
+          criticSettled: true,
+          clearCriticWaitLine: true,
           criticPending: false,
           clearCriticMessage: true,
         ),
       );
       _logger.event('session.critic_delivered', {'answered': answered});
+      _releaseCriticWhenReady();
     } catch (error) {
       if (isClosed ||
           revision != _flowRevision ||
-          state.status != SessionStatus.ready) {
+          state.status != SessionStatus.critic ||
+          !state.criticPending) {
         return;
       }
+      _cancelCriticTimers();
       // No automatic model retry after an uncertain outcome. Votes remain saved.
       emit(
         state.copyWith(
           criticPending: false,
-          criticMessage:
-              'The Critic’s response couldn’t load. You can keep choosing songs.',
+          criticSettled: true,
+          clearCriticWaitLine: true,
+          criticMessage: CriticStagePolicy.unavailable,
         ),
       );
       _logger.event('session.critic_unavailable', {'answered': answered});
+      _releaseCriticWhenReady();
+    }
+  }
+
+  Future<void> submitPushback(String message) async {
+    final text = message.trim();
+    final sessionId = state.sessionId;
+    if (_pushbackRepository == null ||
+        sessionId == null ||
+        text.isEmpty ||
+        text.length > 500 ||
+        state.status != SessionStatus.ready ||
+        state.currentRound?.round != 4 ||
+        state.pushbackSaving ||
+        state.reacting ||
+        state.selectedSongId != null ||
+        _pendingReaction != null) {
+      return;
+    }
+    if (_pushbackText != text) {
+      _pushbackText = text;
+      _pushbackMutationId = List.generate(
+        16,
+        (_) => Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join();
+    }
+    final revision = _flowRevision;
+    emit(state.copyWith(pushbackSaving: true, clearPushbackError: true));
+    _logger.event('session.pushback_requested');
+    try {
+      final saved = await _pushbackRepository.submitPushback(
+        sessionId: sessionId,
+        text: text,
+        mutationId: _pushbackMutationId!,
+      );
+      if (isClosed || revision != _flowRevision) return;
+      emit(state.copyWith(pushbackSaving: false, pushbackReply: saved.reply));
+      _logger.event('session.pushback_saved');
+      unawaited(_refreshExperience(sessionId: sessionId, revision: revision));
+    } catch (_) {
+      if (isClosed || revision != _flowRevision) return;
+      emit(
+        state.copyWith(
+          pushbackSaving: false,
+          pushbackError:
+              "Couldn't save that. Keep going — your picks still count.",
+        ),
+      );
+      _logger.event('session.pushback_unavailable');
     }
   }
 
@@ -999,12 +1348,14 @@ class SessionCubit extends Cubit<SessionState> {
     if (repository == null ||
         sessionId == null ||
         state.reacting ||
+        state.pushbackSaving ||
         state.criticPending ||
         state.status != SessionStatus.ready) {
       return;
     }
     if (_pendingReaction != null && _pendingReaction != reaction) return;
     _pendingReaction = reaction;
+    final revision = _flowRevision;
     _reactionPairingId ??= state.currentRound?.pairing?.id;
     _reactionMutationId ??= List.generate(
       16,
@@ -1023,6 +1374,7 @@ class SessionCubit extends Cubit<SessionState> {
         pairingId: _reactionPairingId,
       );
       final experience = await repository.fetchExperience(sessionId: sessionId);
+      if (isClosed || revision != _flowRevision) return;
       _pendingReaction = null;
       _reactionMutationId = null;
       _reactionPairingId = null;
@@ -1049,6 +1401,7 @@ class SessionCubit extends Cubit<SessionState> {
         await revealSession();
       }
     } catch (error) {
+      if (isClosed || revision != _flowRevision) return;
       _logger.event('session.reaction_failed', {'sessionId': sessionId});
       final apiError = error is AppApiException ? error : null;
       emit(
@@ -1096,5 +1449,12 @@ class SessionCubit extends Cubit<SessionState> {
 
   int _normalizeMsToDecide(int msToDecide) {
     return msToDecide.clamp(0, maxMsToDecide).toInt();
+  }
+
+  @override
+  Future<void> close() {
+    _cancelCriticTimers();
+    _flowRevision++;
+    return super.close();
   }
 }

@@ -1,3 +1,5 @@
+import '../../features/session/domain/repositories/session_pushback_repository.dart';
+import '../../features/session/data/critic_copy_store.dart';
 import '../../features/session/domain/repositories/session_critic_repository.dart';
 import 'dart:async';
 import '../../features/ai_permission/data/ai_permission_data_source.dart';
@@ -56,6 +58,7 @@ class AppDependencies {
           aiPermissionService.authorizeRequest(method, path),
     );
     authRemoteDataSource = SupabaseAuthRemoteDataSource(supabase, apiClient);
+    if (config.experienceV1) unawaited(criticCopyStore.load());
     authRepository = AuthRepositoryImpl(authRemoteDataSource);
     _ownerChanges = authRepository.observeAuthState().listen((user) {
       if (_continuationOwner != null && user?.id != _continuationOwner) {
@@ -81,6 +84,7 @@ class AppDependencies {
   late final StreamSubscription<music_auth.AuthUser?> _ownerChanges;
   void dispose() {
     _ownerChanges.cancel();
+    if (config.experienceV1) criticCopyStore.dispose();
     for (final cubit in _continuations.values) {
       cubit.close();
     }
@@ -131,6 +135,10 @@ class AppDependencies {
           resultVersion: resultVersion,
         ) !=
         null,
+  );
+
+  late final CriticCopyStore criticCopyStore = CriticCopyStore(
+    baseUri: Uri.parse(config.apiBaseUrl),
   );
 
   late final AppLogger logger = const AppLogger();
@@ -220,6 +228,10 @@ class AppDependencies {
   SessionCubit createSessionCubit({StartedMusicSession? startedSession}) {
     return SessionCubit(
       sessionRepository,
+      pushbackRepository: config.experienceV1
+          ? sessionRepository as SessionPushbackRepository
+          : null,
+      loadCriticCopy: config.experienceV1 ? criticCopyStore.snapshot : null,
       criticRepository: config.experienceV1
           ? sessionRepository as SessionCriticRepository
           : null,

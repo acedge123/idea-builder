@@ -1,3 +1,4 @@
+import '../../domain/auth_failure.dart';
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -23,6 +24,7 @@ class AuthState extends Equatable {
     this.user,
     this.submissionStatus = AuthSubmissionStatus.idle,
     this.errorMessage,
+    this.failureKind,
     this.infoMessage,
   });
 
@@ -37,6 +39,7 @@ class AuthState extends Equatable {
   final AuthUser? user;
   final AuthSubmissionStatus submissionStatus;
   final String? errorMessage;
+  final AuthFailureKind? failureKind;
   final String? infoMessage;
 
   AuthState copyWith({
@@ -45,6 +48,7 @@ class AuthState extends Equatable {
     bool clearUser = false,
     AuthSubmissionStatus? submissionStatus,
     String? errorMessage,
+    AuthFailureKind? failureKind,
     bool clearErrorMessage = false,
     String? infoMessage,
     bool clearInfoMessage = false,
@@ -53,6 +57,7 @@ class AuthState extends Equatable {
       status: status ?? this.status,
       user: clearUser ? null : user ?? this.user,
       submissionStatus: submissionStatus ?? this.submissionStatus,
+      failureKind: clearErrorMessage ? null : failureKind ?? this.failureKind,
       errorMessage: clearErrorMessage
           ? null
           : errorMessage ?? this.errorMessage,
@@ -66,6 +71,7 @@ class AuthState extends Equatable {
     user,
     submissionStatus,
     errorMessage,
+    failureKind,
     infoMessage,
   ];
 }
@@ -116,7 +122,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signIn({required String email, required String password}) async {
-    _logger.event('auth.sign_in_requested', <String, Object?>{'email': email});
+    if (state.submissionStatus == AuthSubmissionStatus.submitting) return;
+    _logger.event('auth.sign_in_requested');
     emit(
       state.copyWith(
         submissionStatus: AuthSubmissionStatus.submitting,
@@ -129,6 +136,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
       );
+      if (isClosed) return;
       _logger.event('auth.sign_in_succeeded', <String, Object?>{
         'userId': user.id,
       });
@@ -142,13 +150,15 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (error) {
-      _logger.error('auth.sign_in_failed', error, <String, Object?>{
-        'email': email,
-      });
+      if (isClosed) return;
+      _logFailure('auth.sign_in_failed', error);
       emit(
         state.copyWith(
           submissionStatus: AuthSubmissionStatus.failure,
           errorMessage: _readableError(error),
+          failureKind: error is AuthFailure
+              ? error.kind
+              : AuthFailureKind.unknown,
         ),
       );
     }
@@ -178,18 +188,23 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (error) {
-      _logger.error('auth.ensure_anonymous_failed', error);
+      if (isClosed) return;
+      _logFailure('auth.ensure_anonymous_failed', error);
       emit(
         state.copyWith(
           submissionStatus: AuthSubmissionStatus.failure,
           errorMessage: _readableError(error),
+          failureKind: error is AuthFailure
+              ? error.kind
+              : AuthFailureKind.unknown,
         ),
       );
     }
   }
 
   Future<void> signUp({required String email, required String password}) async {
-    _logger.event('auth.sign_up_requested', <String, Object?>{'email': email});
+    if (state.submissionStatus == AuthSubmissionStatus.submitting) return;
+    _logger.event('auth.sign_up_requested');
     emit(
       state.copyWith(
         submissionStatus: AuthSubmissionStatus.submitting,
@@ -202,6 +217,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
       );
+      if (isClosed) return;
       _logger.event('auth.sign_up_succeeded', <String, Object?>{
         'userId': result.user.id,
         'hasActiveSession': result.hasActiveSession,
@@ -230,21 +246,46 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (error) {
-      _logger.error('auth.sign_up_failed', error, <String, Object?>{
-        'email': email,
-      });
+      if (isClosed) return;
+      _logFailure('auth.sign_up_failed', error);
       emit(
         state.copyWith(
           submissionStatus: AuthSubmissionStatus.failure,
           errorMessage: _readableError(error),
+          failureKind: error is AuthFailure
+              ? error.kind
+              : AuthFailureKind.unknown,
         ),
       );
     }
   }
 
-  Future<void> signOut() {
+  Future<void> signOut() async {
+    if (state.submissionStatus == AuthSubmissionStatus.submitting) return;
     _logger.event('auth.sign_out_requested');
-    return _authRepository.signOut();
+    emit(
+      state.copyWith(
+        submissionStatus: AuthSubmissionStatus.submitting,
+        clearErrorMessage: true,
+        clearInfoMessage: true,
+      ),
+    );
+    try {
+      await _authRepository.signOut();
+      if (!isClosed) emit(const AuthState.unauthenticated());
+    } catch (error) {
+      if (isClosed) return;
+      _logFailure('auth.sign_out_failed', error);
+      emit(
+        state.copyWith(
+          submissionStatus: AuthSubmissionStatus.failure,
+          errorMessage: _readableError(error),
+          failureKind: error is AuthFailure
+              ? error.kind
+              : AuthFailureKind.unknown,
+        ),
+      );
+    }
   }
 
   Future<void> deleteAccount() async {
@@ -266,11 +307,15 @@ class AuthCubit extends Cubit<AuthState> {
         ),
       );
     } catch (error) {
-      _logger.error('auth.delete_account_failed', error);
+      if (isClosed) return;
+      _logFailure('auth.delete_account_failed', error);
       emit(
         state.copyWith(
           submissionStatus: AuthSubmissionStatus.failure,
           errorMessage: _readableError(error),
+          failureKind: error is AuthFailure
+              ? error.kind
+              : AuthFailureKind.unknown,
         ),
       );
     }
@@ -286,21 +331,15 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  String _readableError(Object error) {
-    final message = error.toString().trim();
-    if (message.isEmpty) {
-      return 'Something went wrong. Please try again.';
-    }
+  String _readableError(Object error) => error is AuthFailure
+      ? error.message
+      : const AuthFailure(AuthFailureKind.unknown).message;
 
-    if (message.startsWith('AuthException:')) {
-      return message.replaceFirst('AuthException:', '').trim();
-    }
-
-    if (message.startsWith('AuthApiException:')) {
-      return message.replaceFirst('AuthApiException:', '').trim();
-    }
-
-    return message;
+  void _logFailure(String event, Object error) {
+    _logger.event(event, {
+      'kind': error is AuthFailure ? error.kind.name : 'unknown',
+      'errorType': error.runtimeType.toString(),
+    });
   }
 
   @override

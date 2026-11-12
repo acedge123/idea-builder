@@ -96,6 +96,18 @@ class SessionRemoteDataSource {
     );
   }
 
+  Future<Map<String, dynamic>> submitPushback({
+    required String sessionId,
+    required String text,
+    required String mutationId,
+  }) async => _decodeJson(
+    await _apiClient.post(
+      '/api/v1/session/$sessionId/pushback',
+      headers: _experienceHeaders,
+      body: {'text': text, 'mutation_id': mutationId},
+    ),
+  );
+
   Future<Map<String, dynamic>> fetchNextPairing({
     required String sessionId,
   }) async {

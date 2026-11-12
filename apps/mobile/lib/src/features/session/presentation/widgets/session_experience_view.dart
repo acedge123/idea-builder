@@ -72,8 +72,18 @@ class SessionExperienceView extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            for (final group in groups)
-                              SessionExchangeView(group: group),
+                            for (final (index, group) in groups.indexed)
+                              SessionExchangeView(
+                                group: group,
+                                choiceNumber: groups
+                                    .take(index + 1)
+                                    .where(
+                                      (g) => g.exchanges.any(
+                                        (e) => e.type == 'choice',
+                                      ),
+                                    )
+                                    .length,
+                              ),
                             if (currentRead != null &&
                                 !exchanges.any((e) => e.read == currentRead))
                               SessionReadView(read: currentRead),
@@ -215,7 +225,12 @@ String reactionLabel(String? kind) => switch (kind) {
 };
 
 class SessionExchangeView extends StatelessWidget {
-  const SessionExchangeView({super.key, required this.group});
+  const SessionExchangeView({
+    super.key,
+    required this.group,
+    this.choiceNumber,
+  });
+  final int? choiceNumber;
   final SessionExchangeGroup group;
 
   @override
@@ -228,7 +243,10 @@ class SessionExchangeView extends StatelessWidget {
         children: [
           for (final e in group.exchanges) ...[
             if (e.type == 'choice') ...[
-              Text('YOUR CHOICE', style: theme.textTheme.labelSmall),
+              Text(
+                choiceNumber == null ? 'YOUR CHOICE' : 'CHOICE $choiceNumber',
+                style: theme.textTheme.labelSmall,
+              ),
               const SizedBox(height: 8),
               Text(
                 '${e.chosen ?? 'Unavailable song'} over ${e.rejected ?? 'Unavailable song'}',
@@ -257,6 +275,10 @@ class SessionExchangeView extends StatelessWidget {
             ],
             if (e.read != null) SessionReadView(read: e.read!),
             if (e.type == 'skip') const Text('Pairing skipped'),
+            if (e.type == 'pushback') ...[
+              Text(e.pushbackText ?? '', style: theme.textTheme.bodyMedium),
+              Text(e.pushbackReply ?? '', style: theme.textTheme.headlineSmall),
+            ],
             if (e.type == 'reaction') Text(reactionLabel(e.reaction)),
           ],
         ],

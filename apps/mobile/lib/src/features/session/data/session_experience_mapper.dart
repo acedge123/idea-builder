@@ -65,7 +65,13 @@ SessionExperience mapSessionExperience(
   for (final (index, value) in (data['exchanges'] as List).indexed) {
     final e = experienceObject(value);
     final type = e['type'] as String;
-    if (!const ['choice', 'read', 'skip', 'reaction'].contains(type)) {
+    if (!const [
+      'choice',
+      'read',
+      'skip',
+      'reaction',
+      'pushback',
+    ].contains(type)) {
       throw const AppApiException(
         kind: AppApiErrorKind.upstream,
         message: 'The server returned an unsupported exchange.',
@@ -97,6 +103,8 @@ SessionExperience mapSessionExperience(
               ].whereType<String>().where((s) => s.isNotEmpty).join('\n'),
         read: type == 'read' ? mapSessionRead(e) : null,
         reaction: e['kind'] as String?,
+        pushbackText: type == 'pushback' ? e['text'] as String? : null,
+        pushbackReply: type == 'pushback' ? e['reply'] as String? : null,
       ),
     ));
   }
