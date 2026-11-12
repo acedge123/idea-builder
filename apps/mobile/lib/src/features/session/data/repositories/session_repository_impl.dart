@@ -8,6 +8,7 @@ import '../../domain/repositories/session_experience_repository.dart';
 import '../../domain/entities/session_experience.dart';
 import '../session_experience_mapper.dart';
 import '../session_result_mapper.dart';
+import '../reading_report_mapper.dart';
 import '../../domain/entities/session_result.dart';
 import '../../domain/repositories/session_result_repository.dart';
 import '../../domain/repositories/session_preparation_repository.dart';
@@ -142,6 +143,7 @@ class SessionRepositoryImpl
         ? mapSessionResult(response)
         : null;
     final full = result == null ? response : experienceObject(response['full']);
+
     return SessionReveal(
       archetypeId: full['archetypeId'] as String?,
       archetypeName: full['archetypeName'] as String?,
@@ -155,7 +157,40 @@ class SessionRepositoryImpl
   }
 
   @override
-  Future<SessionReveal?> fetchSavedReading({required String sessionId}) async {
+  Future<SessionReveal?> fetchSavedReading({
+    required String sessionId,
+    int? resultVersion,
+  }) async {
+    if (resultVersion != null && resultVersion < 1) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.invalidInput,
+        code: 'INVALID_INPUT',
+        message: 'Choose a valid saved reading version.',
+      );
+    }
+    try {
+      final result = mapSavedReport(
+        await _remoteDataSource.fetchReport(
+          sessionId: sessionId,
+          resultVersion: resultVersion,
+        ),
+        sessionId,
+        resultVersion: resultVersion,
+      );
+      return SessionReveal(
+        interpretation: result.headline,
+        vector: const {},
+        allowedClaims: const [],
+        counterarguments: const [],
+        result: result,
+      );
+    } on AppApiException catch (error) {
+      if (error.code == 'NO_RESULT' && resultVersion == null) return null;
+      // Explicit API errors (including owner denial and missing exact versions)
+      // must never fall back to a different version or invoke generation.
+      if (error.statusCode != 404 || error.code != null) rethrow;
+    }
+
     final data = await _remoteDataSource.fetchSavedReading(
       sessionId: sessionId,
     );
@@ -168,9 +203,22 @@ class SessionRepositoryImpl
     }
     final rows = (data['result_versions'] as List)
         .map(experienceObject)
-        .where((v) => v['source'] == 'pairings')
+        .where(
+          (v) =>
+              v['source'] == 'pairings' &&
+              (resultVersion == null || v['version'] == resultVersion),
+        )
         .toList();
-    if (rows.isEmpty) return null;
+    if (rows.isEmpty) {
+      if (resultVersion != null) {
+        throw const AppApiException(
+          kind: AppApiErrorKind.invalidInput,
+          code: 'VERSION_NOT_FOUND',
+          message: 'This saved reading version is not available.',
+        );
+      }
+      return null;
+    }
     rows.sort((a, b) => (a['version'] as int).compareTo(b['version'] as int));
     final row = rows.first;
     final content = experienceObject(row['content']);
@@ -191,6 +239,9 @@ class SessionRepositoryImpl
       'voice_version': content['voice_version'],
       'audit_text': content['audit_text'],
       'narration_status': content['narration_status'],
+      if (content.containsKey('dna_summary'))
+        'dna_summary': content['dna_summary'],
+      if (content.containsKey('signature')) 'signature': content['signature'],
     });
     return SessionReveal(
       interpretation: result.headline,

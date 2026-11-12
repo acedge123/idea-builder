@@ -24,6 +24,16 @@ class SessionRemoteDataSource {
     );
   }
 
+  Future<Map<String, dynamic>> fetchReport({
+    required String sessionId,
+    int? resultVersion,
+  }) async => _decodeJson(
+    await _apiClient.get(
+      "/api/v1/session/${Uri.encodeComponent(sessionId)}/report${resultVersion == null ? '' : '?version=$resultVersion'}",
+      headers: _experienceHeaders,
+    ),
+  );
+
   Future<Map<String, dynamic>> fetchSavedReading({
     required String sessionId,
   }) async => _decodeJson(
@@ -187,6 +197,7 @@ class SessionRemoteDataSource {
         final code = error['code'] as String?;
         throw AppApiException(
           kind: _mapErrorKind(code),
+          code: code,
           statusCode: response.statusCode,
           message: code == 'EXPERIENCE_DISABLED'
               ? 'This version of the interview is temporarily unavailable. Please try again later.'

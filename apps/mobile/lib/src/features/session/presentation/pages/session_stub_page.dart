@@ -19,6 +19,7 @@ import '../widgets/session_result_view.dart';
 import '../widgets/session_milestone_view.dart';
 import '../../../result_feedback/presentation/result_feedback_cubit.dart';
 import '../../../result_feedback/presentation/result_feedback_view.dart';
+import '../../../result_feedback/presentation/archetype_feedback_view.dart';
 
 class SessionStubPage extends StatefulWidget {
   const SessionStubPage({
@@ -27,6 +28,7 @@ class SessionStubPage extends StatefulWidget {
     this.startedSession,
     this.ownerId,
     this.createFeedbackCubit,
+    this.createArchetypeFeedbackCubit,
     this.createExploreCubit,
   });
 
@@ -35,6 +37,12 @@ class SessionStubPage extends StatefulWidget {
     required bool isExplore,
   })?
   createExploreCubit;
+  final ResultFeedbackCubit Function({
+    required String sessionId,
+    required int resultVersion,
+    required String archetypeName,
+  })?
+  createArchetypeFeedbackCubit;
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
   final String? ownerId;
@@ -386,12 +394,36 @@ class _SessionStubPageState extends State<SessionStubPage> {
                     },
                   ),
                   if (state.status == SessionStatus.revealed &&
+                      state.reveal?.result?.report?.archetype != null &&
+                      state.sessionId != null &&
+                      widget.createArchetypeFeedbackCubit != null)
+                    BlocProvider<ResultFeedbackCubit>(
+                      key: ValueKey((
+                        'archetype-feedback',
+                        widget.ownerId,
+                        state.sessionId,
+                        state.reveal!.result!.version,
+                        state.reveal!.result!.report!.archetype!.name,
+                      )),
+                      create: (_) => widget.createArchetypeFeedbackCubit!(
+                        sessionId: state.sessionId!,
+                        resultVersion: state.reveal!.result!.version,
+                        archetypeName:
+                            state.reveal!.result!.report!.archetype!.name,
+                      )..load(),
+                      child: ArchetypeFeedbackView(
+                        name: state.reveal!.result!.report!.archetype!.name,
+                        onSignIn: () => context.push('/auth'),
+                      ),
+                    ),
+                  if (state.status == SessionStatus.revealed &&
                       state.reveal?.result != null &&
                       state.sessionId != null &&
                       widget.createFeedbackCubit != null)
                     BlocProvider<ResultFeedbackCubit>(
                       key: ValueKey((
                         'result-feedback',
+                        widget.ownerId,
                         state.sessionId,
                         state.reveal!.result!.version,
                       )),

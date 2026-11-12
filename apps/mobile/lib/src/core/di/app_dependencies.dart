@@ -118,15 +118,19 @@ class AppDependencies {
   AiPermissionCubit createAiPermissionCubit() =>
       AiPermissionCubit(aiPermissionService, logger: logger);
 
-  AiPermissionCubit createSavedReadingPermissionCubit(String sessionId) =>
-      AiPermissionCubit(
-        aiPermissionService,
-        logger: logger,
-        canReadWithoutPermission: () async =>
-            await (sessionRepository as SavedReadingRepository)
-                .fetchSavedReading(sessionId: sessionId) !=
-            null,
-      );
+  AiPermissionCubit createSavedReadingPermissionCubit(
+    String sessionId, {
+    int? resultVersion,
+  }) => AiPermissionCubit(
+    aiPermissionService,
+    logger: logger,
+    canReadWithoutPermission: () async =>
+        await (sessionRepository as SavedReadingRepository).fetchSavedReading(
+          sessionId: sessionId,
+          resultVersion: resultVersion,
+        ) !=
+        null,
+  );
 
   late final AppLogger logger = const AppLogger();
   late final AuthRemoteDataSource authRemoteDataSource;
@@ -165,16 +169,28 @@ class AppDependencies {
   ResultFeedbackCubit createResultFeedbackCubit({
     required String sessionId,
     required int resultVersion,
+    String? feedbackTarget,
   }) => ResultFeedbackCubit(
     target: FeedbackTarget(
       ownerId: authRepository.currentUser?.id ?? '',
       sessionId: sessionId,
       resultVersion: resultVersion,
+      feedbackTarget: feedbackTarget,
     ),
     repository: resultFeedbackRepository,
     currentOwnerId: () => authRepository.currentUser?.id,
     ownerChanges: authRepository.observeAuthState().map((user) => user?.id),
     logger: logger,
+  );
+
+  ResultFeedbackCubit createArchetypeFeedbackCubit({
+    required String sessionId,
+    required int resultVersion,
+    required String archetypeName,
+  }) => createResultFeedbackCubit(
+    sessionId: sessionId,
+    resultVersion: resultVersion,
+    feedbackTarget: 'archetype:$archetypeName',
   );
 
   ExploreCubit createExploreCubit({

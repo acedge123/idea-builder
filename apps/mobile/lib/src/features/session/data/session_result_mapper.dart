@@ -1,6 +1,7 @@
 import '../../../core/network/app_api_exception.dart';
 import '../domain/entities/session_result.dart';
 import 'session_experience_mapper.dart';
+import 'reading_report_mapper.dart';
 
 Never _invalid() => throw const AppApiException(
   kind: AppApiErrorKind.upstream,
@@ -35,6 +36,9 @@ SessionResult mapSessionResult(Map<String, dynamic> data) {
       ? null
       : experienceObject(data['tension']);
   return SessionResult(
+    report: data.containsKey('dna_summary') || data.containsKey('signature')
+        ? mapInlineReport(data)
+        : null,
     version: version,
     outcome: outcome as String,
     headline: _text(data['headline']),

@@ -68,7 +68,9 @@ void main() {
             200,
           );
         }
-        return history([row()]);
+        return history([
+          {...row(), 'mutation_id': 'mutation'},
+        ]);
       });
       final saved = await repository.save(
         target: target,

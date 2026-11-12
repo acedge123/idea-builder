@@ -76,6 +76,9 @@ void main() {
       final repo = SessionRepositoryImpl(
         remote((request) async {
           expect(request.method, 'GET');
+          if (request.url.path.endsWith('/report')) {
+            return http.Response('{}', 404);
+          }
           expect(request.url.path, '/api/v1/session/root/chat');
           return json({
             'contract': 1,
@@ -320,8 +323,10 @@ class SavedReader implements SavedReadingRepository {
   final List<SessionReveal?> results;
   int reads = 0;
   @override
-  Future<SessionReveal?> fetchSavedReading({required String sessionId}) async =>
-      results[reads++];
+  Future<SessionReveal?> fetchSavedReading({
+    required String sessionId,
+    int? resultVersion,
+  }) async => results[reads++];
 }
 
 class WritingRepository extends FakeSessionRepository {

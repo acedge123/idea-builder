@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'reading_report.dart';
 
 class ResultSupport extends Equatable {
   ResultSupport({
@@ -26,6 +27,7 @@ class SessionResult extends Equatable {
     this.auditText,
     this.narrationStatus,
     this.reveal,
+    this.report,
   }) : supportingChoices = List.unmodifiable(supportingChoices);
   final int version;
   final String outcome, headline;
@@ -33,6 +35,7 @@ class SessionResult extends Equatable {
   final String? tensionClaim, tensionNotes;
   final String? voiceVersion, auditText, narrationStatus;
   final ResultReveal? reveal;
+  final ReadingReport? report;
   @override
   List<Object?> get props => [
     version,
@@ -45,6 +48,7 @@ class SessionResult extends Equatable {
     auditText,
     narrationStatus,
     reveal,
+    report,
   ];
 }
 
