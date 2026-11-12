@@ -107,12 +107,36 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
         path: '/session/:sessionId',
         builder: (context, state) {
           final sessionId = state.pathParameters['sessionId']!;
+          final requested = state.uri.queryParameters['version'];
+          final version = requested == null ? null : int.tryParse(requested);
+          if (requested != null && (version == null || version < 1)) {
+            return const Scaffold(
+              body: SafeArea(
+                child: Center(
+                  child: Text('Choose a valid saved reading version.'),
+                ),
+              ),
+            );
+          }
           return AiPermissionGate(
-            createCubit: () =>
-                dependencies.createSavedReadingPermissionCubit(sessionId),
-            childBuilder: (_) => _sessionPage(dependencies, sessionId),
-            readOnlyBuilder: (_) =>
-                _sessionPage(dependencies, sessionId, savedOnly: true),
+            key: ValueKey((
+              'saved-report-permission',
+              dependencies.authRepository.currentUser?.id,
+              sessionId,
+              version,
+            )),
+            createCubit: () => dependencies.createSavedReadingPermissionCubit(
+              sessionId,
+              resultVersion: version,
+            ),
+            childBuilder: (_) =>
+                _sessionPage(dependencies, sessionId, resultVersion: version),
+            readOnlyBuilder: (_) => _sessionPage(
+              dependencies,
+              sessionId,
+              savedOnly: true,
+              resultVersion: version,
+            ),
           );
         },
       ),
@@ -128,6 +152,9 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
             )..initialize(),
             child: SessionStubPage(
               ownerId: dependencies.authRepository.currentUser?.id,
+              createArchetypeFeedbackCubit: dependencies.hasResultFeedback
+                  ? dependencies.createArchetypeFeedbackCubit
+                  : null,
               createFeedbackCubit: dependencies.hasResultFeedback
                   ? dependencies.createResultFeedbackCubit
                   : null,
@@ -150,6 +177,7 @@ Widget _sessionPage(
   AppDependencies dependencies,
   String sessionId, {
   bool savedOnly = false,
+  int? resultVersion,
 }) {
   final reference = StartedMusicSession.reference(sessionId);
   return BlocProvider<SessionCubit>(
@@ -157,12 +185,16 @@ Widget _sessionPage(
       dependencies.authRepository.currentUser?.id,
       sessionId,
       savedOnly,
+      resultVersion,
     )),
     create: (_) =>
         dependencies.createSessionCubit(startedSession: reference)
-          ..initialize(savedOnly: savedOnly),
+          ..initialize(savedOnly: savedOnly, resultVersion: resultVersion),
     child: SessionStubPage(
       ownerId: dependencies.authRepository.currentUser?.id,
+      createArchetypeFeedbackCubit: dependencies.hasResultFeedback
+          ? dependencies.createArchetypeFeedbackCubit
+          : null,
       createFeedbackCubit: dependencies.hasResultFeedback
           ? dependencies.createResultFeedbackCubit
           : null,

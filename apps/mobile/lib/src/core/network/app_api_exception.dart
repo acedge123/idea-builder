@@ -13,11 +13,13 @@ class AppApiException implements Exception {
     required this.kind,
     required this.message,
     this.statusCode,
+    this.code,
   });
 
   final AppApiErrorKind kind;
   final String message;
   final int? statusCode;
+  final String? code;
 
   bool get isAuthRelated =>
       kind == AppApiErrorKind.unauthorized || kind == AppApiErrorKind.forbidden;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/session_reveal.dart';
 import '../cubit/session_cubit.dart';
+import 'reading_report_sections.dart';
 
 class SessionResultView extends StatelessWidget {
   const SessionResultView({
@@ -28,6 +29,7 @@ class SessionResultView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (result.report != null) ReadingIdentity(report: result.report!),
         Text(
           'THE READ · VERSION ${result.version}',
           style: theme.textTheme.labelSmall,
@@ -40,8 +42,13 @@ class SessionResultView extends StatelessWidget {
             height: 1.35,
           ),
         ),
-        if (result.reveal != null) ...[
-          if (result.reveal!.twist?.isNotEmpty == true) ...[
+        if (result.report != null) ...[
+          ReadingDimensions(report: result.report!),
+          if (result.report!.panel != null)
+            ReadingEvidence(panel: result.report!.panel!),
+        ],
+        if (result.reveal != null || result.report?.challenge != null) ...[
+          if (result.reveal?.twist?.isNotEmpty == true) ...[
             const SizedBox(height: 24),
             Text('The twist', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -50,9 +57,14 @@ class SessionResultView extends StatelessWidget {
           const SizedBox(height: 24),
           Text('The challenge', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
-          Text(result.reveal!.challenge, style: theme.textTheme.bodyLarge),
+          Text(
+            result.report?.challenge ?? result.reveal?.challenge ?? '',
+            style: theme.textTheme.bodyLarge,
+          ),
         ],
-        if (result.reveal == null && result.supportingChoices.isNotEmpty) ...[
+        if (result.report == null &&
+            result.reveal == null &&
+            result.supportingChoices.isNotEmpty) ...[
           const SizedBox(height: 24),
           Text('The choices behind it', style: theme.textTheme.titleMedium),
           for (final support in result.supportingChoices.take(2))
@@ -68,7 +80,8 @@ class SessionResultView extends StatelessWidget {
               ),
             ),
         ],
-        if (result.reveal == null &&
+        if (result.report == null &&
+            result.reveal == null &&
             !result.supportingChoices.any(
               (support) => support.examples.isNotEmpty,
             )) ...[
@@ -77,7 +90,9 @@ class SessionResultView extends StatelessWidget {
             'No supporting song examples were included with this saved reading.',
           ),
         ],
-        if (result.reveal == null && result.tensionClaim != null) ...[
+        if (result.report == null &&
+            result.reveal == null &&
+            result.tensionClaim != null) ...[
           const SizedBox(height: 24),
           Text('Still unresolved', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -91,10 +106,10 @@ class SessionResultView extends StatelessWidget {
           runSpacing: 8,
           children: [
             if (onPushBack != null)
-              FilledButton.icon(
+              TextButton.icon(
                 onPressed: onPushBack,
                 icon: const Icon(Icons.chat_bubble_outline),
-                label: const Text('Argue with me'),
+                label: const Text('Discuss this read'),
               ),
             if (shareUrl == null && state.publication?.isPublic != true)
               OutlinedButton.icon(
@@ -140,11 +155,14 @@ class SessionResultView extends StatelessWidget {
             TextButton(onPressed: onSignIn, child: const Text('Sign in again')),
         ],
         const SizedBox(height: 16),
-        ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          title: Text(result.reveal == null ? 'Full reading' : 'The receipts'),
-          children: [_FullReading(reveal: reveal)],
-        ),
+        if (result.report == null)
+          ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            title: Text(
+              result.reveal == null ? 'Full reading' : 'The receipts',
+            ),
+            children: [_FullReading(reveal: reveal)],
+          ),
       ],
     );
   }

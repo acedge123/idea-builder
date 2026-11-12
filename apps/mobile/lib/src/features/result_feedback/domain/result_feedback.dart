@@ -7,11 +7,18 @@ class FeedbackTarget extends Equatable {
     required this.ownerId,
     required this.sessionId,
     required this.resultVersion,
+    this.feedbackTarget,
   });
   final String ownerId, sessionId;
   final int resultVersion;
+  final String? feedbackTarget;
   @override
-  List<Object?> get props => [ownerId, sessionId, resultVersion];
+  List<Object?> get props => [
+    ownerId,
+    sessionId,
+    resultVersion,
+    feedbackTarget,
+  ];
 }
 
 class FeedbackDraft extends Equatable {

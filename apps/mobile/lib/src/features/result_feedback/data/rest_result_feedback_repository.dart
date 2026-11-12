@@ -55,7 +55,7 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
     if (row['id'] is! String ||
         (row['id'] as String).isEmpty ||
         row['result_version'] != target.resultVersion ||
-        row['target'] != null) {
+        row['target'] != target.feedbackTarget) {
       throw const FormatException('Invalid saved feedback');
     }
     final accuracy = switch (row['accuracy']) {
@@ -92,7 +92,7 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
         .where(
           (r) =>
               r['result_version'] == target.resultVersion &&
-              r['target'] == null,
+              r['target'] == target.feedbackTarget,
         )
         .toList();
     if (rows.isEmpty) return null;
@@ -142,11 +142,12 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
         'mutation_id': mutationId,
         'accuracy': switch (draft.accuracy) {
           ReadingAccuracy.accurate => 'accurate',
-          ReadingAccuracy.partly => 'partly',
+          ReadingAccuracy.partly =>
+            target.feedbackTarget == null ? 'partly' : 'mixed',
           ReadingAccuracy.missed => 'not_accurate',
           null => throw const FormatException('Accuracy required'),
         },
-        'target': null,
+        'target': target.feedbackTarget,
         'most_accurate_sentence': draft.usefulSentence,
         'least_accurate_sentence': draft.inaccurateSentence,
         'comment': draft.comment,
@@ -162,8 +163,7 @@ class RestResultFeedbackRepository implements ResultFeedbackRepository {
       target,
     )).where((r) => r['id'] == ack['id']).toList();
     if (rows.length != 1) throw const FormatException('Saved feedback missing');
-    if (rows.single['mutation_id'] != null &&
-        rows.single['mutation_id'] != mutationId) {
+    if (rows.single['mutation_id'] != mutationId) {
       throw const FormatException('Saved feedback mutation changed');
     }
     final saved = _map(target, rows.single, mutationId);

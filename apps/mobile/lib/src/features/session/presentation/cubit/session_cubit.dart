@@ -237,7 +237,11 @@ class SessionCubit extends Cubit<SessionState> {
   static const int maxPairingRounds = 6;
   static const int maxMsToDecide = 600000;
 
-  Future<void> initialize({bool savedOnly = false}) async {
+  bool _savedOnly = false;
+  int? _savedResultVersion;
+  Future<void> initialize({bool? savedOnly, int? resultVersion}) async {
+    _savedOnly = savedOnly ?? _savedOnly;
+    _savedResultVersion = resultVersion ?? _savedResultVersion;
     var sessionId = state.sessionId;
     if ((sessionId == null || sessionId.isEmpty) && _resumeStore != null) {
       final resumedSession = await _resumeStore.load();
@@ -274,49 +278,69 @@ class SessionCubit extends Cubit<SessionState> {
       ),
     );
 
-    if (savedOnly) {
-      // Declining AI permission must not hide an existing reading. Only read
-      // the saved version; never ask for a matchup, preparation or reveal.
+    if (_savedOnly ||
+        _savedResultVersion != null ||
+        _savedReadingRepository != null) {
       try {
         final saved = await _savedReadingRepository?.fetchSavedReading(
           sessionId: sessionId,
+          resultVersion: _savedResultVersion,
         );
         if (isClosed) return;
-        if (saved == null) {
+        if (saved == null && (_savedOnly || _savedResultVersion != null)) {
           throw const AppApiException(
             kind: AppApiErrorKind.invalidInput,
-            message: 'This saved reading is no longer available.',
+            code: 'NO_RESULT',
+            message: 'No saved reading is available yet.',
           );
         }
-        final experience = await _experienceRepository?.fetchExperience(
-          sessionId: sessionId,
-        );
-        if (isClosed) return;
-        emit(
-          state.copyWith(
-            status: SessionStatus.revealed,
-            reveal: saved,
-            exchanges: experience?.exchanges,
-            mode: experience?.mode,
-            decade: experience?.decade,
-            parentSessionId: experience?.parentSessionId,
-            publication: experience?.publication,
-            shareMayBePublic: experience?.publication?.isPublic == true,
-            read: experience?.latestRead,
-            clearErrorMessage: true,
-          ),
-        );
+        if (saved != null) {
+          // Publication/history metadata is optional; it cannot hide a saved read.
+          SessionExperience? experience;
+          try {
+            experience = await _experienceRepository?.fetchExperience(
+              sessionId: sessionId,
+            );
+          } catch (_) {
+            _logger.event('session.saved_metadata_unavailable');
+          }
+          if (isClosed) return;
+          final report = saved.result?.report;
+          emit(
+            state.copyWith(
+              status: SessionStatus.revealed,
+              reveal: saved,
+              exchanges: experience?.exchanges,
+              mode: report?.mode ?? experience?.mode,
+              decade: report?.decade ?? experience?.decade,
+              parentSessionId:
+                  report?.parentSessionId ?? experience?.parentSessionId,
+              publication: experience?.publication,
+              clearPublication: experience?.publication == null,
+              shareVerified: false,
+              shareMayBePublic: experience?.publication?.isPublic == true,
+              read: experience?.latestRead,
+              clearErrorMessage: true,
+            ),
+          );
+          _logger.event('session.saved_report_loaded', {
+            'version': saved.result?.version,
+          });
+          return;
+        }
       } catch (error) {
         if (isClosed) return;
         _logger.event('session.saved_only_load_failed');
         emit(
           state.copyWith(
             status: SessionStatus.failure,
+            requiresReauthentication:
+                error is AppApiException && error.isAuthRelated,
             errorMessage: _readableError(error),
           ),
         );
+        return;
       }
-      return;
     }
 
     await _loadNextPairing(
@@ -597,6 +621,9 @@ class SessionCubit extends Cubit<SessionState> {
         state.copyWith(
           status: SessionStatus.revealed,
           reveal: reveal,
+          mode: reveal.result?.report?.mode,
+          decade: reveal.result?.report?.decade,
+          parentSessionId: reveal.result?.report?.parentSessionId,
           sharedReveal: sharedReveal,
           clearSharedReveal: sharedReveal == null,
           clearErrorMessage: true,
@@ -618,6 +645,9 @@ class SessionCubit extends Cubit<SessionState> {
               state.copyWith(
                 status: SessionStatus.revealed,
                 reveal: saved,
+                mode: saved.result?.report?.mode,
+                decade: saved.result?.report?.decade,
+                parentSessionId: saved.result?.report?.parentSessionId,
                 clearErrorMessage: true,
                 requiresReauthentication: false,
               ),
@@ -908,6 +938,16 @@ class SessionCubit extends Cubit<SessionState> {
 
   String _readableError(Object error) {
     if (error is AppApiException) {
+      switch (error.code) {
+        case 'NO_RESULT':
+          return 'No saved reading is available yet.';
+        case 'VERSION_NOT_FOUND':
+          return 'This saved reading version is not available.';
+        case 'NOT_FOUND':
+          return 'This reading could not be found in your account.';
+        case 'UNAVAILABLE':
+          return 'Your saved reading could not be loaded. Please try again.';
+      }
       switch (error.kind) {
         case AppApiErrorKind.unauthorized:
         case AppApiErrorKind.forbidden:

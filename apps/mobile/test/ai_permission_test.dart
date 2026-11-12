@@ -442,8 +442,10 @@ class SavedOnlyRepository extends ResultRepository
   final bool available;
   int nextCalls = 0;
   @override
-  Future<SessionReveal?> fetchSavedReading({required String sessionId}) async =>
-      available ? reveal : null;
+  Future<SessionReveal?> fetchSavedReading({
+    required String sessionId,
+    int? resultVersion,
+  }) async => available ? reveal : null;
   @override
   Future<SessionRoundState> fetchNextPairing({
     required String sessionId,

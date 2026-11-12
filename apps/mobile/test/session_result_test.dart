@@ -195,9 +195,9 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(MaterialApp.router(routerConfig: router));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Argue with me'));
+      await tester.ensureVisible(find.text('Discuss this read'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Argue with me'));
+      await tester.tap(find.text('Discuss this read'));
       await tester.pumpAndSettle();
       expect(received!.original, same(reveal));
       expect(received!.resultVersion, result.version);
