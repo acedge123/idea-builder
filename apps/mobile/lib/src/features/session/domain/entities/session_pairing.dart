@@ -162,9 +162,11 @@ class SessionChoiceFeedback extends Equatable {
     this.delta,
     this.read,
     this.readPending = false,
+    this.hunch,
   });
 
   final bool readPending;
+  final String? hunch;
   final String verdict;
   final String why;
   final String? hesitation;
@@ -181,5 +183,6 @@ class SessionChoiceFeedback extends Equatable {
     delta,
     read,
     readPending,
+    hunch,
   ];
 }

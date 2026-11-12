@@ -75,7 +75,7 @@ void main() {
     },
   );
 
-  testWidgets('advancing keeps the next pairing ahead of late Critic feedback', (
+  testWidgets('saved Critic feedback leads into the new pairing', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -129,7 +129,10 @@ void main() {
     final y = tester.getTopLeft(find.text('Which one would you keep?')).dy;
     expect(y, greaterThanOrEqualTo(0));
     expect(y, lessThan(300));
-    expect(tester.getTopLeft(find.text('Latest saved feedback')).dy, greaterThan(y));
+    expect(
+      tester.getTopLeft(find.text('Latest saved feedback')).dy,
+      lessThan(y),
+    );
     expect(find.text('The actual next question'), findsNothing);
     expect(find.text('Which one would you keep?'), findsOneWidget);
     expect(tester.takeException(), isNull);

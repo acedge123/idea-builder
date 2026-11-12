@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'package:music_dna/src/features/session/domain/entities/critic_stage_policy.dart';
+import 'package:music_dna/src/features/session/presentation/widgets/session_critic_stage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,6 +43,10 @@ class FlowRepository extends FakeSessionRepository
     experienceRepository: this,
     criticRepository: this,
     resultRepository: this,
+    loadCriticCopy: () async => CriticFillers.fromJson(
+      jsonDecode(File('assets/copy/critic-fillers.json').readAsStringSync())
+          as Map<String, dynamic>,
+    ),
   );
   SessionRoundState round() => SessionRoundState(
     sessionId: start.sessionId,
@@ -99,7 +106,9 @@ class FlowRepository extends FakeSessionRepository
     required String afterPairingId,
     required int answered,
   }) {
-    expect(afterPairingId, 'pair-$answered');
+    if (afterPairingId != 'pair-$answered') {
+      throw StateError('Fake read cursor mismatch');
+    }
     return reads.putIfAbsent(answered, () => Completer<SessionRead>()).future;
   }
 
@@ -142,8 +151,8 @@ void main() {
       repo.nextGate = Completer<SessionRoundState>();
       final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 70);
       await flush();
-      expect(cubit.state.status, SessionStatus.submitting);
-      expect(cubit.state.read, isNull);
+      expect(cubit.state.status, SessionStatus.critic);
+      expect(cubit.state.currentRound?.pairing?.id, 'pair-1');
       repo.nextGate!.complete(repo.round());
       await choice;
       await flush();
@@ -152,33 +161,34 @@ void main() {
       expect(
         states
             .where((s) => s.read?.thesis == 'New inline Critic')
-            .every((s) => s.currentRound?.pairing?.id == 'pair-2'),
+            .every(
+              (s) =>
+                  s.status == SessionStatus.critic ||
+                  s.currentRound?.pairing?.id == 'pair-2',
+            ),
         isTrue,
       );
     },
   );
   test(
-    'next pair is ready while the Critic is pending; newer choices supersede old replies',
+    'next pairing stays hidden and untappable until the exact Critic read arrives',
     () async {
       final repo = FlowRepository();
       final cubit = repo.cubit();
       addTearDown(cubit.close);
       await cubit.initialize();
       await cubit.chooseSong(chosenSongId: 'a', msToDecide: 40);
-      expect(cubit.state.status, SessionStatus.ready);
-      expect(cubit.state.currentRound?.pairing?.id, 'pair-2');
-      expect(cubit.state.criticPending, isTrue);
+      expect(cubit.state.status, SessionStatus.critic);
+      expect(cubit.state.currentRound?.pairing?.id, 'pair-1');
+      expect(cubit.state.prefetchedRound?.pairing?.id, 'pair-2');
       await cubit.chooseSong(chosenSongId: 'b', msToDecide: 60);
-      expect(repo.choiceCalls, 2);
-      expect(cubit.state.currentRound?.pairing?.id, 'pair-3');
-      repo.reads[1]!.complete(const SessionRead(thesis: 'Obsolete response'));
-      await flush();
-      expect(cubit.state.read, isNull);
-      expect(cubit.state.criticPending, isTrue);
-      repo.reads[2]!.complete(
+      expect(repo.choiceCalls, 1);
+      repo.reads[1]!.complete(
         const SessionRead(thesis: 'Latest exact response'),
       );
       await flush();
+      expect(cubit.state.status, SessionStatus.ready);
+      expect(cubit.state.currentRound?.pairing?.id, 'pair-2');
       expect(cubit.state.read?.thesis, 'Latest exact response');
       expect(cubit.state.criticPending, isFalse);
     },
@@ -193,14 +203,14 @@ void main() {
       repo.historyGate = Completer<SessionExperience>();
       final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 10);
       await flush();
-      expect(cubit.state.status, SessionStatus.ready);
-      expect(cubit.state.currentRound?.pairing?.id, 'pair-2');
+      expect(cubit.state.status, SessionStatus.critic);
+      expect(cubit.state.prefetchedRound?.pairing?.id, 'pair-2');
       repo.reads[1]!.completeError(TimeoutException('unknown model outcome'));
       repo.historyGate!.completeError(Exception('history unavailable'));
       await choice;
       await flush();
       expect(cubit.state.status, SessionStatus.ready);
-      expect(cubit.state.criticMessage, contains('keep choosing'));
+      expect(cubit.state.criticMessage, CriticStagePolicy.unavailable);
       expect(repo.choiceCalls, 1);
       repo.historyGate = null;
       await cubit.chooseSong(chosenSongId: 'b', msToDecide: 30);
@@ -217,14 +227,17 @@ void main() {
       for (var i = 0; i < 6; i++) {
         expect(cubit.state.visibleMilestone, isNull);
         await cubit.chooseSong(chosenSongId: 'a', msToDecide: 10);
+        if (i < 5) {
+          repo.reads[i + 1]!.complete(const SessionRead(thesis: 'Exact read'));
+          await flush();
+          expect(cubit.state.status, SessionStatus.ready);
+        }
       }
       expect(repo.choiceCalls, 6);
       expect(repo.revealCalls, 1);
       expect(repo.reads.keys, [1, 2, 3, 4, 5]);
       expect(cubit.state.status, SessionStatus.revealed);
-      for (final pending in repo.reads.values) {
-        pending.complete(const SessionRead(thesis: 'Late response'));
-      }
+
       await flush();
       expect(cubit.state.reveal, reveal);
       expect(cubit.state.status, SessionStatus.revealed);
@@ -320,7 +333,7 @@ void main() {
     },
   );
   testWidgets(
-    'loading paints thinking UI instead of flashing the selected old card; late prose does not move next songs',
+    'Critic-only stage hides old and new cards; read and next pairing appear together',
     (tester) async {
       final repo = FlowRepository();
       final cubit = repo.cubit();
@@ -342,17 +355,23 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(find.byType(SessionSongChoiceCard), findsNothing);
-      expect(find.text('Saving your choice'), findsOneWidget);
+      expect(find.text('YOU PICKED · First song 1'), findsOneWidget);
+      expect(find.byType(SessionCriticStage), findsOneWidget);
       repo.saveGate!.complete();
       await choice;
       await tester.pump();
-      expect(find.byType(SessionSongChoiceCard), findsNWidgets(2));
-      expect(find.text('The Critic is thinking'), findsOneWidget);
-      final before = tester.getTopLeft(find.text('First song 2'));
+      expect(find.byType(SessionSongChoiceCard), findsNothing);
+      expect(find.text('Writing that down.'), findsOneWidget);
+      expect(find.text('Next matchup'), findsNothing);
       repo.reads[1]!.complete(const SessionRead(thesis: 'Late exact prose'));
       await tester.pump();
       await tester.pump();
-      expect(tester.getTopLeft(find.text('First song 2')), before);
+      expect(find.byType(SessionSongChoiceCard), findsNWidgets(2));
+      expect(find.text('First song 1'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Late exact prose')).dy,
+        lessThan(tester.getTopLeft(find.text('First song 2')).dy),
+      );
       expect(find.text('Late exact prose'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

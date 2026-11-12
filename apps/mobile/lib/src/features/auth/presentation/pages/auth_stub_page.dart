@@ -1,3 +1,6 @@
+import '../../domain/auth_failure.dart';
+import '../../domain/password_recovery.dart';
+import '../../data/open_password_recovery.dart' as recovery;
 import 'package:flutter/material.dart';
 import '../../../readings/presentation/app_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +12,11 @@ import '../cubit/auth_cubit.dart';
 enum _AuthFormMode { signIn, signUp }
 
 class AuthStubPage extends StatefulWidget {
-  const AuthStubPage({super.key});
+  const AuthStubPage({
+    super.key,
+    this.openPasswordRecovery = recovery.openPasswordRecovery,
+  });
+  final Future<bool> Function(Uri) openPasswordRecovery;
 
   @override
   State<AuthStubPage> createState() => _AuthStubPageState();
@@ -20,6 +27,8 @@ class _AuthStubPageState extends State<AuthStubPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   _AuthFormMode _mode = _AuthFormMode.signIn;
+  bool _openingRecovery = false;
+  String? _recoveryError;
 
   @override
   void dispose() {
@@ -39,13 +48,6 @@ class _AuthStubPageState extends State<AuthStubPage> {
           listenWhen: (previous, current) =>
               previous.submissionStatus != current.submissionStatus,
           listener: (context, state) {
-            if (state.submissionStatus == AuthSubmissionStatus.failure &&
-                state.errorMessage != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
-            }
-
             if (state.submissionStatus ==
                     AuthSubmissionStatus.emailConfirmationRequired &&
                 state.infoMessage != null) {
@@ -99,10 +101,8 @@ class _AuthStubPageState extends State<AuthStubPage> {
                 if (!hasAccount)
                   _ModeToggle(
                     mode: _mode,
-                    onChanged: (mode) {
-                      context.read<AuthCubit>().clearFeedback();
-                      setState(() => _mode = mode);
-                    },
+                    enabled: !isSubmitting,
+                    onChanged: _changeMode,
                   ),
                 const SizedBox(height: 20),
                 if (!hasAccount)
@@ -118,6 +118,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
                             const SizedBox(height: 16),
                             TextFormField(
                               controller: _emailController,
+                              enabled: !isSubmitting,
                               keyboardType: TextInputType.emailAddress,
                               autofillHints: const <String>[
                                 AutofillHints.email,
@@ -138,7 +139,9 @@ class _AuthStubPageState extends State<AuthStubPage> {
                             ),
                             const SizedBox(height: 16),
                             TextFormField(
+                              key: ValueKey(_mode),
                               controller: _passwordController,
+                              enabled: !isSubmitting,
                               obscureText: true,
                               autofillHints: _mode == _AuthFormMode.signIn
                                   ? const <String>[AutofillHints.password]
@@ -158,7 +161,20 @@ class _AuthStubPageState extends State<AuthStubPage> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 20),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: isSubmitting || _openingRecovery
+                                    ? null
+                                    : _openRecovery,
+                                child: Text(
+                                  _openingRecovery
+                                      ? 'Opening recovery…'
+                                      : 'Forgot password?',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
                             SizedBox(
                               width: double.infinity,
                               child: FilledButton(
@@ -174,8 +190,29 @@ class _AuthStubPageState extends State<AuthStubPage> {
                             ),
                             if (state.errorMessage != null) ...<Widget>[
                               const SizedBox(height: 14),
+                              Semantics(
+                                liveRegion: true,
+                                child: Text(
+                                  state.errorMessage!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              ),
+                              if (_mode == _AuthFormMode.signUp &&
+                                  state.failureKind ==
+                                      AuthFailureKind.emailInUse)
+                                TextButton(
+                                  onPressed: isSubmitting
+                                      ? null
+                                      : () => _changeMode(_AuthFormMode.signIn),
+                                  child: const Text('Sign in instead'),
+                                ),
+                            ],
+                            if (_recoveryError != null) ...[
+                              const SizedBox(height: 12),
                               Text(
-                                state.errorMessage!,
+                                _recoveryError!,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.error,
                                 ),
@@ -227,8 +264,9 @@ class _AuthStubPageState extends State<AuthStubPage> {
                                 child: const Text('AI permission'),
                               ),
                               OutlinedButton(
-                                onPressed: () =>
-                                    context.read<AuthCubit>().signOut(),
+                                onPressed: isSubmitting
+                                    ? null
+                                    : () => context.read<AuthCubit>().signOut(),
                                 child: const Text('Sign out'),
                               ),
                               OutlinedButton(
@@ -242,6 +280,18 @@ class _AuthStubPageState extends State<AuthStubPage> {
                               ),
                             ],
                           ),
+                          if (hasAccount && state.errorMessage != null) ...[
+                            const SizedBox(height: 14),
+                            Semantics(
+                              liveRegion: true,
+                              child: Text(
+                                state.errorMessage!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.error,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -255,7 +305,47 @@ class _AuthStubPageState extends State<AuthStubPage> {
     );
   }
 
+  void _changeMode(_AuthFormMode mode) {
+    if (_mode == mode ||
+        context.read<AuthCubit>().state.submissionStatus ==
+            AuthSubmissionStatus.submitting) {
+      return;
+    }
+    _passwordController.clear();
+    context.read<AuthCubit>().clearFeedback();
+    setState(() {
+      _mode = mode;
+      _recoveryError = null;
+    });
+  }
+
+  Future<void> _openRecovery() async {
+    if (_openingRecovery) return;
+    setState(() {
+      _openingRecovery = true;
+      _recoveryError = null;
+    });
+    var opened = false;
+    try {
+      opened = await widget.openPasswordRecovery(PasswordRecovery.pageUri);
+    } catch (_) {
+      /* Platform errors also use controlled copy. */
+    }
+    if (!mounted) return;
+    setState(() {
+      _openingRecovery = false;
+      if (!opened) {
+        _recoveryError =
+            'Couldn’t open password recovery. Visit musicdna.fm/auth?mode=forgot in your browser.';
+      }
+    });
+  }
+
   void _submit() {
+    if (context.read<AuthCubit>().state.submissionStatus ==
+        AuthSubmissionStatus.submitting) {
+      return;
+    }
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -297,17 +387,25 @@ class _AuthStubPageState extends State<AuthStubPage> {
       return;
     }
 
-    await context.read<AuthCubit>().deleteAccount();
-    if (context.mounted) {
+    final auth = context.read<AuthCubit>();
+    await auth.deleteAccount();
+    if (context.mounted &&
+        auth.state.status == AuthStatus.unauthenticated &&
+        auth.state.submissionStatus == AuthSubmissionStatus.success) {
       context.go('/');
     }
   }
 }
 
 class _ModeToggle extends StatelessWidget {
-  const _ModeToggle({required this.mode, required this.onChanged});
+  const _ModeToggle({
+    required this.mode,
+    required this.onChanged,
+    required this.enabled,
+  });
 
   final _AuthFormMode mode;
+  final bool enabled;
   final ValueChanged<_AuthFormMode> onChanged;
 
   @override
@@ -325,7 +423,7 @@ class _ModeToggle extends StatelessWidget {
             child: _ModeButton(
               label: 'Sign in',
               selected: mode == _AuthFormMode.signIn,
-              onTap: () => onChanged(_AuthFormMode.signIn),
+              onTap: enabled ? () => onChanged(_AuthFormMode.signIn) : null,
             ),
           ),
           const SizedBox(width: 8),
@@ -333,7 +431,7 @@ class _ModeToggle extends StatelessWidget {
             child: _ModeButton(
               label: 'Sign up',
               selected: mode == _AuthFormMode.signUp,
-              onTap: () => onChanged(_AuthFormMode.signUp),
+              onTap: enabled ? () => onChanged(_AuthFormMode.signUp) : null,
             ),
           ),
         ],
@@ -351,7 +449,7 @@ class _ModeButton extends StatelessWidget {
 
   final String label;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

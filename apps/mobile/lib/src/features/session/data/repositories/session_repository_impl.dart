@@ -1,3 +1,4 @@
+import '../../domain/repositories/session_pushback_repository.dart';
 import '../../domain/repositories/session_critic_repository.dart';
 import '../../domain/repositories/saved_reading_repository.dart';
 import '../../../../core/network/app_api_exception.dart';
@@ -17,6 +18,7 @@ import '../datasources/session_remote_data_source.dart';
 
 class SessionRepositoryImpl
     implements
+        SessionPushbackRepository,
         SessionRepository,
         SessionExperienceRepository,
         SessionCriticRepository,
@@ -112,6 +114,9 @@ class SessionRepositoryImpl
     return SessionChoiceFeedback(
       verdict: feedback['verdict'] as String? ?? '',
       why: feedback['why'] as String? ?? '',
+      hunch: const ['against', 'with', 'early'].contains(response['hunch'])
+          ? response['hunch'] as String
+          : 'early',
       readPending:
           _remoteDataSource.experienceV1 && response['read_pending'] == true,
       read: _remoteDataSource.experienceV1 && response['read'] != null
@@ -120,6 +125,36 @@ class SessionRepositoryImpl
       hesitation: response['hesitation'] as String?,
       dimension: response['dim'] as String?,
       delta: _readDouble(response['delta']),
+    );
+  }
+
+  @override
+  Future<SavedPushback> submitPushback({
+    required String sessionId,
+    required String text,
+    required String mutationId,
+  }) async {
+    final response = await _remoteDataSource.submitPushback(
+      sessionId: sessionId,
+      text: text,
+      mutationId: mutationId,
+    );
+    requireExperienceVersion(response);
+    if (response['mutation_id'] != mutationId ||
+        response['text'] != text ||
+        response['counts_as_vote'] != false ||
+        response['provenance'] != 'self_report' ||
+        response['reply'] is! String ||
+        (response['reply'] as String).isEmpty) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'Your reply could not be verified. Retry the same reply.',
+      );
+    }
+    return SavedPushback(
+      text: text,
+      reply: response['reply'] as String,
+      mutationId: mutationId,
     );
   }
 

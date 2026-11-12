@@ -36,7 +36,10 @@ void main() {
 
       expect(cubit.state.status, AuthStatus.unauthenticated);
       expect(cubit.state.submissionStatus, AuthSubmissionStatus.failure);
-      expect(cubit.state.errorMessage, contains('bad credentials'));
+      expect(
+        cubit.state.errorMessage,
+        'Something went wrong. Please try again.',
+      );
     });
 
     test(
