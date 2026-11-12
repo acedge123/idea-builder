@@ -15,6 +15,7 @@ class SessionExperienceView extends StatelessWidget {
     this.pendingReaction,
     this.activeExchangeKey,
     this.showReactionControls = true,
+    this.showHistory = true,
     this.showCurrentRead = true,
   });
   final List<SessionExchange> exchanges;
@@ -25,6 +26,7 @@ class SessionExperienceView extends StatelessWidget {
   final SessionReaction? pendingReaction;
   final Key? activeExchangeKey;
   final bool showReactionControls;
+  final bool showHistory;
   final bool showCurrentRead;
 
   @override
@@ -40,41 +42,45 @@ class SessionExperienceView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (groups.isNotEmpty || currentRead != null)
+        if (showHistory)
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               icon: const Icon(Icons.history, size: 18),
               label: const Text('Interview history'),
-              onPressed: () => showModalBottomSheet<void>(
-                context: context,
-                isScrollControlled: true,
-                useSafeArea: true,
-                showDragHandle: true,
-                builder: (context) => FractionallySizedBox(
-                  heightFactor: 0.85,
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(child: Text('Interview history')),
-                          IconButton(
-                            tooltip: 'Close history',
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.close),
-                          ),
-                        ],
+              onPressed: groups.isEmpty && currentRead == null
+                  ? null
+                  : () => showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      showDragHandle: true,
+                      builder: (context) => FractionallySizedBox(
+                        heightFactor: 0.85,
+                        child: ListView(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text('Interview history'),
+                                ),
+                                IconButton(
+                                  tooltip: 'Close history',
+                                  onPressed: () => Navigator.pop(context),
+                                  icon: const Icon(Icons.close),
+                                ),
+                              ],
+                            ),
+                            for (final group in groups)
+                              SessionExchangeView(group: group),
+                            if (currentRead != null &&
+                                !exchanges.any((e) => e.read == currentRead))
+                              SessionReadView(read: currentRead),
+                          ],
+                        ),
                       ),
-                      for (final group in groups)
-                        SessionExchangeView(group: group),
-                      if (currentRead != null &&
-                          !exchanges.any((e) => e.read == currentRead))
-                        SessionReadView(read: currentRead),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
             ),
           ),
         if (showCurrentRead)

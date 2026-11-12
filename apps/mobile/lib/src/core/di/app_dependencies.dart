@@ -1,3 +1,4 @@
+import '../../features/session/domain/repositories/session_critic_repository.dart';
 import 'dart:async';
 import '../../features/ai_permission/data/ai_permission_data_source.dart';
 import '../../features/ai_permission/data/local_ai_permission_repository.dart';
@@ -219,6 +220,9 @@ class AppDependencies {
   SessionCubit createSessionCubit({StartedMusicSession? startedSession}) {
     return SessionCubit(
       sessionRepository,
+      criticRepository: config.experienceV1
+          ? sessionRepository as SessionCriticRepository
+          : null,
       experienceRepository: config.experienceV1
           ? sessionRepository as SessionExperienceRepository
           : null,

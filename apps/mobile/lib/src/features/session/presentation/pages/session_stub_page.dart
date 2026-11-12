@@ -1,3 +1,5 @@
+import '../widgets/session_critic_response.dart';
+import '../../../../core/widgets/music_thinking_view.dart';
 import 'package:flutter/material.dart';
 import '../../../readings/presentation/explore_cubit.dart';
 import '../../../readings/presentation/explore_view.dart';
@@ -16,7 +18,6 @@ import '../cubit/session_cubit.dart';
 import '../widgets/session_experience_view.dart';
 import '../widgets/session_pairing_card.dart';
 import '../widgets/session_result_view.dart';
-import '../widgets/session_milestone_view.dart';
 import '../../../result_feedback/presentation/result_feedback_cubit.dart';
 import '../../../result_feedback/presentation/result_feedback_view.dart';
 import '../../../result_feedback/presentation/archetype_feedback_view.dart';
@@ -59,7 +60,7 @@ class SessionStubPage extends StatefulWidget {
 class _SessionStubPageState extends State<SessionStubPage> {
   Stopwatch? _stopwatch;
   String? _pairingId;
-  final _activeExchangeKey = GlobalKey();
+  final _pairingKey = GlobalKey();
   final _resultKey = GlobalKey();
 
   @override
@@ -87,9 +88,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
           listenWhen: (previous, current) =>
               previous.currentRound?.pairing?.id !=
                   current.currentRound?.pairing?.id ||
-              previous.exchanges != current.exchanges ||
-              previous.status != current.status ||
-              previous.visibleMilestone != current.visibleMilestone,
+              previous.status != current.status,
           listener: (context, state) {
             _syncStopwatch(state.currentRound?.pairing?.id);
             _scrollToActive(state);
@@ -153,13 +152,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                   if (showFeedback) const SizedBox(height: 16),
                   if (context.read<SessionCubit>().hasExperience)
                     SessionExperienceView(
-                      activeExchangeKey: _activeExchangeKey,
                       showReactionControls: false,
-                      showCurrentRead:
-                          state.status != SessionStatus.revealed &&
-                          state.status != SessionStatus.revealing &&
-                          state.status != SessionStatus.waitingForReading &&
-                          state.visibleMilestone == null,
+                      showCurrentRead: false,
                       exchanges: state.exchanges,
                       read: state.read,
                       busy: isBusy || state.status != SessionStatus.ready,
@@ -181,32 +175,14 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       ),
                     ),
                   KeyedSubtree(
-                    key: _resultKey,
+                    key: state.status == SessionStatus.revealed
+                        ? _resultKey
+                        : _pairingKey,
                     child: switch (state.status) {
-                      SessionStatus.initial ||
-                      SessionStatus.loading => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 48),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      SessionStatus.submitting => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          if (pairing != null)
-                            _PairingIntro(pairing: pairing, round: round),
-                          if (pairing != null) const SizedBox(height: 18),
-                          if (pairing != null)
-                            SessionPairingCard(
-                              pairing: pairing,
-                              isBusy: true,
-                              selectedSongId: state.selectedSongId,
-                              onChoose: (_) {},
-                              onSkip: () {},
-                            ),
-                          const SizedBox(height: 20),
-                          const Center(child: CircularProgressIndicator()),
-                        ],
+                      SessionStatus.initial || SessionStatus.loading =>
+                        const PairingThinkingView(savingChoice: false),
+                      SessionStatus.submitting => PairingThinkingView(
+                        savingChoice: state.selectedSongId != null,
                       ),
                       SessionStatus.ready =>
                         pairing == null
@@ -217,19 +193,6 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                 primaryLabel: 'Try again',
                                 onPrimary: () =>
                                     context.read<SessionCubit>().initialize(),
-                              )
-                            : state.visibleMilestone != null
-                            ? SessionMilestoneView(
-                                milestone: state.visibleMilestone!,
-                                onContinue: () {
-                                  _stopwatch?.reset();
-                                  context
-                                      .read<SessionCubit>()
-                                      .continueInterview();
-                                },
-                                onFinish: context
-                                    .read<SessionCubit>()
-                                    .finishEarly,
                               )
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,10 +217,19 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                   if (context
                                       .read<SessionCubit>()
                                       .hasExperience)
+                                    SessionCriticResponse(
+                                      state: state,
+                                      onReaction: context
+                                          .read<SessionCubit>()
+                                          .react,
+                                    ),
+                                  if (context
+                                      .read<SessionCubit>()
+                                      .hasExperience)
                                     SessionReactionControls(
                                       exchanges: state.exchanges,
                                       read: state.read,
-                                      busy: isBusy,
+                                      busy: isBusy || state.criticPending,
                                       pendingReaction: context
                                           .read<SessionCubit>()
                                           .pendingReaction,
@@ -275,14 +247,10 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         onPrimary: () =>
                             context.read<SessionCubit>().revealSession(),
                       ),
-                      SessionStatus.revealing => _FallbackCard(
-                        title: 'Building your reading',
+                      SessionStatus.revealing => const MusicThinkingView(
+                        title: 'Writing your reading',
                         body:
-                            'Tightening the theory, checking the pattern, and turning it into a read worth keeping.',
-                        primaryLabel: 'Generating...',
-                        onPrimary: () {},
-                        primaryEnabled: false,
-                        busy: true,
+                            'Your choices are saved. The Critic is putting the whole reading together.',
                       ),
                       SessionStatus.waitingForReading => _FallbackCard(
                         title: 'Your reading is still finishing',
@@ -469,14 +437,12 @@ class _SessionStubPageState extends State<SessionStubPage> {
         if (!mounted) return;
         final target = state.status == SessionStatus.revealed
             ? _resultKey.currentContext
-            : _activeExchangeKey.currentContext;
+            : _pairingKey.currentContext;
         if (target != null) {
           Scrollable.ensureVisible(
             target,
             alignment: state.status == SessionStatus.revealed ? 0 : 0.02,
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 250),
+            duration: Duration.zero,
           );
         }
       });
@@ -756,8 +722,6 @@ class _FallbackCard extends StatelessWidget {
     required this.onPrimary,
     this.secondaryLabel,
     this.onSecondary,
-    this.primaryEnabled = true,
-    this.busy = false,
   });
 
   final String title;
@@ -766,8 +730,6 @@ class _FallbackCard extends StatelessWidget {
   final VoidCallback onPrimary;
   final String? secondaryLabel;
   final VoidCallback? onSecondary;
-  final bool primaryEnabled;
-  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -791,16 +753,7 @@ class _FallbackCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: <Widget>[
-                FilledButton(
-                  onPressed: primaryEnabled ? onPrimary : null,
-                  child: busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(primaryLabel),
-                ),
+                FilledButton(onPressed: onPrimary, child: Text(primaryLabel)),
                 if (secondaryLabel != null && onSecondary != null)
                   OutlinedButton(
                     onPressed: onSecondary,

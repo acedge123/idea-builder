@@ -1,3 +1,4 @@
+import '../../domain/repositories/session_critic_repository.dart';
 import '../../domain/repositories/saved_reading_repository.dart';
 import '../../../../core/network/app_api_exception.dart';
 import '../../domain/entities/session_pairing.dart';
@@ -18,6 +19,7 @@ class SessionRepositoryImpl
     implements
         SessionRepository,
         SessionExperienceRepository,
+        SessionCriticRepository,
         SessionResultRepository,
         SessionPreparationRepository,
         SavedReadingRepository {
@@ -99,16 +101,48 @@ class SessionRepositoryImpl
     final feedback = _remoteDataSource.experienceV1
         ? experienceObject(response['feedback'])
         : response;
+    if (_remoteDataSource.experienceV1 &&
+        response['read'] == null &&
+        response['read_pending'] != true) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'The server did not identify the Critic response state.',
+      );
+    }
     return SessionChoiceFeedback(
       verdict: feedback['verdict'] as String? ?? '',
       why: feedback['why'] as String? ?? '',
-      read: _remoteDataSource.experienceV1
+      readPending:
+          _remoteDataSource.experienceV1 && response['read_pending'] == true,
+      read: _remoteDataSource.experienceV1 && response['read'] != null
           ? mapSessionRead(experienceObject(response['read']))
           : null,
       hesitation: response['hesitation'] as String?,
       dimension: response['dim'] as String?,
       delta: _readDouble(response['delta']),
     );
+  }
+
+  @override
+  Future<SessionRead> fetchRead({
+    required String sessionId,
+    required String afterPairingId,
+    required int answered,
+  }) async {
+    final response = await _remoteDataSource.fetchRead(
+      sessionId: sessionId,
+      afterPairingId: afterPairingId,
+      answered: answered,
+    );
+    requireExperienceVersion(response);
+    if (response['after_pairing_id'] != afterPairingId ||
+        response['answered'] != answered) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'The Critic response belongs to a different choice.',
+      );
+    }
+    return mapSessionRead(experienceObject(response['read']));
   }
 
   @override

@@ -75,7 +75,7 @@ void main() {
     },
   );
 
-  testWidgets('advancing scrolls to latest exchange below a long opening', (
+  testWidgets('advancing keeps the next pairing ahead of late Critic feedback', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -126,9 +126,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final y = tester.getTopLeft(find.text('Latest saved feedback')).dy;
+    final y = tester.getTopLeft(find.text('Which one would you keep?')).dy;
     expect(y, greaterThanOrEqualTo(0));
     expect(y, lessThan(300));
+    expect(tester.getTopLeft(find.text('Latest saved feedback')).dy, greaterThan(y));
     expect(find.text('The actual next question'), findsNothing);
     expect(find.text('Which one would you keep?'), findsOneWidget);
     expect(tester.takeException(), isNull);

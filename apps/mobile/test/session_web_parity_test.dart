@@ -148,7 +148,7 @@ void main() {
       final cubit = makeCubit(repository);
       addTearDown(cubit.close);
       await cubit.initialize();
-      expect(cubit.state.visibleMilestone?.answered, 3);
+      expect(cubit.state.visibleMilestone, isNull);
       await cubit.finishEarly();
       expect(repository.finishRequests, isEmpty);
       cubit.continueInterview();
@@ -158,23 +158,17 @@ void main() {
       expect(repository.lastChoiceSongId, isNull);
     },
   );
-  test(
-    'initial reading timeout retries the same early-finish intent',
-    () async {
-      final repository = Repository(milestone(4))..failFirstReveal = true;
-      final cubit = makeCubit(repository);
-      addTearDown(cubit.close);
-      await cubit.initialize();
-      await cubit.finishEarly();
-      expect(cubit.state.status, SessionStatus.failure);
-      expect(cubit.state.finishEarlyRequested, true);
-      await cubit.revealSession();
-      expect(repository.finishRequests, [true, true]);
-      expect(cubit.state.status, SessionStatus.revealed);
-      expect(cubit.state.reveal, reveal);
-      expect(repository.lastChoiceSongId, isNull);
-    },
-  );
+  test('four-answer guidance never prompts or finishes the reading', () async {
+    final repository = Repository(milestone(4));
+    final cubit = makeCubit(repository);
+    addTearDown(cubit.close);
+    await cubit.initialize();
+    await cubit.finishEarly();
+    expect(cubit.state.visibleMilestone, isNull);
+    expect(cubit.state.status, SessionStatus.ready);
+    expect(repository.finishRequests, isEmpty);
+    expect(cubit.state.currentRound?.pairing, pairing);
+  });
   test(
     'preparation waits for a visible pairing and never retries after uncertainty',
     () async {
@@ -183,7 +177,7 @@ void main() {
       addTearDown(cubit.close);
       await cubit.initialize();
       await cubit.prepareCurrentPairing();
-      expect(repository.preparations, 0);
+      expect(repository.preparations, 1);
       cubit.continueInterview();
       await cubit.prepareCurrentPairing();
       await cubit.prepareCurrentPairing();
@@ -288,7 +282,7 @@ void main() {
       expect(await request, isEmpty);
     },
   );
-  testWidgets('small-phone milestone hides choices until explicit continue', (
+  testWidgets('small-phone fourth choice continues without a reading prompt', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(320, 700);
@@ -313,11 +307,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(SessionSongChoiceCard), findsNothing);
-    expect(repository.preparations, 0);
-    await tester.ensureVisible(find.text('Give me two more'));
-    await tester.tap(find.text('Give me two more'));
-    await tester.pumpAndSettle();
+    expect(find.text('Give me two more'), findsNothing);
+    expect(find.text('Read me now'), findsNothing);
     expect(find.byType(SessionSongChoiceCard), findsNWidgets(2));
     expect(repository.preparations, 1);
     expect(repository.finishRequests, isEmpty);
