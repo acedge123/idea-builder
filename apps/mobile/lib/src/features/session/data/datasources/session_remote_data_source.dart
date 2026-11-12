@@ -120,10 +120,24 @@ class SessionRemoteDataSource {
         'pairing_id': pairingId,
         'chosen_song_id': chosenSongId,
         'ms_to_decide': msToDecide,
+        if (experienceV1) 'defer_read': true,
       },
     );
     return _decodeJson(response);
   }
+
+  Future<Map<String, dynamic>> fetchRead({
+    required String sessionId,
+    required String afterPairingId,
+    required int answered,
+  }) async => _decodeJson(
+    await _apiClient.post(
+      '/api/v1/session/$sessionId/read',
+      timeout: MusicDnaApiClient.criticRequestTimeout,
+      headers: _experienceHeaders,
+      body: {'after_pairing_id': afterPairingId, 'answered': answered},
+    ),
+  );
 
   Future<void> skipPairing({
     required String sessionId,

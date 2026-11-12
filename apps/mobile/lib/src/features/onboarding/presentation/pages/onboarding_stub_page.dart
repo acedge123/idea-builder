@@ -1,3 +1,4 @@
+import '../../../../core/widgets/music_thinking_view.dart';
 import 'package:flutter/material.dart';
 import '../../../readings/presentation/app_navigation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,7 +80,6 @@ class _OnboardingStubPageState extends State<OnboardingStubPage> {
               final router = GoRouter.of(context);
               final startedSession = state.startedSession!;
               setState(() => _isTransitioningToSession = true);
-              await Future<void>.delayed(const Duration(milliseconds: 1400));
               if (!mounted) {
                 return;
               }
@@ -101,6 +101,19 @@ class _OnboardingStubPageState extends State<OnboardingStubPage> {
                 !_isTransitioningToSession &&
                 state.stage != OnboardingStage.success;
 
+            if (_isTransitioningToSession ||
+                state.stage == OnboardingStage.success ||
+                (state.stage == OnboardingStage.submitting &&
+                    state.currentSongIndex == 2)) {
+              return const Padding(
+                padding: EdgeInsets.all(24),
+                child: MusicThinkingView(
+                  title: 'Getting your interview ready',
+                  body:
+                      'Your opening songs are in. Next come six song choices.',
+                ),
+              );
+            }
             return ListView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
