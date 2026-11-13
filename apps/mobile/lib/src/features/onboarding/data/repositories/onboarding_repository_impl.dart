@@ -1,5 +1,6 @@
 import '../../domain/entities/onboarding_reaction.dart';
 import '../../domain/entities/started_music_session.dart';
+import '../../../session/domain/entities/interview_flow.dart';
 import '../../domain/repositories/onboarding_repository.dart';
 import '../datasources/onboarding_remote_data_source.dart';
 
@@ -46,6 +47,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
       reasoning: _readStringList(opener['reasoning']),
       secondaryLanes: _readStringList(opener['secondary_lanes']),
       songs: songs,
+      flow: InterviewFlow.fromWire(session['flow']),
     );
   }
 

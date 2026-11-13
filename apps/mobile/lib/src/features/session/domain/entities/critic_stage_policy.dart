@@ -86,4 +86,6 @@ abstract final class CriticStagePolicy {
   static const fillerInterval = Duration(milliseconds: 2500);
   static const readDeadline = Duration(seconds: 20);
   static const unavailable = "I'll come back to that one.";
+  static const checkpointUnavailable =
+      'The Critic is still chewing on that. Your picks are saved.';
 }

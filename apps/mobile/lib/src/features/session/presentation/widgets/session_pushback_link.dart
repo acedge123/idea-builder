@@ -30,7 +30,12 @@ class _SessionPushbackLinkState extends State<SessionPushbackLink> {
     final saved =
         state.pushbackReply ??
         state.exchanges
-            .where((e) => e.type == 'pushback')
+            .where(
+              (e) =>
+                  e.type == 'pushback' &&
+                  (!state.isCheckpoint ||
+                      e.answered == state.checkpointAnswered),
+            )
             .lastOrNull
             ?.pushbackReply;
     if (saved != null) {

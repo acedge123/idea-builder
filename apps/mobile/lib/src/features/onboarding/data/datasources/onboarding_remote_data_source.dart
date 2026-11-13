@@ -37,7 +37,10 @@ class OnboardingRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> startSession() async {
-    final response = await _apiClient.post('/api/v1/session');
+    final response = await _apiClient.post(
+      '/api/v1/session',
+      headers: const {'X-MusicDNA-Interview-Flow': 'checkpoints-v1'},
+    );
     return _decodeJson(response);
   }
 

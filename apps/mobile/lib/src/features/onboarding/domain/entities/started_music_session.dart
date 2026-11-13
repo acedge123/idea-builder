@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../session/domain/entities/interview_flow.dart';
 
 class StartedMusicSession extends Equatable {
   const StartedMusicSession({
@@ -12,6 +13,7 @@ class StartedMusicSession extends Equatable {
     required this.reasoning,
     required this.secondaryLanes,
     required this.songs,
+    this.flow,
   });
 
   factory StartedMusicSession.reference(String sessionId) =>
@@ -38,6 +40,7 @@ class StartedMusicSession extends Equatable {
   final List<String> reasoning;
   final List<String> secondaryLanes;
   final List<String> songs;
+  final InterviewFlow? flow;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -51,6 +54,7 @@ class StartedMusicSession extends Equatable {
       'reasoning': reasoning,
       'secondaryLanes': secondaryLanes,
       'songs': songs,
+      if (flow != null) 'flow': flow!.wireName,
     };
   }
 
@@ -71,6 +75,7 @@ class StartedMusicSession extends Equatable {
       reasoning: _readStringList(json['reasoning']),
       secondaryLanes: _readStringList(json['secondaryLanes']),
       songs: _readStringList(json['songs']),
+      flow: InterviewFlow.fromWire(json['flow']),
     );
   }
 
@@ -86,6 +91,7 @@ class StartedMusicSession extends Equatable {
     reasoning,
     secondaryLanes,
     songs,
+    flow,
   ];
 
   static double _readDouble(Object? value) {

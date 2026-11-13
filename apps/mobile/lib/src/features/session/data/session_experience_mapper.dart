@@ -92,6 +92,8 @@ SessionExperience mapSessionExperience(
         type: type,
         at: DateTime.parse(e['at'] as String),
         pairingId: e['pairing_id'] as String?,
+        answered: ((type == 'pushback' ? e['at_pick'] : e['answered']) as num?)
+            ?.toInt(),
         chosen: song(e['chosen']),
         rejected: song(e['rejected']),
         evidenceSource: e['evidence_source'] as String?,

@@ -1,4 +1,6 @@
 import '../widgets/session_pushback_link.dart';
+import '../../domain/entities/interview_flow.dart';
+import '../widgets/session_checkpoint_view.dart';
 import '../widgets/session_critic_stage.dart';
 import '../widgets/session_critic_response.dart';
 import '../../../../core/widgets/music_thinking_view.dart';
@@ -69,7 +71,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final state = context.read<SessionCubit>().state;
-    _syncStopwatch(state.currentRound?.pairing?.id);
+    _syncStopwatch(state);
     _scrollToActive(state);
   }
 
@@ -92,7 +94,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                   current.currentRound?.pairing?.id ||
               previous.status != current.status,
           listener: (context, state) {
-            _syncStopwatch(state.currentRound?.pairing?.id);
+            _syncStopwatch(state);
             _scrollToActive(state);
           },
           builder: (context, state) {
@@ -188,12 +190,36 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       SessionStatus.submitting ||
                       SessionStatus.critic =>
                         context.read<SessionCubit>().hasExperience
-                            ? SessionCriticStage(
-                                state: state,
-                                onRetryNext: context
-                                    .read<SessionCubit>()
-                                    .retryNextMatchup,
-                              )
+                            ? state.isCheckpoint && state.criticSettled
+                                  ? SessionCheckpointView(
+                                      state: state,
+                                      onContinue: context
+                                          .read<SessionCubit>()
+                                          .continueCheckpoint,
+                                      onFinish: context
+                                          .read<SessionCubit>()
+                                          .finishEarly,
+                                      onRetryRead: context
+                                          .read<SessionCubit>()
+                                          .retryCheckpointRead,
+                                      onRetryNext: context
+                                          .read<SessionCubit>()
+                                          .retryNextMatchup,
+                                      onPushback:
+                                          context
+                                              .read<SessionCubit>()
+                                              .hasPushback
+                                          ? context
+                                                .read<SessionCubit>()
+                                                .submitPushback
+                                          : null,
+                                    )
+                                  : SessionCriticStage(
+                                      state: state,
+                                      onRetryNext: context
+                                          .read<SessionCubit>()
+                                          .retryNextMatchup,
+                                    )
                             : PairingThinkingView(
                                 savingChoice: state.selectedSongId != null,
                               ),
@@ -211,8 +237,9 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   if (context
-                                      .read<SessionCubit>()
-                                      .hasExperience)
+                                          .read<SessionCubit>()
+                                          .hasExperience &&
+                                      state.flow == InterviewFlow.perPick)
                                     SessionCriticResponse(
                                       state: state,
                                       onReaction: context
@@ -236,7 +263,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                     ),
                                     onSkip: () => _skipPairing(context),
                                   ),
-                                  if (round?.round == 4 &&
+                                  if (state.flow == InterviewFlow.perPick &&
+                                      round?.round == 4 &&
                                       context.read<SessionCubit>().hasPushback)
                                     SessionPushbackLink(
                                       state: state,
@@ -245,8 +273,9 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                           .submitPushback,
                                     ),
                                   if (context
-                                      .read<SessionCubit>()
-                                      .hasExperience)
+                                          .read<SessionCubit>()
+                                          .hasExperience &&
+                                      state.flow == InterviewFlow.perPick)
                                     SessionReactionControls(
                                       exchanges: state.exchanges,
                                       read: state.read,
@@ -498,8 +527,14 @@ class _SessionStubPageState extends State<SessionStubPage> {
     context.read<SessionCubit>().skipPairing(msToDecide: elapsedMs);
   }
 
-  void _syncStopwatch(String? pairingId) {
-    if (pairingId == null || pairingId == _pairingId) {
+  void _syncStopwatch(SessionState state) {
+    final pairingId = state.currentRound?.pairing?.id;
+    if (state.status != SessionStatus.ready || pairingId == null) {
+      _stopwatch?.stop();
+      return;
+    }
+    if (pairingId == _pairingId) {
+      _stopwatch?.start();
       return;
     }
 

@@ -1,6 +1,7 @@
 import '../../features/session/domain/repositories/session_pushback_repository.dart';
 import '../../features/session/data/critic_copy_store.dart';
 import '../../features/session/domain/repositories/session_critic_repository.dart';
+import '../../features/session/domain/repositories/session_flow_repository.dart';
 import 'dart:async';
 import '../../features/ai_permission/data/ai_permission_data_source.dart';
 import '../../features/ai_permission/data/local_ai_permission_repository.dart';
@@ -228,6 +229,9 @@ class AppDependencies {
   SessionCubit createSessionCubit({StartedMusicSession? startedSession}) {
     return SessionCubit(
       sessionRepository,
+      flowRepository: config.experienceV1
+          ? sessionRepository as SessionFlowRepository
+          : null,
       pushbackRepository: config.experienceV1
           ? sessionRepository as SessionPushbackRepository
           : null,
