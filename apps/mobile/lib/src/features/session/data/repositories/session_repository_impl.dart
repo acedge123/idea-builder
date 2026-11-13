@@ -1,4 +1,6 @@
 import '../../domain/repositories/session_pushback_repository.dart';
+import '../../domain/entities/interview_flow.dart';
+import '../../domain/repositories/session_flow_repository.dart';
 import '../../domain/repositories/session_critic_repository.dart';
 import '../../domain/repositories/saved_reading_repository.dart';
 import '../../../../core/network/app_api_exception.dart';
@@ -19,6 +21,7 @@ import '../datasources/session_remote_data_source.dart';
 class SessionRepositoryImpl
     implements
         SessionPushbackRepository,
+        SessionFlowRepository,
         SessionRepository,
         SessionExperienceRepository,
         SessionCriticRepository,
@@ -28,6 +31,28 @@ class SessionRepositoryImpl
   SessionRepositoryImpl(this._remoteDataSource);
 
   final SessionRemoteDataSource _remoteDataSource;
+
+  @override
+  Future<InterviewFlow?> fetchFlow({required String sessionId}) async {
+    Map<String, dynamic> response;
+    try {
+      response = await _remoteDataSource.fetchFlow(sessionId: sessionId);
+    } on AppApiException catch (error) {
+      // A route-level 404 from a pre-checkpoint deployment is compatible.
+      // Ownership denials and unavailable lookups must never select another flow.
+      if (error.statusCode == 404 && error.code == null) return null;
+      rethrow;
+    }
+    requireExperienceVersion(response);
+    final flow = InterviewFlow.fromWire(response['flow']);
+    if (flow == null || response['saved'] != true) {
+      throw const AppApiException(
+        kind: AppApiErrorKind.upstream,
+        message: 'The interview could not be restored. Please try again.',
+      );
+    }
+    return flow;
+  }
 
   @override
   Future<SharePublication> setPublication({

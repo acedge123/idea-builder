@@ -1,4 +1,6 @@
 import '../../domain/repositories/session_pushback_repository.dart';
+import '../../domain/entities/interview_flow.dart';
+import '../../domain/repositories/session_flow_repository.dart';
 import '../../domain/entities/critic_stage_policy.dart';
 import 'dart:async';
 import '../../domain/repositories/session_critic_repository.dart';
@@ -72,6 +74,8 @@ class SessionState extends Equatable {
     this.mode = 'discover',
     this.decade,
     this.parentSessionId,
+    this.flow = InterviewFlow.perPick,
+    this.checkpointAnswered,
   });
 
   final SessionStatus status;
@@ -103,6 +107,12 @@ class SessionState extends Equatable {
   final String mode;
   final int? decade;
   final String? parentSessionId;
+  final InterviewFlow flow;
+  final int? checkpointAnswered;
+  bool get isCheckpoint =>
+      status == SessionStatus.critic &&
+      flow == InterviewFlow.checkpoints &&
+      checkpointAnswered != null;
   // Server guidance is optional; it must never replace the next song choices.
   SessionMilestone? get visibleMilestone => null;
 
@@ -133,6 +143,7 @@ class SessionState extends Equatable {
     bool? skipping,
     bool? pushbackSaving,
     String? pushbackReply,
+    bool clearPushbackReply = false,
     String? pushbackError,
     bool clearPushbackError = false,
     String? criticWaitLine,
@@ -161,6 +172,9 @@ class SessionState extends Equatable {
     String? mode,
     int? decade,
     String? parentSessionId,
+    InterviewFlow? flow,
+    int? checkpointAnswered,
+    bool clearCheckpoint = false,
   }) {
     return SessionState(
       status: status ?? this.status,
@@ -193,7 +207,9 @@ class SessionState extends Equatable {
       criticSettled: criticSettled ?? this.criticSettled,
       skipping: skipping ?? this.skipping,
       pushbackSaving: pushbackSaving ?? this.pushbackSaving,
-      pushbackReply: pushbackReply ?? this.pushbackReply,
+      pushbackReply: clearPushbackReply
+          ? null
+          : pushbackReply ?? this.pushbackReply,
       pushbackError: clearPushbackError
           ? null
           : pushbackError ?? this.pushbackError,
@@ -227,6 +243,10 @@ class SessionState extends Equatable {
       mode: mode ?? this.mode,
       decade: decade ?? this.decade,
       parentSessionId: parentSessionId ?? this.parentSessionId,
+      flow: flow ?? this.flow,
+      checkpointAnswered: clearCheckpoint
+          ? null
+          : checkpointAnswered ?? this.checkpointAnswered,
     );
   }
 
@@ -267,6 +287,8 @@ class SessionState extends Equatable {
     mode,
     decade,
     parentSessionId,
+    flow,
+    checkpointAnswered,
   ];
 }
 
@@ -283,6 +305,7 @@ class SessionCubit extends Cubit<SessionState> {
     SessionResultRepository? resultRepository,
     SessionPreparationRepository? preparationRepository,
     SavedReadingRepository? savedReadingRepository,
+    SessionFlowRepository? flowRepository,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
        _experienceRepository = experienceRepository,
@@ -292,9 +315,11 @@ class SessionCubit extends Cubit<SessionState> {
        _resultRepository = resultRepository,
        _preparationRepository = preparationRepository,
        _savedReadingRepository = savedReadingRepository,
+       _flowRepository = flowRepository,
        super(SessionState(startedSession: startedSession));
 
   final SessionRepository _repository;
+  final SessionFlowRepository? _flowRepository;
   final AppLogger _logger;
   final SessionResumeStore? _resumeStore;
   final SessionResultRepository? _resultRepository;
@@ -304,7 +329,10 @@ class SessionCubit extends Cubit<SessionState> {
   String? _pushbackText, _pushbackMutationId;
   bool get hasPushback => _pushbackRepository != null;
   int _flowRevision = 0;
-  Timer? _criticDeadlineTimer, _criticFillerTimer;
+  Timer? _criticDeadlineTimer, _criticFillerTimer, _quipHoldTimer;
+  bool _holdingQuip = false;
+  String? _readPairingId;
+  int? _readAnswered;
   final Future<CriticFillers> Function()? _loadCriticCopy;
   CriticFillers? _fillers;
   List<String> _waitingLines = const [];
@@ -325,6 +353,7 @@ class SessionCubit extends Cubit<SessionState> {
   Future<void> initialize({bool? savedOnly, int? resultVersion}) async {
     _cancelCriticTimers();
     _flowRevision++;
+    final revision = _flowRevision;
     _savedOnly = savedOnly ?? _savedOnly;
     _savedResultVersion = resultVersion ?? _savedResultVersion;
     var sessionId = state.sessionId;
@@ -428,14 +457,45 @@ class SessionCubit extends Cubit<SessionState> {
       }
     }
 
+    try {
+      final flow = await _flowRepository?.fetchFlow(sessionId: sessionId);
+      if (isClosed || revision != _flowRevision) return;
+      if (_flowRepository != null &&
+          flow == null &&
+          state.startedSession?.flow == InterviewFlow.checkpoints) {
+        throw const AppApiException(
+          kind: AppApiErrorKind.upstream,
+          message: 'The interview could not be restored. Please try again.',
+        );
+      }
+      emit(
+        state.copyWith(
+          flow: flow ?? state.startedSession?.flow ?? InterviewFlow.perPick,
+          clearCheckpoint: true,
+        ),
+      );
+      _logger.event('session.flow_restored', {'flow': state.flow.wireName});
+    } catch (error) {
+      if (isClosed || revision != _flowRevision) return;
+      emit(
+        state.copyWith(
+          status: SessionStatus.failure,
+          errorMessage: _readableError(error),
+          requiresReauthentication:
+              error is AppApiException && error.isAuthRelated,
+        ),
+      );
+      return;
+    }
     if (_fillers == null && _loadCriticCopy != null) {
       _fillers = await _loadCriticCopy();
-      if (isClosed) return;
+      if (isClosed || revision != _flowRevision) return;
     }
     _beginWaitingCopy(wait: 0, revision: _flowRevision);
     await _loadNextPairing(
       sessionId: sessionId,
       keepFeedback: state.lastFeedback != null,
+      restoreCheckpoint: true,
     );
   }
 
@@ -477,6 +537,8 @@ class SessionCubit extends Cubit<SessionState> {
 
     _cancelCriticTimers();
     final revision = ++_flowRevision;
+    _pushbackText = null;
+    _pushbackMutationId = null;
     emit(
       state.copyWith(
         status: SessionStatus.submitting,
@@ -492,6 +554,9 @@ class SessionCubit extends Cubit<SessionState> {
         selectedSongId: chosenSongId,
         clearLastFeedback: true,
         clearReactionMessage: true,
+        clearCheckpoint: true,
+        clearPushbackReply: true,
+        clearPushbackError: true,
       ),
     );
 
@@ -514,10 +579,18 @@ class SessionCubit extends Cubit<SessionState> {
       });
       if (hasExperience) {
         final answered = state.currentRound!.round;
+        _readPairingId = pairingId;
+        _readAnswered = answered;
         final finalPick =
             answered >= (state.currentRound!.maxAnswered ?? maxPairingRounds);
+        final checkpointFlow = state.flow == InterviewFlow.checkpoints;
+        final checkpoint = checkpointFlow && (answered == 2 || answered == 4);
+        final quipOnly = checkpointFlow && !checkpoint && !finalPick;
         final pending =
-            !finalPick && feedback.readPending && _criticRepository != null;
+            !finalPick &&
+            !quipOnly &&
+            feedback.readPending &&
+            _criticRepository != null;
         if (_waitingIndex == 0) {
           _waitingLines =
               _fillers?.waitingLines(
@@ -536,12 +609,40 @@ class SessionCubit extends Cubit<SessionState> {
             criticPending: pending,
             criticSettled: !pending,
             nextPairingLoading: true,
-            criticMessage: !pending && !finalPick && feedback.read == null
-                ? CriticStagePolicy.unavailable
+            checkpointAnswered: checkpoint ? answered : null,
+            clearCheckpoint: !checkpoint,
+            criticMessage:
+                !pending && !finalPick && !quipOnly && feedback.read == null
+                ? (checkpoint
+                      ? CriticStagePolicy.checkpointUnavailable
+                      : CriticStagePolicy.unavailable)
                 : null,
-            clearCriticMessage: pending || feedback.read != null || finalPick,
+            clearCriticMessage:
+                pending || feedback.read != null || finalPick || quipOnly,
           ),
         );
+        if (quipOnly) {
+          _cancelCriticTimers();
+          _holdingQuip = true;
+          final lines = _fillers?.waitingLines(
+            answered,
+            hunch: feedback.hunch ?? 'early',
+            pairing: pairing,
+          );
+          emit(
+            state.copyWith(
+              clearRead: true,
+              criticWaitLine: lines != null && lines.length > 1
+                  ? lines[1]
+                  : state.criticWaitLine,
+            ),
+          );
+          _quipHoldTimer = Timer(CriticStagePolicy.fillerInterval, () {
+            if (isClosed || revision != _flowRevision) return;
+            _holdingQuip = false;
+            _releaseCriticWhenReady();
+          });
+        }
         if (pending) {
           _startCriticDeadline(revision);
           unawaited(
@@ -678,6 +779,13 @@ class SessionCubit extends Cubit<SessionState> {
   }
 
   Future<void> finishEarly() async {
+    if (state.isCheckpoint &&
+        state.checkpointAnswered == 4 &&
+        !state.criticPending &&
+        !state.pushbackSaving) {
+      await revealSession(finishEarly: true);
+      return;
+    }
     if (state.visibleMilestone?.canFinish != true || _pendingReaction != null) {
       return;
     }
@@ -690,6 +798,8 @@ class SessionCubit extends Cubit<SessionState> {
     final sessionId = state.sessionId;
     final pairing = state.currentRound?.pairing;
     if (state.mode == 'explore' ||
+        (state.flow == InterviewFlow.checkpoints &&
+            !const [2, 4, 6].contains(state.currentRound?.round)) ||
         repository == null ||
         sessionId == null ||
         pairing?.exposureId == null ||
@@ -977,6 +1087,7 @@ class SessionCubit extends Cubit<SessionState> {
     required bool keepFeedback,
     SessionChoiceFeedback? feedback,
     String? afterPairingId,
+    bool restoreCheckpoint = false,
   }) async {
     final revision = _flowRevision;
     try {
@@ -991,6 +1102,71 @@ class SessionCubit extends Cubit<SessionState> {
                   nextRound.round > maxPairingRounds));
       final pending =
           !isComplete && afterPairingId != null && _criticRepository != null;
+      final answered = nextRound.round - 1;
+      if (restoreCheckpoint &&
+          !isComplete &&
+          state.flow == InterviewFlow.checkpoints &&
+          const [2, 4].contains(answered)) {
+        // Read history before exposing any cards. A missing/failed read is a
+        // recoverable checkpoint, never permission to skip straight past it.
+        final experience = await _experienceRepository!.fetchExperience(
+          sessionId: sessionId,
+        );
+        if (isClosed || revision != _flowRevision) return;
+        final choices = experience.exchanges
+            .where((e) => e.type == 'choice')
+            .toList();
+        final lastChoice = choices.isEmpty ? null : choices.last;
+        if (choices.length != answered || lastChoice?.pairingId == null) {
+          throw const AppApiException(
+            kind: AppApiErrorKind.upstream,
+            message: 'The interview could not be restored. Please try again.',
+          );
+        }
+        SessionRead? savedRead;
+        for (final exchange in experience.exchanges.reversed) {
+          if (exchange.type == 'choice') break;
+          if (exchange.read != null &&
+              (exchange.answered == null || exchange.answered == answered)) {
+            savedRead = exchange.read;
+            break;
+          }
+        }
+        if (savedRead?.thesis.trim().isEmpty == true) savedRead = null;
+        _readPairingId = lastChoice!.pairingId;
+        _readAnswered = answered;
+        _cancelCriticTimers();
+        emit(
+          state.copyWith(
+            status: SessionStatus.critic,
+            currentRound: nextRound,
+            prefetchedRound: nextRound,
+            checkpointAnswered: answered,
+            exchanges: experience.exchanges,
+            mode: experience.mode,
+            decade: experience.decade,
+            parentSessionId: experience.parentSessionId,
+            read: savedRead,
+            clearRead: savedRead == null,
+            criticPending: false,
+            criticSettled: true,
+            criticMessage: savedRead == null
+                ? CriticStagePolicy.checkpointUnavailable
+                : null,
+            clearCriticMessage: savedRead != null,
+            clearCriticWaitLine: true,
+            clearLastFeedback: true,
+            clearSelection: true,
+            nextPairingLoading: false,
+            clearErrorMessage: true,
+          ),
+        );
+        _logger.event('session.checkpoint_restored', {
+          'answered': answered,
+          'hasRead': savedRead != null,
+        });
+        return;
+      }
       _logger.event('session.next_pairing_loaded', {
         'round': nextRound.round,
         'done': isComplete,
@@ -1050,6 +1226,8 @@ class SessionCubit extends Cubit<SessionState> {
   void _cancelCriticTimers() {
     _criticDeadlineTimer?.cancel();
     _criticFillerTimer?.cancel();
+    _quipHoldTimer?.cancel();
+    _holdingQuip = false;
   }
 
   void _beginWaitingCopy({
@@ -1096,7 +1274,9 @@ class SessionCubit extends Cubit<SessionState> {
           criticSettled: true,
           criticPending: false,
           clearCriticWaitLine: true,
-          criticMessage: CriticStagePolicy.unavailable,
+          criticMessage: state.isCheckpoint
+              ? CriticStagePolicy.checkpointUnavailable
+              : CriticStagePolicy.unavailable,
         ),
       );
       _logger.event('session.critic_wait_elapsed');
@@ -1187,6 +1367,8 @@ class SessionCubit extends Cubit<SessionState> {
     final next = state.prefetchedRound;
     if (state.status != SessionStatus.critic ||
         !state.criticSettled ||
+        state.isCheckpoint ||
+        _holdingQuip ||
         state.reacting ||
         _pendingReaction != null ||
         next == null) {
@@ -1203,9 +1385,65 @@ class SessionCubit extends Cubit<SessionState> {
         criticPending: false,
         criticSettled: false,
         clearCriticWaitLine: true,
+        clearCheckpoint: true,
+        clearRead: state.flow == InterviewFlow.checkpoints,
+        clearLastFeedback: state.flow == InterviewFlow.checkpoints,
+        clearCriticMessage: state.flow == InterviewFlow.checkpoints,
       ),
     );
     _logger.event('session.critic_pairing_revealed');
+  }
+
+  void continueCheckpoint() {
+    if (!state.isCheckpoint ||
+        state.criticPending ||
+        state.pushbackSaving ||
+        state.prefetchedRound == null ||
+        state.nextPairingLoading) {
+      return;
+    }
+    final answered = state.checkpointAnswered;
+    emit(state.copyWith(clearCheckpoint: true));
+    _releaseCriticWhenReady();
+    _logger.event('session.checkpoint_continued', {'answered': answered});
+  }
+
+  Future<void> retryCheckpointRead() async {
+    if (!state.isCheckpoint ||
+        state.criticPending ||
+        state.pushbackSaving ||
+        _criticRepository == null ||
+        _readPairingId == null ||
+        _readAnswered == null) {
+      return;
+    }
+    // Explicit retry only; never resubmit the committed choice.
+    final revision = ++_flowRevision;
+    _cancelCriticTimers();
+    emit(
+      state.copyWith(
+        criticPending: true,
+        criticSettled: false,
+        clearCriticMessage: true,
+      ),
+    );
+    _beginWaitingCopy(wait: _readAnswered!, revision: revision);
+    _startCriticDeadline(revision);
+    await _deliverCriticRead(
+      sessionId: state.sessionId!,
+      afterPairingId: _readPairingId!,
+      answered: _readAnswered!,
+      revision: revision,
+    );
+    // A next-pair request from the previous revision may have been discarded.
+    if (!isClosed &&
+        revision == _flowRevision &&
+        state.prefetchedRound == null) {
+      await _prefetchCriticNext(
+        sessionId: state.sessionId!,
+        revision: revision,
+      );
+    }
   }
 
   Future<void> _refreshExperience({
@@ -1286,7 +1524,9 @@ class SessionCubit extends Cubit<SessionState> {
           criticPending: false,
           criticSettled: true,
           clearCriticWaitLine: true,
-          criticMessage: CriticStagePolicy.unavailable,
+          criticMessage: state.isCheckpoint
+              ? CriticStagePolicy.checkpointUnavailable
+              : CriticStagePolicy.unavailable,
         ),
       );
       _logger.event('session.critic_unavailable', {'answered': answered});
@@ -1301,11 +1541,15 @@ class SessionCubit extends Cubit<SessionState> {
         sessionId == null ||
         text.isEmpty ||
         text.length > 500 ||
-        state.status != SessionStatus.ready ||
-        state.currentRound?.round != 4 ||
+        !((state.status == SessionStatus.ready &&
+                state.flow == InterviewFlow.perPick &&
+                state.currentRound?.round == 4) ||
+            (state.status == SessionStatus.critic &&
+                state.isCheckpoint &&
+                !state.criticPending)) ||
         state.pushbackSaving ||
         state.reacting ||
-        state.selectedSongId != null ||
+        (!state.isCheckpoint && state.selectedSongId != null) ||
         _pendingReaction != null) {
       return;
     }

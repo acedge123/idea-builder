@@ -13,6 +13,15 @@ class SessionRemoteDataSource {
   Map<String, String> get _experienceHeaders =>
       experienceV1 ? const {'X-MusicDNA-Experience': '1'} : const {};
 
+  Future<Map<String, dynamic>> fetchFlow({
+    required String sessionId,
+  }) async => _decodeJson(
+    await _apiClient.get(
+      '/api/v1/interview-flow?session=${Uri.encodeQueryComponent(sessionId)}',
+      headers: _experienceHeaders,
+    ),
+  );
+
   Future<Map<String, dynamic>> fetchExperience({
     required String sessionId,
   }) async {

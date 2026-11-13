@@ -67,12 +67,14 @@ class SessionExchange extends Equatable {
     this.evidenceSource,
     this.pushbackText,
     this.pushbackReply,
+    this.answered,
   });
   final String type;
   final DateTime at;
   final String? pairingId, chosen, rejected, feedback, reaction, evidenceSource;
   final SessionRead? read;
   final String? pushbackText, pushbackReply;
+  final int? answered;
   @override
   List<Object?> get props => [
     type,
@@ -86,6 +88,7 @@ class SessionExchange extends Equatable {
     evidenceSource,
     pushbackText,
     pushbackReply,
+    answered,
   ];
 }
 
