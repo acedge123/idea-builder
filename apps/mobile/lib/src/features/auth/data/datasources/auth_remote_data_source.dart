@@ -95,6 +95,25 @@ class SupabaseAuthRemoteDataSource implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
+    final guest = _supabase.auth.currentSession?.user;
+    if (guest?.isAnonymous == true) {
+      // Upgrade the owner in place. signUp() creates a different user and
+      // strands every reading, pick and message owned by the guest UUID.
+      final response = await _supabase.auth.updateUser(
+        UserAttributes(email: email, password: password),
+      );
+      final user = response.user;
+      if (user == null || user.id != guest!.id) {
+        throw const AuthRemoteDataSourceException(
+          'The guest account upgrade could not be verified.',
+        );
+      }
+      return domain.AuthSignUpResult(
+        user: _requireUser(user),
+        hasActiveSession: _supabase.auth.currentSession?.user.id == user.id,
+      );
+    }
+
     final response = await _supabase.auth.signUp(
       email: email,
       password: password,

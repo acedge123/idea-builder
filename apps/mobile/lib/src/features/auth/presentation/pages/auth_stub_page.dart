@@ -28,6 +28,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
   final _passwordController = TextEditingController();
   _AuthFormMode _mode = _AuthFormMode.signIn;
   bool _openingRecovery = false;
+  bool _upgradingGuest = false;
   String? _recoveryError;
 
   @override
@@ -57,8 +58,13 @@ class _AuthStubPageState extends State<AuthStubPage> {
             }
 
             if (state.submissionStatus == AuthSubmissionStatus.success &&
-                state.status == AuthStatus.authenticated) {
-              context.go(_mode == _AuthFormMode.signUp ? '/onboarding' : '/');
+                state.status == AuthStatus.authenticated &&
+                state.user?.isAnonymous == false) {
+              context.go(
+                _mode == _AuthFormMode.signUp
+                    ? (_upgradingGuest ? '/readings' : '/onboarding')
+                    : '/',
+              );
             }
           },
           builder: (context, state) {
@@ -92,7 +98,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
                       ? 'Manage your account and return to your saved readings.'
                       : _mode == _AuthFormMode.signIn
                       ? 'Pick up your saved readings.'
-                      : 'Email and a password. No social, no ceremony. We will move straight into the opening interview.',
+                      : 'Save your readings and pick up where you left off.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.mutedForeground,
                   ),
@@ -359,6 +365,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
       return;
     }
 
+    _upgradingGuest = authCubit.state.user?.isAnonymous == true;
     authCubit.signUp(email: email, password: password);
   }
 
