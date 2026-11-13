@@ -99,6 +99,14 @@ class AuthCubit extends Cubit<AuthState> {
     _subscription ??= _authRepository.observeAuthState().listen((
       AuthUser? user,
     ) {
+      if (user?.isAnonymous == true &&
+          user?.id == state.user?.id &&
+          state.submissionStatus ==
+              AuthSubmissionStatus.emailConfirmationRequired) {
+        // A delayed SDK userUpdated/token event must not erase the pending
+        // confirmation instructions or turn the guest into a completed signup.
+        return;
+      }
       _logger.event('auth.state_changed', <String, Object?>{
         'authenticated': user != null,
       });
@@ -222,14 +230,20 @@ class AuthCubit extends Cubit<AuthState> {
         'userId': result.user.id,
         'hasActiveSession': result.hasActiveSession,
       });
-      if (!result.hasActiveSession) {
+      if (!result.hasActiveSession || result.user.isAnonymous) {
         emit(
           state.copyWith(
-            status: AuthStatus.unauthenticated,
-            clearUser: true,
+            status: result.hasActiveSession
+                ? AuthStatus.authenticated
+                : AuthStatus.unauthenticated,
+            user: result.hasActiveSession ? result.user : null,
+            clearUser: !result.hasActiveSession,
             submissionStatus: AuthSubmissionStatus.emailConfirmationRequired,
-            infoMessage:
-                'Check your email to confirm your account, then sign in.',
+            infoMessage: result.hasActiveSession
+                ? 'Check your email to confirm your account, then sign in '
+                      'here. Your guest reading is still saved on this device; '
+                      'stay signed in until you confirm.'
+                : 'Check your email to confirm your account, then sign in.',
             clearErrorMessage: true,
           ),
         );
