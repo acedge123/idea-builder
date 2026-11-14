@@ -15,11 +15,13 @@ class SessionResultView extends StatelessWidget {
     required this.onCopy,
     required this.onSignIn,
     this.onPushBack,
+    this.shareCardActions,
   });
   final SessionState state;
   final String? shareUrl;
   final VoidCallback onPublish, onRevoke, onVerify, onCopy, onSignIn;
   final VoidCallback? onPushBack;
+  final Widget? shareCardActions;
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +149,11 @@ class SessionResultView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: SelectableText(shareUrl!),
+          ),
+        if (shareUrl != null && shareCardActions != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: shareCardActions!,
           ),
         if (state.shareError != null) ...[
           const SizedBox(height: 12),
