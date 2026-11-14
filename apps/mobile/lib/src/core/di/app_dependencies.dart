@@ -1,3 +1,9 @@
+import 'package:http/http.dart' as http;
+import '../../features/share_card/domain/share_card.dart';
+import '../../features/share_card/data/http_share_card_repository.dart';
+import '../../features/share_card/data/svg_share_card_renderer.dart';
+import '../../features/share_card/data/native_share_card_sender.dart';
+import '../../features/share_card/presentation/share_card_cubit.dart';
 import '../../features/guest_save/domain/guest_save_repository.dart';
 import '../../features/guest_save/data/guest_reading_store.dart';
 import '../../features/guest_save/data/supabase_guest_save_auth.dart';
@@ -88,6 +94,7 @@ class AppDependencies {
   String? _continuationOwner;
   late final StreamSubscription<music_auth.AuthUser?> _ownerChanges;
   void dispose() {
+    _shareCardClient.close();
     _ownerChanges.cancel();
     if (config.experienceV1) criticCopyStore.dispose();
     for (final cubit in _continuations.values) {
@@ -140,6 +147,24 @@ class AppDependencies {
           resultVersion: resultVersion,
         ) !=
         null,
+  );
+
+  final _shareCardClient = http.Client();
+  late final ShareCardRepository shareCardRepository = HttpShareCardRepository(
+    baseUri: Uri.parse(config.apiBaseUrl),
+    client: _shareCardClient,
+  );
+  ShareCardCubit createShareCardCubit({
+    required ShareCardSource source,
+    required bool Function() stillCurrent,
+  }) => ShareCardCubit(
+    source: source,
+    repository: shareCardRepository,
+    renderer: SvgShareCardRenderer(),
+    sender: NativeShareCardSender(),
+    stillCurrent: () =>
+        authRepository.currentUser?.id == source.ownerId && stillCurrent(),
+    logger: logger,
   );
 
   late final CriticCopyStore criticCopyStore = CriticCopyStore(

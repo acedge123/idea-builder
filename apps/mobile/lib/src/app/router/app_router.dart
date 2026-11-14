@@ -188,6 +188,8 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
             child: SessionStubPage(
               ownerId: dependencies.authRepository.currentUser?.id,
               guestSaveRepository: dependencies.guestSaveRepository,
+              createShareCardCubit: dependencies.createShareCardCubit,
+
               createArchetypeFeedbackCubit: dependencies.hasResultFeedback
                   ? dependencies.createArchetypeFeedbackCubit
                   : null,
@@ -229,6 +231,7 @@ Widget _sessionPage(
     child: SessionStubPage(
       ownerId: dependencies.authRepository.currentUser?.id,
       guestSaveRepository: dependencies.guestSaveRepository,
+      createShareCardCubit: dependencies.createShareCardCubit,
       createArchetypeFeedbackCubit: dependencies.hasResultFeedback
           ? dependencies.createArchetypeFeedbackCubit
           : null,

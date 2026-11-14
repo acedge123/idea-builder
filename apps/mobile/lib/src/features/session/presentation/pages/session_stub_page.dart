@@ -1,3 +1,6 @@
+import '../../../share_card/domain/share_card.dart';
+import '../../../share_card/presentation/share_card_cubit.dart';
+import '../../../share_card/presentation/share_card_actions.dart';
 import '../../../guest_save/domain/guest_reading.dart';
 import '../../../guest_save/domain/guest_save_repository.dart';
 import '../../../guest_save/presentation/guest_reading_save.dart';
@@ -36,6 +39,7 @@ class SessionStubPage extends StatefulWidget {
     this.startedSession,
     this.ownerId,
     this.guestSaveRepository,
+    this.createShareCardCubit,
     this.createFeedbackCubit,
     this.createArchetypeFeedbackCubit,
     this.createExploreCubit,
@@ -56,6 +60,11 @@ class SessionStubPage extends StatefulWidget {
   final StartedMusicSession? startedSession;
   final String? ownerId;
   final GuestSaveRepository? guestSaveRepository;
+  final ShareCardCubit Function({
+    required ShareCardSource source,
+    required bool Function() stillCurrent,
+  })?
+  createShareCardCubit;
   final ResultFeedbackCubit Function({
     required String sessionId,
     required int resultVersion,
@@ -87,6 +96,50 @@ class _SessionStubPageState extends State<SessionStubPage> {
       sourceUserId: user!.id,
       sessionId: state.sessionId!,
       resultVersion: state.reveal!.result!.version,
+    );
+  }
+
+  Widget? _shareImageActions(SessionState state) {
+    final publication = state.publication;
+    final session = context.read<SessionCubit>();
+    if (widget.createShareCardCubit == null ||
+        widget.ownerId == null ||
+        state.sessionId == null ||
+        state.sharing ||
+        !state.shareVerified ||
+        publication?.isPublic != true ||
+        publication?.token == null ||
+        publication?.resultVersion != state.reveal?.result?.version) {
+      return null;
+    }
+    final source = ShareCardSource(
+      ownerId: widget.ownerId!,
+      sessionId: state.sessionId!,
+      resultVersion: publication!.resultVersion!,
+      token: publication.token!,
+    );
+    return BlocProvider(
+      key: ValueKey((
+        source.ownerId,
+        source.sessionId,
+        source.resultVersion,
+        source.token,
+      )),
+      create: (_) => widget.createShareCardCubit!(
+        source: source,
+        stillCurrent: () {
+          if (session.isClosed) return false;
+          final current = session.state;
+          return current.sessionId == source.sessionId &&
+              !current.sharing &&
+              current.shareVerified &&
+              current.publication?.isPublic == true &&
+              current.publication?.token == source.token &&
+              current.publication?.resultVersion == source.resultVersion &&
+              current.reveal?.result?.version == source.resultVersion;
+        },
+      ),
+      child: const ShareCardActions(),
     );
   }
 
@@ -396,6 +449,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                             ? SessionResultView(
                                 state: state,
                                 shareUrl: _buildShareUrl(state.reveal!),
+                                shareCardActions: _shareImageActions(state),
                                 onPublish: () => context
                                     .read<SessionCubit>()
                                     .setPublication(publish: true),
