@@ -1,0 +1,37 @@
+{
+  "web_source": "bfd2a672112d00b6e4af4c4bba7b0a42e7c2b16a",
+  "mobile_base": "276e7ff",
+  "version": "0.1.2+16",
+  "assets": [
+    {
+      "asset": "assets/archetypes/anthemist.jpg",
+      "bytes": 54811,
+      "sha256": "875fcb18d5cb6233aad9c913ae52d5a333c432a0bea2ac0d646ed0c0f5beb290"
+    },
+    {
+      "asset": "assets/archetypes/atmospherist.jpg",
+      "bytes": 51968,
+      "sha256": "53c14972f4c67300b2f659698a87357478327b13bf4641faea6adca8adedf3b6"
+    },
+    {
+      "asset": "assets/archetypes/hedonist.jpg",
+      "bytes": 66481,
+      "sha256": "186790d60a0b792fc03eaebcc560e4d7e61d8056301e478760a69ccaadf4e699"
+    },
+    {
+      "asset": "assets/archetypes/romantic.jpg",
+      "bytes": 42220,
+      "sha256": "b2de6f2bc154b77517f839964e0f62142812b773945ee01dff539cb26d592413"
+    },
+    {
+      "asset": "assets/archetypes/transformer.jpg",
+      "bytes": 60549,
+      "sha256": "ce65e8b7910f3616e158140ab2d3b438dc40272a584a6e5ceb51f95217044d4a"
+    },
+    {
+      "asset": "assets/archetypes/witness.jpg",
+      "bytes": 74995,
+      "sha256": "73952ee83e4e055558c059b62ec889bed6060e303e74a44ad9442f38621bac36"
+    }
+  ]
+}
