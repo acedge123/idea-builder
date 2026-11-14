@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'archetype_art.dart';
 import '../../domain/entities/reading_report.dart';
 
 class ReadingIdentity extends StatelessWidget {
@@ -18,6 +19,7 @@ class ReadingIdentity extends StatelessWidget {
                 : 'Leaning toward',
             style: theme.labelSmall,
           ),
+          ArchetypeArt(name: archetype.name),
           Text(archetype.name, style: theme.headlineMedium),
           if (archetype.profileVersion != null)
             Text(
