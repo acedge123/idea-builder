@@ -14,9 +14,11 @@ enum _AuthFormMode { signIn, signUp }
 class AuthStubPage extends StatefulWidget {
   const AuthStubPage({
     super.key,
+    this.signInOnly = false,
     this.openPasswordRecovery = recovery.openPasswordRecovery,
   });
   final Future<bool> Function(Uri) openPasswordRecovery;
+  final bool signInOnly;
 
   @override
   State<AuthStubPage> createState() => _AuthStubPageState();
@@ -104,7 +106,7 @@ class _AuthStubPageState extends State<AuthStubPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                if (!hasAccount)
+                if (!hasAccount && !widget.signInOnly)
                   _ModeToggle(
                     mode: _mode,
                     enabled: !isSubmitting,

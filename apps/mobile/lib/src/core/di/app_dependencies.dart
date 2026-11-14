@@ -1,3 +1,7 @@
+import '../../features/guest_save/domain/guest_save_repository.dart';
+import '../../features/guest_save/data/guest_reading_store.dart';
+import '../../features/guest_save/data/supabase_guest_save_auth.dart';
+import '../../features/guest_save/data/verified_guest_save_repository.dart';
 import '../../features/session/domain/repositories/session_pushback_repository.dart';
 import '../../features/session/data/critic_copy_store.dart';
 import '../../features/session/domain/repositories/session_critic_repository.dart';
@@ -163,6 +167,14 @@ class AppDependencies {
   );
   late final ReadingLibraryRepository readingLibraryRepository =
       RestReadingLibraryRepository(sessionRemoteDataSource);
+  late final GuestSaveRepository guestSaveRepository =
+      VerifiedGuestSaveRepository(
+        auth: SupabaseGuestSaveAuth(supabase),
+        store: GuestReadingStore(),
+        library: readingLibraryRepository,
+        reports: sessionRepository as SavedReadingRepository,
+        logger: logger,
+      );
   ReadingLibraryCubit createReadingLibraryCubit() => ReadingLibraryCubit(
     readingLibraryRepository,
     ownerId: authRepository.currentUser!.id,

@@ -1,3 +1,5 @@
+import '../../guest_save/domain/guest_save_repository.dart';
+import '../../guest_save/presentation/guest_recovery_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,8 +9,13 @@ import 'reading_library_cubit.dart';
 import 'app_navigation.dart';
 
 class ReadingLibraryPage extends StatelessWidget {
-  const ReadingLibraryPage({this.home = false, super.key});
+  const ReadingLibraryPage({
+    this.home = false,
+    this.guestSaveRepository,
+    super.key,
+  });
   final bool home;
+  final GuestSaveRepository? guestSaveRepository;
   @override
   Widget build(BuildContext context) => Scaffold(
     bottomNavigationBar: AppNavigation(index: home ? 0 : 1),
@@ -20,6 +27,8 @@ class ReadingLibraryPage extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
               children: [
+                if (guestSaveRepository != null)
+                  GuestRecoveryCard(repository: guestSaveRepository!),
                 Image.asset(
                   'assets/branding/music-dna-logo.png',
                   height: 52,

@@ -3,14 +3,15 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 class AppNavigation extends StatelessWidget {
-  const AppNavigation({this.index = 0, super.key});
+  const AppNavigation({this.index = 0, this.onNavigate, super.key});
   final int index;
+  final ValueChanged<String>? onNavigate;
   @override
   Widget build(BuildContext context) => NavigationBar(
     backgroundColor: AppTheme.background,
     selectedIndex: index,
     onDestinationSelected: (i) =>
-        context.go(const ['/', '/readings', '/auth'][i]),
+        (onNavigate ?? context.go)(const ['/', '/readings', '/auth'][i]),
     destinations: const [
       NavigationDestination(
         icon: Icon(Icons.home_outlined),

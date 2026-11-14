@@ -1,10 +1,12 @@
+import '../../features/auth/presentation/pages/auth_stub_page.dart';
+import '../../features/guest_save/presentation/guest_save_page.dart';
+import '../../features/guest_save/presentation/guest_account_gate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/di/app_dependencies.dart';
 import '../../features/ai_permission/presentation/ai_permission_gate.dart';
-import '../../features/auth/presentation/pages/auth_stub_page.dart';
 import '../../features/continuation/domain/continuation_repository.dart';
 import '../../features/continuation/presentation/continuation_page.dart';
 import '../../features/foundation/presentation/pages/foundation_home_page.dart';
@@ -38,9 +40,38 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
         builder: (context, state) => FoundationHomePage(
           config: dependencies.config,
           createLibraryCubit: dependencies.createReadingLibraryCubit,
+          guestSaveRepository: dependencies.guestSaveRepository,
         ),
       ),
-      GoRoute(path: '/auth', builder: (context, state) => const AuthStubPage()),
+      GoRoute(
+        path: '/auth',
+        builder: (context, state) =>
+            state.uri.queryParameters['mode'] == 'sign-in-only'
+            ? const AuthStubPage(signInOnly: true)
+            : GuestAccountGate(
+                key: ValueKey(dependencies.authRepository.currentUser?.id),
+                repository: dependencies.guestSaveRepository,
+              ),
+      ),
+      GoRoute(
+        path: '/save-reading',
+        builder: (context, state) {
+          final sessionId = state.uri.queryParameters['session'];
+          final version = int.tryParse(
+            state.uri.queryParameters['version'] ?? '',
+          );
+          if (sessionId == null || version == null || version < 1) {
+            return GuestAccountGate(
+              repository: dependencies.guestSaveRepository,
+            );
+          }
+          return GuestSavePage(
+            repository: dependencies.guestSaveRepository,
+            sessionId: sessionId,
+            version: version,
+          );
+        },
+      ),
       GoRoute(
         path: '/ai-permission',
         builder: (context, state) =>
@@ -50,13 +81,17 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
         path: '/readings',
         builder: (context, state) => BlocBuilder<AuthCubit, AuthState>(
           builder: (context, auth) {
-            if (auth.user == null || auth.user!.isAnonymous) {
-              return const AuthStubPage();
+            if (auth.user == null) {
+              return GuestAccountGate(
+                repository: dependencies.guestSaveRepository,
+              );
             }
             return BlocProvider(
               key: ValueKey(auth.user!.id),
               create: (_) => dependencies.createReadingLibraryCubit()..load(),
-              child: const ReadingLibraryPage(),
+              child: ReadingLibraryPage(
+                guestSaveRepository: dependencies.guestSaveRepository,
+              ),
             );
           },
         ),
@@ -152,6 +187,7 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
             )..initialize(),
             child: SessionStubPage(
               ownerId: dependencies.authRepository.currentUser?.id,
+              guestSaveRepository: dependencies.guestSaveRepository,
               createArchetypeFeedbackCubit: dependencies.hasResultFeedback
                   ? dependencies.createArchetypeFeedbackCubit
                   : null,
@@ -192,6 +228,7 @@ Widget _sessionPage(
           ..initialize(savedOnly: savedOnly, resultVersion: resultVersion),
     child: SessionStubPage(
       ownerId: dependencies.authRepository.currentUser?.id,
+      guestSaveRepository: dependencies.guestSaveRepository,
       createArchetypeFeedbackCubit: dependencies.hasResultFeedback
           ? dependencies.createArchetypeFeedbackCubit
           : null,
