@@ -1,3 +1,5 @@
+import '../../../guest_save/domain/guest_save_repository.dart';
+import '../../../guest_save/presentation/guest_recovery_card.dart';
 import 'package:flutter/material.dart';
 import '../../../readings/presentation/reading_library_page.dart';
 import '../../../readings/presentation/reading_library_cubit.dart';
@@ -13,10 +15,12 @@ class FoundationHomePage extends StatelessWidget {
   const FoundationHomePage({
     required this.config,
     this.createLibraryCubit,
+    this.guestSaveRepository,
     super.key,
   });
 
   final AppConfig config;
+  final GuestSaveRepository? guestSaveRepository;
   final ReadingLibraryCubit Function()? createLibraryCubit;
   static final Uri _privacyUri = Uri.parse('https://www.musicdna.fm/privacy');
   static final Uri _termsUri = Uri.parse('https://www.musicdna.fm/terms');
@@ -41,7 +45,10 @@ class FoundationHomePage extends StatelessWidget {
               return BlocProvider(
                 key: ValueKey(state.user!.id),
                 create: (_) => createLibraryCubit!()..load(),
-                child: const ReadingLibraryPage(home: true),
+                child: ReadingLibraryPage(
+                  home: true,
+                  guestSaveRepository: guestSaveRepository,
+                ),
               );
             }
             return Stack(
@@ -72,6 +79,11 @@ class FoundationHomePage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
+                    if (guestSaveRepository != null)
+                      GuestRecoveryCard(
+                        key: ValueKey(state.user?.id),
+                        repository: guestSaveRepository!,
+                      ),
                     _PrimaryCalloutCard(
                       title: hasAccount
                           ? 'Give me three songs you love...'

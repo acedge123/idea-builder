@@ -1,3 +1,6 @@
+import '../../../guest_save/domain/guest_reading.dart';
+import '../../../guest_save/domain/guest_save_repository.dart';
+import '../../../guest_save/presentation/guest_reading_save.dart';
 import '../widgets/session_pushback_link.dart';
 import '../../domain/entities/interview_flow.dart';
 import '../widgets/session_checkpoint_view.dart';
@@ -32,6 +35,7 @@ class SessionStubPage extends StatefulWidget {
     required this.shareBaseUrl,
     this.startedSession,
     this.ownerId,
+    this.guestSaveRepository,
     this.createFeedbackCubit,
     this.createArchetypeFeedbackCubit,
     this.createExploreCubit,
@@ -51,6 +55,7 @@ class SessionStubPage extends StatefulWidget {
   final String shareBaseUrl;
   final StartedMusicSession? startedSession;
   final String? ownerId;
+  final GuestSaveRepository? guestSaveRepository;
   final ResultFeedbackCubit Function({
     required String sessionId,
     required int resultVersion,
@@ -66,6 +71,57 @@ class _SessionStubPageState extends State<SessionStubPage> {
   String? _pairingId;
   final _pairingKey = GlobalKey();
   final _resultKey = GlobalKey();
+  bool _leaving = false;
+  late final String? _sourceOwnerId = widget.ownerId;
+  GuestReading? _guestReading(SessionState state) {
+    if (widget.guestSaveRepository == null) return null;
+    final user = context.read<AuthCubit>().state.user;
+    if (user?.id != _sourceOwnerId ||
+        user?.isAnonymous != true ||
+        state.status != SessionStatus.revealed ||
+        state.sessionId == null ||
+        state.reveal?.result == null) {
+      return null;
+    }
+    return GuestReading(
+      sourceUserId: user!.id,
+      sessionId: state.sessionId!,
+      resultVersion: state.reveal!.result!.version,
+    );
+  }
+
+  Future<void> _leaveTo(String path) async {
+    if (_leaving) return;
+    _leaving = true;
+    try {
+      final reading = _guestReading(context.read<SessionCubit>().state);
+      if (reading != null) {
+        final saved = await widget.guestSaveRepository!.remember(reading);
+        if (!mounted) return;
+        if (!await offerGuestSave(
+          context,
+          widget.guestSaveRepository!,
+          saved,
+          leaving: true,
+        )) {
+          return;
+        }
+      }
+      if (mounted) context.go(path);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Could not keep your reading. Please try again before leaving.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      _leaving = false;
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -83,10 +139,25 @@ class _SessionStubPageState extends State<SessionStubPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.guestSaveRepository == null) return _buildSession(context);
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, _) => BlocBuilder<SessionCubit, SessionState>(
+        builder: (context, state) => PopScope(
+          canPop: _guestReading(state) == null,
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop) _leaveTo('/');
+          },
+          child: _buildSession(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSession(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      bottomNavigationBar: const AppNavigation(index: 1),
+      bottomNavigationBar: AppNavigation(index: 1, onNavigate: _leaveTo),
       body: SafeArea(
         child: BlocConsumer<SessionCubit, SessionState>(
           listenWhen: (previous, current) =>
@@ -411,6 +482,16 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       ),
                     },
                   ),
+                  if (_guestReading(state) case final reading?)
+                    GuestReadingSave(
+                      key: ValueKey((
+                        reading.sourceUserId,
+                        reading.sessionId,
+                        reading.resultVersion,
+                      )),
+                      repository: widget.guestSaveRepository!,
+                      reading: reading,
+                    ),
                   if (state.status == SessionStatus.revealed &&
                       state.reveal?.result?.report?.archetype != null &&
                       state.sessionId != null &&
