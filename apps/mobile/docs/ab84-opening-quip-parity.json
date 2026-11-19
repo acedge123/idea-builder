@@ -1,0 +1,51 @@
+{
+  "ticket": "AB-84",
+  "date": "2026-11-18",
+  "mobile_repository": "acedge123/idea-builder",
+  "mobile_base": "662f88029c377b9ee1968b242111f573bafe2ef7",
+  "candidate": "0.1.2 (17)",
+  "web_repository": "acedge123/music-dna",
+  "web_revision": "be86204ac616a46d148c53ca798ebbf16315c65d",
+  "source_contracts": [
+    "docs/musicdna/flutter-critic-fillers-handoff.md",
+    "docs/musicdna/experience-contract-v1.md",
+    "src/lib/critic-wait.ts",
+    "src/lib/quip-sequences.ts",
+    "src/lib/quip-clock.ts",
+    "src/components/musicdna/critic-stage.tsx",
+    "src/routes/onboarding.tsx"
+  ],
+  "changes": [
+    "Same preparation component/copy while the third opener commits and the first pairing loads, with no extra dwell. Static preparation Noted is a status line, outside the rotating post-pick quip ledger, as on web.",
+    "Editorial selection matches the web group rules, hunch conflicts, actual pool lengths and finite approved final-wait pool. No filler wording edited in Dart or in the bundled copy.",
+    "Ceilings: one after1/3/5, three after2, four after4; final waits consume unused approved groups until exhausted. A ready checkpoint or saved result is never delayed to fill the budget.",
+    "One tap captures wait index, pairing era and picked title. Saving a vote, receiving its hunch and requesting the final result do not reset the displayed line or timer.",
+    "One-shot timers prevent catch-up bursts. Odd-choice dwell starts on tap and does not restart after a slow save acknowledgement.",
+    "Only painted post-pick lines are recorded; owner/interview-scoped local history survives resume. Unseen queued lines are not consumed. Persistence failure is logged and presentation continues with in-memory deduplication.",
+    "Final quips accompany a persistent Writing your full reading activity label. Pool exhaustion keeps activity visible; completed or retryable-failed requests stop timers. Late old results cannot paint/cancel a newer final request.",
+    "Saved flow lookup, checkpoint controls, skips, read-binding, four/six completion, reduced motion, AI permission and guest-save/share behavior retain their existing contracts."
+  ],
+  "verification": {
+    "flutter_tests": {
+      "passed": 329,
+      "skipped": 1,
+      "skip_reason": "Existing optional deployed-contract capture, not a failure"
+    },
+    "new_regressions": 14,
+    "web_oracle_cases": 117,
+    "analyzer": "passed, no issues",
+    "ios_simulator": "passed with production app configuration, unsigned debug only",
+    "device_acceptance": "not run; AB-86",
+    "live_readings_or_model_calls": 0,
+    "backend_or_production_changes": false,
+    "testflight_upload": false
+  },
+  "release_boundary": "Build16 archive/IPA untouched; no merge, production promotion, signing or Apple upload. Alan owns merge and release approval.",
+  "remaining_checks": [
+    "AB-86: fresh guest and signed-in physical runs, checkpoint2/4, early4/final6, repeated skips, restart at checkpoint/final wait, late/failure/retry behavior and large text/reduced motion.",
+    "Backend opener/era fix already uses shared owner-scoped profile code; both web and REST call the same commit/start/next implementations. Verify actual production revision and frozen flow when doing device QA; no extra API needed for quip changes.",
+    "True/Roxanne/Little Red Corvette may resolve differently until catalog identity/year coverage is approved; randomized sessions need not return identical pairs. This mobile task does not activate catalog entries or duplicate backend selection.",
+    "AB-68 Refine/library, AB-75 web CI, AB-82 web share cards and build16 guest/email/share/artwork acceptance remain separately tracked."
+  ],
+  "oracle_regeneration": "node tool/generate_critic_wait_parity.mjs /path/to/music-dna (reads unchanged web functions using Node stripTypeScriptTypes; generated fixture records source SHA and hashes)"
+}

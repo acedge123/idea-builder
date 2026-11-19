@@ -1,3 +1,4 @@
+import '../../domain/entities/critic_wait_queue.dart';
 import '../../domain/repositories/session_pushback_repository.dart';
 import '../../domain/entities/interview_flow.dart';
 import '../../domain/repositories/session_flow_repository.dart';
@@ -53,6 +54,7 @@ class SessionState extends Equatable {
     this.criticMessage,
     this.criticSettled = false,
     this.criticWaitLine,
+    this.criticPickedTitle,
     this.skipping = false,
     this.pushbackSaving = false,
     this.pushbackReply,
@@ -94,7 +96,7 @@ class SessionState extends Equatable {
   final bool skipping;
   final bool pushbackSaving;
   final String? pushbackReply, pushbackError;
-  final String? criticWaitLine, nextPairingError;
+  final String? criticWaitLine, criticPickedTitle, nextPairingError;
   final SessionRoundState? prefetchedRound;
   final String? selectedSongId, reactionMessage;
   final bool reacting;
@@ -147,6 +149,8 @@ class SessionState extends Equatable {
     String? pushbackError,
     bool clearPushbackError = false,
     String? criticWaitLine,
+    String? criticPickedTitle,
+    bool clearCriticPickedTitle = false,
     bool clearCriticWaitLine = false,
     SessionRoundState? prefetchedRound,
     bool clearPrefetchedRound = false,
@@ -213,6 +217,9 @@ class SessionState extends Equatable {
       pushbackError: clearPushbackError
           ? null
           : pushbackError ?? this.pushbackError,
+      criticPickedTitle: clearCriticPickedTitle
+          ? null
+          : criticPickedTitle ?? this.criticPickedTitle,
       criticWaitLine: clearCriticWaitLine
           ? null
           : criticWaitLine ?? this.criticWaitLine,
@@ -266,6 +273,7 @@ class SessionState extends Equatable {
     criticMessage,
     criticSettled,
     criticWaitLine,
+    criticPickedTitle,
     skipping,
     pushbackSaving,
     pushbackReply,
@@ -335,8 +343,11 @@ class SessionCubit extends Cubit<SessionState> {
   int? _readAnswered;
   final Future<CriticFillers> Function()? _loadCriticCopy;
   CriticFillers? _fillers;
-  List<String> _waitingLines = const [];
-  int _waitingIndex = 0, _skipCount = 0;
+  CriticWaitQueue? _waitQueue;
+  final _usedQuips = <String>{};
+  String? _quipSessionId;
+  Future<void> _quipWrites = Future.value();
+  int _skipCount = 0;
   final SessionPreparationRepository? _preparationRepository;
   final SavedReadingRepository? _savedReadingRepository;
   final _preparedPairings = <String>{};
@@ -385,6 +396,7 @@ class SessionCubit extends Cubit<SessionState> {
     emit(
       state.copyWith(
         status: SessionStatus.loading,
+        clearCriticPickedTitle: true,
         clearReveal: true,
         clearSharedReveal: true,
         clearErrorMessage: true,
@@ -491,7 +503,17 @@ class SessionCubit extends Cubit<SessionState> {
       _fillers = await _loadCriticCopy();
       if (isClosed || revision != _flowRevision) return;
     }
-    _beginWaitingCopy(wait: 0, revision: _flowRevision);
+    if (_quipSessionId != sessionId) {
+      _quipSessionId = sessionId;
+      _usedQuips.clear();
+      try {
+        _usedQuips.addAll(await _resumeStore?.loadCriticLines(sessionId) ?? {});
+      } catch (_) {
+        _logger.event('session.quip_history_unavailable');
+      }
+      if (isClosed || revision != _flowRevision) return;
+    }
+    _beginWaitingCopy(wait: 0, preparation: true);
     await _loadNextPairing(
       sessionId: sessionId,
       keepFeedback: state.lastFeedback != null,
@@ -552,6 +574,9 @@ class SessionCubit extends Cubit<SessionState> {
         clearCriticMessage: true,
         clearErrorMessage: true,
         selectedSongId: chosenSongId,
+        criticPickedTitle: chosenSongId == pairing.songA.id
+            ? pairing.songA.title
+            : pairing.songB.title,
         clearLastFeedback: true,
         clearReactionMessage: true,
         clearCheckpoint: true,
@@ -562,9 +587,21 @@ class SessionCubit extends Cubit<SessionState> {
 
     _beginWaitingCopy(
       wait: state.currentRound!.round,
-      revision: revision,
       pairing: pairing,
+      finalReading:
+          state.currentRound!.round >=
+          (state.currentRound!.maxAnswered ?? maxPairingRounds),
     );
+    // The one-line dwell starts on tap, not again on the save acknowledgement.
+    if (state.flow == InterviewFlow.checkpoints &&
+        const [1, 3, 5].contains(state.currentRound!.round)) {
+      _holdingQuip = true;
+      _quipHoldTimer = Timer(CriticStagePolicy.fillerInterval, () {
+        if (isClosed || revision != _flowRevision) return;
+        _holdingQuip = false;
+        _releaseCriticWhenReady();
+      });
+    }
     try {
       final feedback = await _repository.submitChoice(
         sessionId: sessionId,
@@ -591,15 +628,7 @@ class SessionCubit extends Cubit<SessionState> {
             !quipOnly &&
             feedback.readPending &&
             _criticRepository != null;
-        if (_waitingIndex == 0) {
-          _waitingLines =
-              _fillers?.waitingLines(
-                answered,
-                hunch: feedback.hunch ?? 'early',
-                pairing: pairing,
-              ) ??
-              const [];
-        }
+        _waitQueue?.updateHunch(feedback.hunch ?? 'early');
         emit(
           state.copyWith(
             status: SessionStatus.critic,
@@ -621,28 +650,6 @@ class SessionCubit extends Cubit<SessionState> {
                 pending || feedback.read != null || finalPick || quipOnly,
           ),
         );
-        if (quipOnly) {
-          _cancelCriticTimers();
-          _holdingQuip = true;
-          final lines = _fillers?.waitingLines(
-            answered,
-            hunch: feedback.hunch ?? 'early',
-            pairing: pairing,
-          );
-          emit(
-            state.copyWith(
-              clearRead: true,
-              criticWaitLine: lines != null && lines.length > 1
-                  ? lines[1]
-                  : state.criticWaitLine,
-            ),
-          );
-          _quipHoldTimer = Timer(CriticStagePolicy.fillerInterval, () {
-            if (isClosed || revision != _flowRevision) return;
-            _holdingQuip = false;
-            _releaseCriticWhenReady();
-          });
-        }
         if (pending) {
           _startCriticDeadline(revision);
           unawaited(
@@ -713,6 +720,7 @@ class SessionCubit extends Cubit<SessionState> {
       state.copyWith(
         status: SessionStatus.submitting,
         skipping: true,
+        clearCriticPickedTitle: true,
         clearRead: true,
         criticWaitLine: _fillers?.skipLine(_skipCount++, skippedPairing),
         criticPending: false,
@@ -833,8 +841,14 @@ class SessionCubit extends Cubit<SessionState> {
 
   Future<void> revealSession({bool finishEarly = false}) async {
     if (state.status == SessionStatus.revealing || state.sharing) return;
-    _cancelCriticTimers();
-    _flowRevision++;
+    final continuingWait =
+        _waitQueue != null &&
+        const [
+          SessionStatus.critic,
+          SessionStatus.completed,
+        ].contains(state.status);
+    _cancelCriticTimers(preserveWaiting: continuingWait);
+    final revision = ++_flowRevision;
     final requestedEarly = finishEarly || state.finishEarlyRequested;
     final sessionId = state.sessionId;
     _logger.event('session.reveal_requested', <String, Object?>{
@@ -862,18 +876,25 @@ class SessionCubit extends Cubit<SessionState> {
       ),
     );
 
+    if (!continuingWait) {
+      _beginWaitingCopy(
+        wait: requestedEarly ? 4 : 6,
+        pairing: state.currentRound?.pairing,
+        finalReading: true,
+      );
+    }
     try {
       final saved = await _savedReadingRepository?.fetchSavedReading(
         sessionId: sessionId,
       );
-      if (isClosed) return;
+      if (isClosed || revision != _flowRevision) return;
       final reveal =
           saved ??
           await _repository.revealSession(
             sessionId: sessionId,
             finishEarly: requestedEarly,
           );
-      if (isClosed) return;
+      if (isClosed || revision != _flowRevision) return;
       SharedReveal? sharedReveal;
       if (reveal.result == null &&
           reveal.shareToken != null &&
@@ -908,7 +929,7 @@ class SessionCubit extends Cubit<SessionState> {
         ),
       );
     } catch (error) {
-      if (isClosed) return;
+      if (isClosed || revision != _flowRevision) return;
       if (error is ReadingPendingException ||
           error is AppApiException && error.kind == AppApiErrorKind.network) {
         // A lost response does not establish failure. Read once before offering retry.
@@ -916,7 +937,7 @@ class SessionCubit extends Cubit<SessionState> {
           final saved = await _savedReadingRepository?.fetchSavedReading(
             sessionId: sessionId,
           );
-          if (isClosed) return;
+          if (isClosed || revision != _flowRevision) return;
           if (saved != null) {
             emit(
               state.copyWith(
@@ -937,7 +958,7 @@ class SessionCubit extends Cubit<SessionState> {
         } catch (_) {
           // Leave outcome uncertain; never retry a model in the background.
         }
-        if (isClosed) return;
+        if (isClosed || revision != _flowRevision) return;
         emit(
           state.copyWith(
             status: SessionStatus.waitingForReading,
@@ -958,6 +979,8 @@ class SessionCubit extends Cubit<SessionState> {
           requiresReauthentication: apiError?.isAuthRelated == true,
         ),
       );
+    } finally {
+      if (revision == _flowRevision) _cancelCriticTimers();
     }
   }
 
@@ -1223,40 +1246,103 @@ class SessionCubit extends Cubit<SessionState> {
     }
   }
 
-  void _cancelCriticTimers() {
+  void _cancelCriticTimers({bool preserveWaiting = false}) {
     _criticDeadlineTimer?.cancel();
-    _criticFillerTimer?.cancel();
     _quipHoldTimer?.cancel();
     _holdingQuip = false;
+    if (!preserveWaiting) {
+      _criticFillerTimer?.cancel();
+      _waitQueue = null;
+    }
   }
 
   void _beginWaitingCopy({
     required int wait,
-    required int revision,
     SessionPairing? pairing,
+    bool finalReading = false,
+    bool preparation = false,
   }) {
-    _waitingIndex = 0;
-    _waitingLines = _fillers?.waitingLines(wait, pairing: pairing) ?? const [];
-    if (_waitingLines.isEmpty) return;
-    emit(state.copyWith(criticWaitLine: _waitingLines.first));
-    _criticFillerTimer = Timer.periodic(CriticStagePolicy.fillerInterval, (
-      timer,
-    ) {
+    _criticFillerTimer?.cancel();
+    final copy = _fillers;
+    if (copy == null) return;
+    final queue = CriticWaitQueue(
+      copy: copy,
+      wait: wait,
+      pairing: pairing,
+      used: _usedQuips,
+      budget: CriticStagePolicy.quipBudget(
+        state.flow,
+        wait,
+        finalReading: finalReading,
+      ),
+      preparation: preparation,
+    );
+    _waitQueue = queue;
+    _logger.event('session.critic_wait_started', {
+      'answered': wait,
+      'flow': state.flow.wireName,
+      'budget': queue.budget,
+      'preparation': preparation,
+    });
+    _showWaitLine(queue.line);
+    _scheduleWaitLine(queue);
+  }
+
+  void _showWaitLine(String? line) {
+    emit(
+      state.copyWith(criticWaitLine: line, clearCriticWaitLine: line == null),
+    );
+  }
+
+  /// Called after the active line paints. Unseen candidates are never consumed.
+  void acknowledgeCriticLine(String line) {
+    if (isClosed ||
+        line != state.criticWaitLine ||
+        line != _waitQueue?.line ||
+        !const [
+          SessionStatus.loading,
+          SessionStatus.submitting,
+          SessionStatus.critic,
+          SessionStatus.revealing,
+        ].contains(state.status) ||
+        _waitQueue?.preparation == true ||
+        !_usedQuips.add(line)) {
+      return;
+    }
+    final sessionId = state.sessionId;
+    if (_resumeStore == null || sessionId == null) return;
+    final displayed = Set<String>.of(_usedQuips);
+    final ownerKey = _resumeStore.storageKey;
+    _quipWrites = _quipWrites.then((_) async {
+      if (_resumeStore.storageKey != ownerKey) return;
+      try {
+        await _resumeStore.saveCriticLines(sessionId, displayed);
+      } catch (_) {
+        _logger.event('session.quip_history_unavailable');
+      }
+    });
+  }
+
+  void _scheduleWaitLine(CriticWaitQueue queue) {
+    // One-shot timers dwell from the actual display: never catch up in a burst.
+    _criticFillerTimer = Timer(CriticStagePolicy.fillerInterval, () {
       if (isClosed ||
-          revision != _flowRevision ||
-          ![
+          !identical(queue, _waitQueue) ||
+          !const [
             SessionStatus.loading,
             SessionStatus.submitting,
             SessionStatus.critic,
+            SessionStatus.revealing,
           ].contains(state.status)) {
-        timer.cancel();
         return;
       }
-      if (_waitingIndex >= _waitingLines.length - 1) {
-        timer.cancel();
-        return;
+      if (queue.canAdvance) {
+        _showWaitLine(queue.advance());
+        _scheduleWaitLine(queue);
+      } else if (queue.budget == null &&
+          state.status == SessionStatus.revealing) {
+        _logger.event('session.quip_pool_exhausted');
       }
-      emit(state.copyWith(criticWaitLine: _waitingLines[++_waitingIndex]));
     });
   }
 
@@ -1296,7 +1382,7 @@ class SessionCubit extends Cubit<SessionState> {
         return;
       }
       if (next.done || (!next.experienceVersion && next.pairing == null)) {
-        _cancelCriticTimers();
+        _cancelCriticTimers(preserveWaiting: _resultRepository != null);
         emit(
           state.copyWith(
             status: SessionStatus.completed,
@@ -1380,6 +1466,7 @@ class SessionCubit extends Cubit<SessionState> {
       state.copyWith(
         status: SessionStatus.ready,
         currentRound: next,
+        clearCriticPickedTitle: true,
         clearSelection: true,
         clearPrefetchedRound: true,
         criticPending: false,
@@ -1427,7 +1514,7 @@ class SessionCubit extends Cubit<SessionState> {
         clearCriticMessage: true,
       ),
     );
-    _beginWaitingCopy(wait: _readAnswered!, revision: revision);
+    _beginWaitingCopy(wait: _readAnswered!);
     _startCriticDeadline(revision);
     await _deliverCriticRead(
       sessionId: state.sessionId!,

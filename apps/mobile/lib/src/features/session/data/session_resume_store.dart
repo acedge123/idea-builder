@@ -42,6 +42,29 @@ class SessionResumeStore {
     return null;
   }
 
+  /// Public editorial lines only; scoped to the owner and interview, no prose/tokens.
+  Future<Set<String>> loadCriticLines(String sessionId) async {
+    final ownerKey = storageKey;
+    if (ownerKey == null) return {};
+    final preferences = await SharedPreferences.getInstance();
+    if (storageKey != ownerKey) return {};
+    return (preferences.getStringList('$ownerKey.critic.$sessionId') ?? [])
+        .where((line) => line.isNotEmpty && line.length <= 500)
+        .take(500)
+        .toSet();
+  }
+
+  Future<void> saveCriticLines(String sessionId, Set<String> lines) async {
+    final ownerKey = storageKey;
+    if (ownerKey == null) return;
+    final preferences = await SharedPreferences.getInstance();
+    if (storageKey != ownerKey) return;
+    await preferences.setStringList(
+      '$ownerKey.critic.$sessionId',
+      lines.take(500).toList(),
+    );
+  }
+
   Future<void> clear() async {
     final key = storageKey;
     if (key == null) return;

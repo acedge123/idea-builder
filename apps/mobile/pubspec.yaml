@@ -1,7 +1,7 @@
 name: music_dna
 description: "MusicDNA Flutter mobile app."
 publish_to: "none"
-version: 0.1.2+16
+version: 0.1.2+17
 
 environment:
   sdk: ^3.11.4

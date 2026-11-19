@@ -1,3 +1,5 @@
+import 'dart:async';
+import '../../../session/domain/entities/critic_stage_policy.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,6 +19,7 @@ class OnboardingState extends Equatable {
     this.songs = const <String>[],
     this.reactions = const <OnboardingReaction>[],
     this.startedSession,
+    this.preparationLine,
     this.errorMessage,
     this.requiresReauthentication = false,
   });
@@ -26,6 +29,7 @@ class OnboardingState extends Equatable {
   final List<String> songs;
   final List<OnboardingReaction> reactions;
   final StartedMusicSession? startedSession;
+  final String? preparationLine;
   final String? errorMessage;
   final bool requiresReauthentication;
 
@@ -42,12 +46,14 @@ class OnboardingState extends Equatable {
     List<String>? songs,
     List<OnboardingReaction>? reactions,
     StartedMusicSession? startedSession,
+    String? preparationLine,
     bool clearStartedSession = false,
     String? errorMessage,
     bool clearErrorMessage = false,
     bool? requiresReauthentication,
   }) {
     return OnboardingState(
+      preparationLine: preparationLine ?? this.preparationLine,
       stage: stage ?? this.stage,
       currentSongIndex: currentSongIndex ?? this.currentSongIndex,
       songs: songs ?? this.songs,
@@ -70,6 +76,7 @@ class OnboardingState extends Equatable {
     songs,
     reactions,
     startedSession,
+    preparationLine,
     errorMessage,
     requiresReauthentication,
   ];
@@ -80,14 +87,27 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     this._repository, {
     SessionResumeStore? resumeStore,
     AppLogger? logger,
+    Future<CriticFillers> Function()? loadCriticCopy,
   }) : _logger = logger ?? const AppLogger(),
        _resumeStore = resumeStore,
-       super(const OnboardingState());
+       super(const OnboardingState()) {
+    if (loadCriticCopy != null) unawaited(_loadPreparationCopy(loadCriticCopy));
+  }
+
+  Future<void> _loadPreparationCopy(
+    Future<CriticFillers> Function() load,
+  ) async {
+    try {
+      final copy = await load();
+      if (!isClosed) emit(state.copyWith(preparationLine: copy.neutral.first));
+    } catch (_) {
+      _logger.event('onboarding.preparation_copy_unavailable');
+    }
+  }
 
   final OnboardingRepository _repository;
   final AppLogger _logger;
   final SessionResumeStore? _resumeStore;
-
   Future<void> submitSong({required String song}) async {
     final trimmedSong = song.trim();
     if (trimmedSong.isEmpty || state.isSubmitting || state.isComplete) {

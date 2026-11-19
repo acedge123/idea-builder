@@ -1,3 +1,4 @@
+import '../widgets/interview_preparation_view.dart';
 import '../../../share_card/domain/share_card.dart';
 import '../../../share_card/presentation/share_card_cubit.dart';
 import '../../../share_card/presentation/share_card_actions.dart';
@@ -310,9 +311,13 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         : _pairingKey,
                     child: switch (state.status) {
                       SessionStatus.initial ||
-                      SessionStatus.loading ||
-                      SessionStatus.submitting ||
-                      SessionStatus.critic =>
+                      SessionStatus.loading => InterviewPreparationView(
+                        line: state.criticWaitLine,
+                        onLineShown: context
+                            .read<SessionCubit>()
+                            .acknowledgeCriticLine,
+                      ),
+                      SessionStatus.submitting || SessionStatus.critic =>
                         context.read<SessionCubit>().hasExperience
                             ? state.isCheckpoint && state.criticSettled
                                   ? SessionCheckpointView(
@@ -340,6 +345,9 @@ class _SessionStubPageState extends State<SessionStubPage> {
                                     )
                                   : SessionCriticStage(
                                       state: state,
+                                      onLineShown: context
+                                          .read<SessionCubit>()
+                                          .acknowledgeCriticLine,
                                       onRetryNext: context
                                           .read<SessionCubit>()
                                           .retryNextMatchup,
@@ -421,10 +429,12 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         onPrimary: () =>
                             context.read<SessionCubit>().revealSession(),
                       ),
-                      SessionStatus.revealing => const MusicThinkingView(
-                        title: 'Writing your reading',
-                        body:
-                            'Your choices are saved. The Critic is putting the whole reading together.',
+                      SessionStatus.revealing => SessionCriticStage(
+                        state: state,
+                        onLineShown: context
+                            .read<SessionCubit>()
+                            .acknowledgeCriticLine,
+                        onRetryNext: () {},
                       ),
                       SessionStatus.waitingForReading => _FallbackCard(
                         title: 'Your reading is still finishing',

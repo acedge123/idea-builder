@@ -1,3 +1,4 @@
+import '../../domain/entities/critic_stage_policy.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../cubit/session_cubit.dart';
@@ -8,9 +9,11 @@ class SessionCriticStage extends StatelessWidget {
     super.key,
     required this.state,
     required this.onRetryNext,
+    this.onLineShown,
   });
   final SessionState state;
   final VoidCallback onRetryNext;
+  final ValueChanged<String>? onLineShown;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -20,7 +23,16 @@ class SessionCriticStage extends StatelessWidget {
         : state.selectedSongId == pairing?.songA.id
         ? pairing?.songA
         : pairing?.songB;
+    final pickedTitle = state.skipping
+        ? null
+        : state.criticPickedTitle ?? picked?.title;
     final line = state.criticMessage ?? state.criticWaitLine;
+    final finalReading = state.status == SessionStatus.revealing;
+    if (line != null && state.criticMessage == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) onLineShown?.call(line);
+      });
+    }
     final duration = MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : const Duration(milliseconds: 700);
@@ -31,9 +43,9 @@ class SessionCriticStage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (picked != null) ...[
+            if (pickedTitle != null) ...[
               Text(
-                'YOU PICKED · ${picked.title}',
+                'YOU PICKED · $pickedTitle',
                 style: theme.textTheme.labelSmall,
               ),
               const SizedBox(height: 24),
@@ -75,7 +87,31 @@ class SessionCriticStage extends StatelessWidget {
                 ),
               ),
             ),
-            if (state.nextPairingError != null) ...[
+            if (finalReading) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (!MediaQuery.disableAnimationsOf(context)) ...[
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppTheme.gold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: Text(
+                      CriticStagePolicy.writingTitle,
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (!finalReading && state.nextPairingError != null) ...[
               const SizedBox(height: 16),
               Text(state.nextPairingError!, style: theme.textTheme.bodyMedium),
               TextButton(
