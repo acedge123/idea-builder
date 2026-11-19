@@ -1,3 +1,4 @@
+import '../../domain/final_reading_recovery.dart';
 import '../../domain/entities/session_mode.dart';
 import '../../domain/entities/critic_wait_queue.dart';
 import '../../domain/repositories/session_pushback_repository.dart';
@@ -903,17 +904,29 @@ class SessionCubit extends Cubit<SessionState> {
         hunch: state.lastFeedback?.hunch ?? 'early',
       );
     }
+    var savedLookupFailed = false;
     try {
-      final saved = await _savedReadingRepository?.fetchSavedReading(
-        sessionId: sessionId,
+      final reveal = await recoverFinalReading(
+        readSaved: () async {
+          try {
+            return await _savedReadingRepository?.fetchSavedReading(
+              sessionId: sessionId,
+            );
+          } catch (_) {
+            savedLookupFailed = true;
+            rethrow;
+          }
+        },
+        generate: () => _repository.revealSession(
+          sessionId: sessionId,
+          finishEarly: requestedEarly,
+        ),
+        isCurrent: () =>
+            !isClosed &&
+            revision == _flowRevision &&
+            state.sessionId == sessionId &&
+            state.status == SessionStatus.revealing,
       );
-      if (isClosed || revision != _flowRevision) return;
-      final reveal =
-          saved ??
-          await _repository.revealSession(
-            sessionId: sessionId,
-            finishEarly: requestedEarly,
-          );
       if (isClosed || revision != _flowRevision) return;
       await _finishStartedPerson();
       if (isClosed ||
@@ -956,46 +969,33 @@ class SessionCubit extends Cubit<SessionState> {
       );
     } catch (error) {
       if (isClosed || revision != _flowRevision) return;
+      if (savedLookupFailed) {
+        emit(
+          state.copyWith(
+            status: SessionStatus.failure,
+            clearReveal: true,
+            errorMessage: error is AppApiException && error.isAuthRelated
+                ? _readableError(error)
+                : 'We couldn’t check your saved reading. Your choices are safe — please try again.',
+            requiresReauthentication:
+                error is AppApiException && error.isAuthRelated,
+          ),
+        );
+        return;
+      }
       if (error is ReadingPendingException ||
           error is AppApiException && error.kind == AppApiErrorKind.network) {
-        // A lost response does not establish failure. Read once before offering retry.
-        try {
-          final saved = await _savedReadingRepository?.fetchSavedReading(
-            sessionId: sessionId,
-          );
-          if (isClosed || revision != _flowRevision) return;
-          if (saved != null) {
-            await _finishStartedPerson();
-            if (isClosed ||
-                revision != _flowRevision ||
-                state.status != SessionStatus.revealing) {
-              return;
-            }
-            emit(
-              state.copyWith(
-                status: SessionStatus.revealed,
-                reveal: saved,
-                mode: saved.result?.report?.mode,
-                decade: saved.result?.report?.decade,
-                parentSessionId: saved.result?.report?.parentSessionId,
-                clearErrorMessage: true,
-                requiresReauthentication: false,
-              ),
-            );
-            _logger.event('session.saved_reading_recovered', {
-              'sessionId': sessionId,
-            });
-            return;
-          }
-        } catch (_) {
-          // Leave outcome uncertain; never retry a model in the background.
-        }
-        if (isClosed || revision != _flowRevision) return;
+        // Recovery already checked the saved report; no unknown automatic retry.
         emit(
           state.copyWith(
             status: SessionStatus.waitingForReading,
             clearReveal: true,
-            clearErrorMessage: true,
+            errorMessage: error is ReadingPendingException
+                ? finalReadingError(error.narrationStatus)
+                : null,
+            clearErrorMessage:
+                error is! ReadingPendingException ||
+                error.narrationStatus == null,
           ),
         );
         return;

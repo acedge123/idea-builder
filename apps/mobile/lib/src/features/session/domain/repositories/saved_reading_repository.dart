@@ -10,5 +10,6 @@ abstract interface class SavedReadingRepository {
 
 /// The server has not committed a result version yet. Never expose save/share.
 class ReadingPendingException implements Exception {
-  const ReadingPendingException();
+  const ReadingPendingException({this.narrationStatus});
+  final String? narrationStatus;
 }

@@ -104,15 +104,33 @@ class CriticFillers {
         ? 'early'
         : hunch;
     final personIndex = index % person.length;
-    final personGroup =
+    bool unused(_QuipGroup group) => !group.lines.any(used.contains);
+    final neutralGroup =
+        [
+          ...neutralGroups.skip(index % neutral.length),
+          ...neutralGroups,
+        ].where(unused).firstOrNull ??
+        neutralGroups[index % neutral.length];
+    final preferredPerson =
         personGroups[(priorWith || resolvedHunch == 'with') && personIndex == 3
             ? 4 % person.length
             : personIndex];
+    final personGroup =
+        [preferredPerson, ...personGroups]
+            .where(
+              (group) =>
+                  unused(group) &&
+                  (wait != 6 || group.lines.length == 2) &&
+                  !((priorWith || resolvedHunch == 'with') &&
+                      group.id == 'person-3'),
+            )
+            .firstOrNull ??
+        preferredPerson;
     // Era fields remain compatible, but never replace a six-pick category.
     final groups = <_QuipGroup>[];
     for (final category in pickPatterns[index] ?? const ['neutral']) {
       if (category == 'neutral') {
-        groups.add(neutralGroups[index % neutral.length]);
+        groups.add(neutralGroup);
       } else if (resolvedHunch != null) {
         if (category == 'person') {
           groups.add(personGroup);
@@ -121,10 +139,14 @@ class CriticFillers {
               ? resolvedHunch
               : 'early';
           final pool = reaction[kind]!;
+          final reactionLine = [
+            ...pool.skip(index % pool.length),
+            ...pool,
+          ].where((line) => !used.contains(line)).firstOrNull;
           groups.add(
             _QuipGroup(
               'reaction-$kind',
-              [pool[index % pool.length]],
+              reactionLine == null ? [] : [reactionLine],
               incompatible: kind == 'with'
                   ? const {'reaction-against', 'person-3'}
                   : kind == 'against'
@@ -135,7 +157,7 @@ class CriticFillers {
         }
       }
     }
-    if (wait == 6 && finalReading) {
+    if (wait == 6 && finalReading && hunch != null) {
       for (var i = 0; i < overtime.length; i++) {
         groups.add(_QuipGroup('overtime-$i', [overtime[i]]));
       }

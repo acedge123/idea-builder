@@ -42,6 +42,33 @@ for (const decade of [null, '1970s', '1980s', '1990s', '2000s', '2010s', '2020s'
       expected: waitQuips(6, 'against', decade, Infinity, new Set(used), true) });
   }
 }
+// Exercise displayed-history fallback and exhaustion, not just fresh queues.
+const histories = [
+  [...fillers.FILLER_NEUTRAL],
+  [...FILLER_REACTION.early],
+  [...FILLER_PERSON[0]],
+  [FILLER_PERSON[0][0]],
+  [...FILLER_PERSON.flat()],
+  [FILLER_REACTION.with[0], ...FILLER_PERSON[0]],
+  [FILLER_REACTION.against[0], ...FILLER_PERSON[2]],
+];
+for (const used of histories) for (const answered of [2, 4, 6]) for (const hunch of [null, 'early', 'with', 'against']) {
+  const finalReading = answered === 6;
+  const budget = quipBudget('checkpoints', answered);
+  cases.push({flow:'checkpoints', answered, hunch, decade:null, used, final_reading:finalReading,
+    budget:Number.isFinite(budget)?budget:null,
+    expected:waitQuips(answered,hunch,null,budget,new Set(used),finalReading)});
+}
+for (const hunch of ['early','with','against']) {
+  const used = new Set();
+  for (let answered=1;answered<=6;answered++) {
+    const budget=quipBudget('checkpoints',answered), finalReading=answered===6;
+    const expected=waitQuips(answered,hunch,null,budget,used,finalReading);
+    cases.push({flow:'checkpoints',answered,hunch,decade:null,used:[...used],final_reading:finalReading,
+      budget:Number.isFinite(budget)?budget:null,expected});
+    expected.forEach(line=>used.add(line));
+  }
+}
 writeFileSync('test/fixtures/critic-wait-web.json', JSON.stringify({
   repo: 'acedge123/music-dna', revision: execFileSync('git', ['-C', web, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(),
   files: Object.fromEntries(files.map((file, i) => [file, createHash('sha256').update(source[i]).digest('hex')])),

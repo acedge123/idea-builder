@@ -83,14 +83,14 @@ Future<void> mountSession(WidgetTester tester, SessionCubit cubit) =>
 
 void main() {
   test(
-    'selection matches 213 cases evaluated by the actual pinned web functions',
+    'selection matches the current web oracle including displayed-history fallback',
     () {
       final oracle =
           jsonDecode(
                 File('test/fixtures/critic-wait-web.json').readAsStringSync(),
               )
               as Map;
-      expect(oracle['revision'], 'c8d80fa2401034b298383d594f27863ef28c6f4a');
+      expect(oracle['revision'], '3fa9a4273fd4b954312af2ad677e0d2df8252b9a');
       for (final row in oracle['cases'] as List) {
         final flow = row['flow'] == 'checkpoints'
             ? InterviewFlow.checkpoints
@@ -154,11 +154,10 @@ void main() {
         budget: 3,
         used: {copy().reaction['early']![2], copy().person[2][0]},
       );
-      expect(
-        partial.line,
-        isNull,
-        reason: 'A used setup cannot leave an orphan punchline',
-      );
+      expect(partial.line, isNot(copy().reaction['early']![2]));
+      expect(partial.advance(), copy().person[0].first);
+      expect(partial.advance(), copy().person[0].last);
+      expect(partial.canAdvance, isFalse);
     },
   );
 
@@ -536,9 +535,11 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       expect(cubit.state.criticWaitLine, 'Okay. Thinking.');
       await tester.pump(const Duration(milliseconds: 2500));
-      expect(cubit.state.criticWaitLine, 'That was inconveniently persuasive.');
-      await tester.pump(const Duration(seconds: 5));
-      expect(cubit.state.criticWaitLine, 'That was inconveniently persuasive.');
+      expect(cubit.state.criticWaitLine, copy().person[0].first);
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, copy().person[0].last);
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, copy().person[0].last);
       expect(cubit.state.status, SessionStatus.critic);
       repo.nextGate!.complete(repo.round());
       await tester.pump();
@@ -637,8 +638,10 @@ void main() {
     await mountSession(tester, resumed);
     expect(resumed.state.isCheckpoint, isTrue);
     final retry = resumed.retryCheckpointRead();
-    expect(resumed.state.criticWaitLine, 'Somebody raised you right.');
+    expect(resumed.state.criticWaitLine, 'Running that back in my head.');
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2500));
+    expect(resumed.state.criticWaitLine, 'Somebody raised you right.');
     await tester.pump(const Duration(milliseconds: 2500));
     expect(resumed.state.criticWaitLine, 'Or you rebelled perfectly.');
     repo.reads[2]!.complete(const SessionRead(thesis: 'Restored checkpoint'));

@@ -119,7 +119,13 @@ void main() {
     );
     await expectLater(
       repo.revealSession(sessionId: 'root'),
-      throwsA(isA<ReadingPendingException>()),
+      throwsA(
+        isA<ReadingPendingException>().having(
+          (e) => e.narrationStatus,
+          'narration status',
+          'invalid_generation',
+        ),
+      ),
     );
   });
   test('network timeout is normalized inside the awaited boundary', () async {

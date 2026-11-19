@@ -1,0 +1,18 @@
+{
+  "web_revision": "3fa9a4273fd4b954312af2ad677e0d2df8252b9a",
+  "web_source_sha256": {
+    "src/musicdna/engine/critic-fillers.ts": "79008a37e7eac8d6c2de9a036a5983541eedae1285e2aa57893a2e1ac5415e1e",
+    "src/lib/quip-sequences.ts": "068eb4ae261b462c89c5542a2cfd5514e00c9fee456c4c85a49eaf9e8c124ce5",
+    "src/lib/critic-wait.ts": "24a93e09248fc8468bafe0aebe5adb7fce5e6415a99d52deafcee6185e9bb671"
+  },
+  "oracle_cases": 315,
+  "mobile_base": "263cebffd6a96eaba0da15c913b8ea0aef21c12b",
+  "candidate": "0.1.2 (17)",
+  "tests": {
+    "passed": 374,
+    "skipped": 1,
+    "analysis": "no issues"
+  },
+  "physical_qa": "pending",
+  "apple_upload": false
+}
