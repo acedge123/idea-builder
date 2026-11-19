@@ -231,7 +231,11 @@ class SessionRepositoryImpl
         response['contract'] == 1 &&
         response.containsKey('result_version') &&
         response['result_version'] == null) {
-      throw const ReadingPendingException();
+      throw ReadingPendingException(
+        narrationStatus: response['narration_status'] is String
+            ? response['narration_status'] as String
+            : null,
+      );
     }
     final result = _remoteDataSource.experienceV1
         ? mapSessionResult(response)

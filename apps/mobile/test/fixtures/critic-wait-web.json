@@ -1,10 +1,10 @@
 {
   "repo": "acedge123/music-dna",
-  "revision": "c8d80fa2401034b298383d594f27863ef28c6f4a",
+  "revision": "3fa9a4273fd4b954312af2ad677e0d2df8252b9a",
   "files": {
     "src/musicdna/engine/critic-fillers.ts": "79008a37e7eac8d6c2de9a036a5983541eedae1285e2aa57893a2e1ac5415e1e",
     "src/lib/quip-sequences.ts": "068eb4ae261b462c89c5542a2cfd5514e00c9fee456c4c85a49eaf9e8c124ce5",
-    "src/lib/critic-wait.ts": "2be2545d05004fd84bedb781961cd0e3a71a3d5e738d3fe891e58ca3451bde74"
+    "src/lib/critic-wait.ts": "24a93e09248fc8468bafe0aebe5adb7fce5e6415a99d52deafcee6185e9bb671"
   },
   "cases": [
     {
@@ -1020,19 +1020,7 @@
       "used": [],
       "budget": null,
       "expected": [
-        "I'll save the dramatic gasp for later.",
-        "The verdict is taking longer than the band's breakup statement.",
-        "Six picks. Somehow this became a double album.",
-        "Apparently the verdict needs a producer's cut.",
-        "The critic has requested one more cigarette. Request denied.",
-        "Even the dramatic pause has hired a manager.",
-        "We're approaching 'experimental B-side' territory.",
-        "The verdict is backstage pretending it can't hear us.",
-        "Someone gave the drum solo a legal team.",
-        "This is why we don't let critics book studio time.",
-        "The liner notes are threatening to become a memoir.",
-        "At this point, the silence deserves a songwriting credit.",
-        "No encore yet. We're still arguing about the setlist."
+        "I'll save the dramatic gasp for later."
       ]
     },
     {
@@ -1056,19 +1044,7 @@
       "used": [],
       "budget": null,
       "expected": [
-        "I'll save the dramatic gasp for later.",
-        "The verdict is taking longer than the band's breakup statement.",
-        "Six picks. Somehow this became a double album.",
-        "Apparently the verdict needs a producer's cut.",
-        "The critic has requested one more cigarette. Request denied.",
-        "Even the dramatic pause has hired a manager.",
-        "We're approaching 'experimental B-side' territory.",
-        "The verdict is backstage pretending it can't hear us.",
-        "Someone gave the drum solo a legal team.",
-        "This is why we don't let critics book studio time.",
-        "The liner notes are threatening to become a memoir.",
-        "At this point, the silence deserves a songwriting credit.",
-        "No encore yet. We're still arguing about the setlist."
+        "I'll save the dramatic gasp for later."
       ]
     },
     {
@@ -1082,7 +1058,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1096,7 +1073,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -1122,7 +1100,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1136,7 +1115,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -1162,7 +1142,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1176,7 +1157,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -1202,7 +1184,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1216,7 +1199,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -1242,7 +1226,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1256,7 +1241,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -1282,7 +1268,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -1296,7 +1283,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2324,19 +2312,7 @@
       "used": [],
       "budget": null,
       "expected": [
-        "I'll save the dramatic gasp for later.",
-        "The verdict is taking longer than the band's breakup statement.",
-        "Six picks. Somehow this became a double album.",
-        "Apparently the verdict needs a producer's cut.",
-        "The critic has requested one more cigarette. Request denied.",
-        "Even the dramatic pause has hired a manager.",
-        "We're approaching 'experimental B-side' territory.",
-        "The verdict is backstage pretending it can't hear us.",
-        "Someone gave the drum solo a legal team.",
-        "This is why we don't let critics book studio time.",
-        "The liner notes are threatening to become a memoir.",
-        "At this point, the silence deserves a songwriting credit.",
-        "No encore yet. We're still arguing about the setlist."
+        "I'll save the dramatic gasp for later."
       ]
     },
     {
@@ -2360,19 +2336,7 @@
       "used": [],
       "budget": null,
       "expected": [
-        "I'll save the dramatic gasp for later.",
-        "The verdict is taking longer than the band's breakup statement.",
-        "Six picks. Somehow this became a double album.",
-        "Apparently the verdict needs a producer's cut.",
-        "The critic has requested one more cigarette. Request denied.",
-        "Even the dramatic pause has hired a manager.",
-        "We're approaching 'experimental B-side' territory.",
-        "The verdict is backstage pretending it can't hear us.",
-        "Someone gave the drum solo a legal team.",
-        "This is why we don't let critics book studio time.",
-        "The liner notes are threatening to become a memoir.",
-        "At this point, the silence deserves a songwriting credit.",
-        "No encore yet. We're still arguing about the setlist."
+        "I'll save the dramatic gasp for later."
       ]
     },
     {
@@ -2386,7 +2350,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2400,7 +2365,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2426,7 +2392,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2440,7 +2407,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2466,7 +2434,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2480,7 +2449,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2506,7 +2476,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2520,7 +2491,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "No surprises there.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2546,7 +2518,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2560,7 +2533,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2586,7 +2560,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive."
+        "I'm starting to like you.",
+        "Don't make it weird."
       ]
     },
     {
@@ -2600,7 +2575,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2628,7 +2604,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2656,7 +2633,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2684,7 +2662,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2712,7 +2691,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2740,7 +2720,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2768,7 +2749,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2796,7 +2778,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2824,7 +2807,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2852,7 +2836,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2880,7 +2865,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2908,7 +2894,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2936,7 +2923,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2964,7 +2952,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -2992,7 +2981,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3020,7 +3010,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3048,7 +3039,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3076,7 +3068,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3104,7 +3097,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "Bold move.",
+        "I'll allow it.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3132,7 +3126,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Okay. Thinking.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3160,7 +3155,8 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
-        "That was inconveniently persuasive.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",
@@ -3188,7 +3184,2342 @@
       "expected": [
         "I'll save the dramatic gasp for later.",
         "Plot thickens.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "Okay. Thinking.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "No surprises there.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Noted.",
+        "Writing that down.",
+        "Filing that away…",
+        "Somewhere, a music critic is clearing their throat.",
+        "A jury of one. Harsh, but efficient.",
+        "One tap. Several wounded opinions.",
+        "I'll save the dramatic gasp for later.",
+        "Congratulations, you just offended an imaginary record-store clerk.",
+        "Got it.",
+        "One beat…",
+        "Hang tight.",
+        "Mm-hm."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "Plot thickens.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Hm.",
+        "Let me sit with that.",
+        "Turning that one over…",
+        "Running that back in my head.",
+        "Putting the needle back on that one.",
+        "Give me a second with this one.",
+        "Okay. Thinking.",
+        "Cross-referencing. Don't rush me."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
         "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…"
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "Bold move.",
+        "I'll allow it.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Taste. Actual taste.",
+        "I'm as surprised as you are.",
+        "Dig it. We'll let you cook.",
+        "You might be my favorite interview today.",
+        "Don't let it go to your head.",
+        "That was inconveniently persuasive.",
+        "Okay, you're good at this.",
+        "Suspiciously good, actually."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Called it.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "Bold move.",
+        "I'll allow it.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "I'm starting to like you.",
+        "Don't make it weird."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "That's not the one I expected.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "early",
+      "decade": null,
+      "used": [],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Writing that down."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Running that back in my head."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Running that back in my head.",
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Running that back in my head.",
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook.",
+        "One tap. Several wounded opinions."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "with",
+      "decade": null,
+      "used": [],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Writing that down."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Yep. Saw that one coming."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Yep. Saw that one coming.",
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Yep. Saw that one coming.",
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook.",
+        "One tap. Several wounded opinions."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "against",
+      "decade": null,
+      "used": [],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Writing that down."
+      ],
+      "final_reading": false,
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Oh, you're going to make this interesting."
+      ],
+      "final_reading": false,
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Oh, you're going to make this interesting.",
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ],
+      "final_reading": false,
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Writing that down.",
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly.",
+        "Oh, you're going to make this interesting.",
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook.",
+        "One tap. Several wounded opinions."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "I'm starting to like you.",
+        "Don't make it weird.",
         "The verdict is taking longer than the band's breakup statement.",
         "Six picks. Somehow this became a double album.",
         "Apparently the verdict needs a producer's cut.",

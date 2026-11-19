@@ -301,7 +301,8 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       onReaction: context.read<SessionCubit>().react,
                     ),
                   if (state.errorMessage != null &&
-                      state.status != SessionStatus.failure)
+                      state.status != SessionStatus.failure &&
+                      state.status != SessionStatus.waitingForReading)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: Text(
@@ -443,10 +444,15 @@ class _SessionStubPageState extends State<SessionStubPage> {
                         onRetryNext: () {},
                       ),
                       SessionStatus.waitingForReading => _FallbackCard(
-                        title: 'Your reading is still finishing',
+                        title: state.errorMessage == null
+                            ? 'Your reading is still finishing'
+                            : 'Your reading needs another draft',
                         body:
+                            state.errorMessage ??
                             'Your choices are saved. Check again to open the finished reading.',
-                        primaryLabel: 'Check my reading',
+                        primaryLabel: state.errorMessage == null
+                            ? 'Check my reading'
+                            : 'Retry my reading',
                         onPrimary: () =>
                             context.read<SessionCubit>().revealSession(),
                       ),
