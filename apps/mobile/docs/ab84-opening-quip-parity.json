@@ -47,5 +47,12 @@
     "True/Roxanne/Little Red Corvette may resolve differently until catalog identity/year coverage is approved; randomized sessions need not return identical pairs. This mobile task does not activate catalog entries or duplicate backend selection.",
     "AB-68 Refine/library, AB-75 web CI, AB-82 web share cards and build16 guest/email/share/artwork acceptance remain separately tracked."
   ],
-  "oracle_regeneration": "node tool/generate_critic_wait_parity.mjs /path/to/music-dna (reads unchanged web functions using Node stripTypeScriptTypes; generated fixture records source SHA and hashes)"
+  "oracle_regeneration": "node tool/generate_critic_wait_parity.mjs /path/to/music-dna (reads unchanged web functions using Node stripTypeScriptTypes; generated fixture records source SHA and hashes)",
+  "pull_request": "https://github.com/acedge123/idea-builder/pull/37",
+  "delivery_status": "Draft: current web parity implemented/tested, awaiting Alan notice that Lovable new per-choice cadence has landed.",
+  "pending_web_update": {
+    "owner_notice": "Alan will notify after Lovable commits the next cadence change; no new counts have been assumed.",
+    "followup": "Re-read the current handoff and web source, update cadence policy/queue as needed, regenerate the source-derived oracle, rerun checks, then mark PR ready for Alan.",
+    "merge_allowed": false
+  }
 }
