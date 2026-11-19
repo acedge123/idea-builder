@@ -1,0 +1,3207 @@
+{
+  "repo": "acedge123/music-dna",
+  "revision": "c8d80fa2401034b298383d594f27863ef28c6f4a",
+  "files": {
+    "src/musicdna/engine/critic-fillers.ts": "79008a37e7eac8d6c2de9a036a5983541eedae1285e2aa57893a2e1ac5415e1e",
+    "src/lib/quip-sequences.ts": "068eb4ae261b462c89c5542a2cfd5514e00c9fee456c4c85a49eaf9e8c124ce5",
+    "src/lib/critic-wait.ts": "2be2545d05004fd84bedb781961cd0e3a71a3d5e738d3fe891e58ca3451bde74"
+  },
+  "cases": [
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 1,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 2,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 3,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 4,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 5,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "per_pick",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 1,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Writing that down."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Turning that one over…",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Right on cue.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 3,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 2,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Huh. Didn't see that coming.",
+        "Somebody raised you right.",
+        "Or you rebelled perfectly."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": []
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Running that back in my head."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Yep. Saw that one coming."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 3,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "Oh, you're going to make this interesting."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Putting the needle back on that one.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Consistent. I like it.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 4,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 4,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "A jury of one. Harsh, but efficient.",
+        "Hm. That changes things.",
+        "Dig it. We'll let you cook."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": 1,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 5,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "One tap. Several wounded opinions."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": null,
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "early",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "with",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "No surprises there.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": false,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "final_reading": true,
+      "used": [],
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": null,
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1970s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1970s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1970s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1980s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1990s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1990s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "1990s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2000s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2000s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2000s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2010s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2010s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2010s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2020s",
+      "used": [
+        "Called it."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Okay. Thinking.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2020s",
+      "used": [
+        "That's not the one I expected."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    },
+    {
+      "flow": "checkpoints",
+      "answered": 6,
+      "hunch": "against",
+      "decade": "2020s",
+      "used": [
+        "I'm starting to like you."
+      ],
+      "final_reading": true,
+      "budget": null,
+      "expected": [
+        "I'll save the dramatic gasp for later.",
+        "Plot thickens.",
+        "That was inconveniently persuasive.",
+        "The verdict is taking longer than the band's breakup statement.",
+        "Six picks. Somehow this became a double album.",
+        "Apparently the verdict needs a producer's cut.",
+        "The critic has requested one more cigarette. Request denied.",
+        "Even the dramatic pause has hired a manager.",
+        "We're approaching 'experimental B-side' territory.",
+        "The verdict is backstage pretending it can't hear us.",
+        "Someone gave the drum solo a legal team.",
+        "This is why we don't let critics book studio time.",
+        "The liner notes are threatening to become a memoir.",
+        "At this point, the silence deserves a songwriting credit.",
+        "No encore yet. We're still arguing about the setlist."
+      ]
+    }
+  ]
+}

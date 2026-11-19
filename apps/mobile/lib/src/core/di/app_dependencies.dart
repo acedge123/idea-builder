@@ -258,6 +258,7 @@ class AppDependencies {
   OnboardingCubit createOnboardingCubit() {
     return OnboardingCubit(
       onboardingRepository,
+      loadCriticCopy: config.experienceV1 ? criticCopyStore.snapshot : null,
       resumeStore: sessionResumeStore,
       logger: logger,
     );

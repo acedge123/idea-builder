@@ -1,6 +1,47 @@
 {
   "contract": 1,
   "version": "fillers-v1",
+  "pacing_version": "six-pick-overtime-v1",
+  "interval_ms": 2500,
+  "pick_patterns": {
+    "1": [
+      "neutral"
+    ],
+    "2": [
+      "reaction",
+      "person"
+    ],
+    "3": [
+      "reaction"
+    ],
+    "4": [
+      "neutral",
+      "reaction",
+      "person"
+    ],
+    "5": [
+      "neutral"
+    ],
+    "6": [
+      "neutral",
+      "reaction",
+      "person"
+    ]
+  },
+  "overtime": [
+    "The verdict is taking longer than the band's breakup statement.",
+    "Six picks. Somehow this became a double album.",
+    "Apparently the verdict needs a producer's cut.",
+    "The critic has requested one more cigarette. Request denied.",
+    "Even the dramatic pause has hired a manager.",
+    "We're approaching 'experimental B-side' territory.",
+    "The verdict is backstage pretending it can't hear us.",
+    "Someone gave the drum solo a legal team.",
+    "This is why we don't let critics book studio time.",
+    "The liner notes are threatening to become a memoir.",
+    "At this point, the silence deserves a songwriting credit.",
+    "No encore yet. We're still arguing about the setlist."
+  ],
   "neutral": [
     "Noted.",
     "Writing that down.",
