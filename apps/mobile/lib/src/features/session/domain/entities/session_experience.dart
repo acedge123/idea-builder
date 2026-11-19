@@ -1,3 +1,4 @@
+import 'session_mode.dart';
 import 'package:equatable/equatable.dart';
 
 import 'session_pairing.dart';
@@ -104,6 +105,7 @@ class SessionExperience {
   }) : exchanges = List.unmodifiable(exchanges);
   final String sessionId;
   final String mode;
+  SessionMode get sessionMode => SessionMode.fromWire(mode);
   final int? decade;
   final String? parentSessionId;
   final List<SessionExchange> exchanges;

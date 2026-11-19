@@ -1,3 +1,5 @@
+import '../../session/domain/entities/session_mode.dart';
+
 class ReadingSummary {
   const ReadingSummary({
     required this.id,
@@ -13,9 +15,15 @@ class ReadingSummary {
   final bool completed;
   final int? decade;
   final String? parentId, lane;
-  bool get isExplore => mode == 'explore';
-  String get label =>
-      isExplore ? '${decadeLabel(decade)} exploration' : 'Original reading';
+  SessionMode get sessionMode => SessionMode.fromWire(mode);
+  bool get isExplore => sessionMode == SessionMode.explore;
+  bool get isRefine => sessionMode == SessionMode.refine;
+  String get label => switch (sessionMode) {
+    SessionMode.discover => 'Original reading',
+    SessionMode.explore => '${decadeLabel(decade)} exploration',
+    SessionMode.refine => 'Refined reading',
+    SessionMode.unknown => 'Reading from a newer version',
+  };
 }
 
 String decadeLabel(int? decade) => switch (decade) {

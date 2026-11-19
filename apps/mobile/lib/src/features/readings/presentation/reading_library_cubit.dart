@@ -17,7 +17,7 @@ class ReadingLibraryState {
   final bool signInRequired;
   ReadingSummary? get unfinished {
     for (final r in rows) {
-      if (!r.completed) return r;
+      if (!r.completed && r.sessionMode.supported) return r;
     }
     return null;
   }
@@ -92,13 +92,18 @@ class ReadingLibraryCubit extends Cubit<ReadingLibraryState> {
 
 /// Groups loaded child runs under their original without inventing unloaded rows.
 List<ReadingSummary> groupReadings(List<ReadingSummary> rows) {
-  final roots = rows.where((r) => !r.isExplore).toList();
+  final roots = rows
+      .where((r) => !r.sessionMode.isChild && r.sessionMode.supported)
+      .toList();
   final rootIds = roots.map((r) => r.id).toSet();
   return [
     for (final root in roots) ...[
       root,
-      ...rows.where((r) => r.isExplore && r.parentId == root.id),
+      ...rows.where((r) => r.sessionMode.isChild && r.parentId == root.id),
     ],
-    ...rows.where((r) => r.isExplore && !rootIds.contains(r.parentId)),
+    ...rows.where(
+      (r) => r.sessionMode.isChild && !rootIds.contains(r.parentId),
+    ),
+    ...rows.where((r) => !r.sessionMode.supported),
   ];
 }

@@ -1,3 +1,4 @@
+import 'session_mode.dart';
 import 'package:equatable/equatable.dart';
 
 /// Frozen identity is separate from annotations rebuilt from saved choices.
@@ -19,6 +20,7 @@ class ReadingReport extends Equatable {
   final DnaPanel? panel;
   final String? mode, parentSessionId;
   final int? decade;
+  SessionMode get sessionMode => SessionMode.fromWire(mode);
   @override
   List<Object?> get props => [
     signatureName,

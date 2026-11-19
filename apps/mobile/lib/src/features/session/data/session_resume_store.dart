@@ -18,13 +18,17 @@ class SessionResumeStore {
     final key = storageKey;
     if (key == null) return;
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(key, jsonEncode(session.toJson()));
+    if (storageKey != key) throw StateError('Reading owner changed');
+    if (!await preferences.setString(key, jsonEncode(session.toJson()))) {
+      throw StateError('Reading resume could not be saved');
+    }
   }
 
   Future<StartedMusicSession?> load() async {
     final key = storageKey;
     if (key == null) return null;
     final preferences = await SharedPreferences.getInstance();
+    if (storageKey != key) return null;
     final raw = preferences.getString(key);
     if (raw == null || raw.isEmpty) {
       return null;
@@ -36,7 +40,7 @@ class SessionResumeStore {
         return StartedMusicSession.fromJson(decoded);
       }
     } catch (_) {
-      await clear();
+      await preferences.remove(key);
     }
 
     return null;

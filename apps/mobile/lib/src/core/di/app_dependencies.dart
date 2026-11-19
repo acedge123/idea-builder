@@ -1,3 +1,7 @@
+import '../../features/readings/domain/refine_repository.dart';
+import '../../features/readings/data/rest_refine_repository.dart';
+import '../../features/readings/data/refine_operation_store.dart';
+import '../../features/readings/presentation/refine_cubit.dart';
 import 'package:http/http.dart' as http;
 import '../../features/share_card/domain/share_card.dart';
 import '../../features/share_card/data/http_share_card_repository.dart';
@@ -192,6 +196,19 @@ class AppDependencies {
   );
   late final ReadingLibraryRepository readingLibraryRepository =
       RestReadingLibraryRepository(sessionRemoteDataSource);
+  late final RefineRepository refineRepository = RestRefineRepository(
+    sessionRemoteDataSource,
+    readingLibraryRepository,
+  );
+  final RefineOperationStore refineOperations = RefineOperationStore();
+  RefineCubit createRefineCubit({required String sessionId}) => RefineCubit(
+    refineRepository,
+    sessionId: sessionId,
+    ownerId: authRepository.currentUser!.id,
+    currentOwner: () => authRepository.currentUser?.id,
+    operations: refineOperations,
+    resumeStore: sessionResumeStore,
+  );
   late final GuestSaveRepository guestSaveRepository =
       VerifiedGuestSaveRepository(
         auth: SupabaseGuestSaveAuth(supabase),

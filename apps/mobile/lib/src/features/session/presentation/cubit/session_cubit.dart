@@ -1,3 +1,4 @@
+import '../../domain/entities/session_mode.dart';
 import '../../domain/entities/critic_wait_queue.dart';
 import '../../domain/repositories/session_pushback_repository.dart';
 import '../../domain/entities/interview_flow.dart';
@@ -80,6 +81,7 @@ class SessionState extends Equatable {
     this.checkpointAnswered,
   });
 
+  SessionMode get sessionMode => SessionMode.fromWire(mode);
   final SessionStatus status;
   final StartedMusicSession? startedSession;
   final SessionRoundState? currentRound;
@@ -324,7 +326,14 @@ class SessionCubit extends Cubit<SessionState> {
        _preparationRepository = preparationRepository,
        _savedReadingRepository = savedReadingRepository,
        _flowRepository = flowRepository,
-       super(SessionState(startedSession: startedSession));
+       super(
+         SessionState(
+           startedSession: startedSession,
+           mode: startedSession?.mode ?? 'discover',
+           parentSessionId: startedSession?.parentSessionId,
+           decade: startedSession?.decade,
+         ),
+       );
 
   final SessionRepository _repository;
   final SessionFlowRepository? _flowRepository;
@@ -372,7 +381,14 @@ class SessionCubit extends Cubit<SessionState> {
     if ((sessionId == null || sessionId.isEmpty) && _resumeStore != null) {
       final resumedSession = await _resumeStore.load();
       if (resumedSession != null) {
-        emit(state.copyWith(startedSession: resumedSession));
+        emit(
+          state.copyWith(
+            startedSession: resumedSession,
+            mode: resumedSession.mode,
+            parentSessionId: resumedSession.parentSessionId,
+            decade: resumedSession.decade,
+          ),
+        );
         sessionId = resumedSession.sessionId;
       }
     }

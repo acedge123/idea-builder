@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../session/domain/entities/interview_flow.dart';
+import '../../../session/domain/entities/session_mode.dart';
 
 class StartedMusicSession extends Equatable {
   const StartedMusicSession({
@@ -14,21 +15,31 @@ class StartedMusicSession extends Equatable {
     required this.secondaryLanes,
     required this.songs,
     this.flow,
+    this.mode,
+    this.parentSessionId,
+    this.decade,
   });
 
-  factory StartedMusicSession.reference(String sessionId) =>
-      StartedMusicSession(
-        sessionId: sessionId,
-        sessionLane: '',
-        sessionLaneConfidence: 0,
-        analysisLane: '',
-        analysisConfidence: 0,
-        hypothesis: '',
-        reaction: '',
-        reasoning: const [],
-        secondaryLanes: const [],
-        songs: const [],
-      );
+  factory StartedMusicSession.reference(
+    String sessionId, {
+    String? mode,
+    String? parentSessionId,
+    int? decade,
+  }) => StartedMusicSession(
+    sessionId: sessionId,
+    sessionLane: '',
+    sessionLaneConfidence: 0,
+    analysisLane: '',
+    analysisConfidence: 0,
+    hypothesis: '',
+    reaction: '',
+    reasoning: const [],
+    secondaryLanes: const [],
+    songs: const [],
+    mode: mode,
+    parentSessionId: parentSessionId,
+    decade: decade,
+  );
 
   final String sessionId;
   final String sessionLane;
@@ -41,6 +52,9 @@ class StartedMusicSession extends Equatable {
   final List<String> secondaryLanes;
   final List<String> songs;
   final InterviewFlow? flow;
+  final String? mode, parentSessionId;
+  final int? decade;
+  SessionMode get sessionMode => SessionMode.fromWire(mode);
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -55,6 +69,9 @@ class StartedMusicSession extends Equatable {
       'secondaryLanes': secondaryLanes,
       'songs': songs,
       if (flow != null) 'flow': flow!.wireName,
+      if (mode != null) 'mode': mode,
+      if (parentSessionId != null) 'parentSessionId': parentSessionId,
+      if (decade != null) 'decade': decade,
     };
   }
 
@@ -76,6 +93,9 @@ class StartedMusicSession extends Equatable {
       secondaryLanes: _readStringList(json['secondaryLanes']),
       songs: _readStringList(json['songs']),
       flow: InterviewFlow.fromWire(json['flow']),
+      mode: json['mode'] as String?,
+      parentSessionId: json['parentSessionId'] as String?,
+      decade: json['decade'] as int?,
     );
   }
 
@@ -92,6 +112,9 @@ class StartedMusicSession extends Equatable {
     secondaryLanes,
     songs,
     flow,
+    mode,
+    parentSessionId,
+    decade,
   ];
 
   static double _readDouble(Object? value) {

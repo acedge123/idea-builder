@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../domain/reading_library.dart';
+import '../../onboarding/domain/entities/started_music_session.dart';
 import 'reading_library_cubit.dart';
 import 'app_navigation.dart';
 
@@ -43,7 +44,7 @@ class ReadingLibraryPage extends StatelessWidget {
                 Text(
                   home
                       ? 'Start with three songs, or pick up where you left off.'
-                      : 'Your original readings and the decades you explored.',
+                      : 'Your originals, refinements and decade explorations.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: AppTheme.mutedForeground,
                   ),
@@ -109,8 +110,15 @@ class ReadingLibraryPage extends StatelessWidget {
       ),
     ),
   );
-  void _open(BuildContext context, ReadingSummary row) =>
-      context.go('/session/${Uri.encodeComponent(row.id)}');
+  void _open(BuildContext context, ReadingSummary row) => context.go(
+    '/session/${Uri.encodeComponent(row.id)}',
+    extra: StartedMusicSession.reference(
+      row.id,
+      mode: row.mode,
+      parentSessionId: row.parentId,
+      decade: row.decade,
+    ),
+  );
 }
 
 class ReadingListTile extends StatelessWidget {
@@ -127,18 +135,36 @@ class ReadingListTile extends StatelessWidget {
     );
     return ListTile(
       contentPadding: EdgeInsets.symmetric(
-        horizontal: reading.isExplore ? 12 : 0,
+        horizontal: reading.sessionMode.isChild ? 12 : 0,
         vertical: 8,
       ),
       leading: Icon(
-        reading.isExplore ? Icons.explore_outlined : Icons.album_outlined,
+        reading.isRefine
+            ? Icons.tune
+            : reading.isExplore
+            ? Icons.explore_outlined
+            : Icons.album_outlined,
       ),
       title: Text(reading.label),
       subtitle: Text(
-        '$date · $time\n${reading.completed ? 'Open reading' : 'In progress'}',
+        '$date · $time\n${!reading.sessionMode.supported
+            ? 'Update the app to open this reading'
+            : reading.completed
+            ? 'Open reading'
+            : 'In progress'}',
       ),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => context.go('/session/${Uri.encodeComponent(reading.id)}'),
+      onTap: !reading.sessionMode.supported
+          ? null
+          : () => context.go(
+              '/session/${Uri.encodeComponent(reading.id)}',
+              extra: StartedMusicSession.reference(
+                reading.id,
+                mode: reading.mode,
+                parentSessionId: reading.parentId,
+                decade: reading.decade,
+              ),
+            ),
     );
   }
 }

@@ -1,3 +1,6 @@
+import '../../../readings/presentation/refine_cubit.dart';
+import '../../../readings/presentation/refine_view.dart';
+import '../../domain/entities/session_mode.dart';
 import '../widgets/interview_preparation_view.dart';
 import '../../../share_card/domain/share_card.dart';
 import '../../../share_card/presentation/share_card_cubit.dart';
@@ -44,8 +47,10 @@ class SessionStubPage extends StatefulWidget {
     this.createFeedbackCubit,
     this.createArchetypeFeedbackCubit,
     this.createExploreCubit,
+    this.createRefineCubit,
   });
 
+  final RefineCubit Function({required String sessionId})? createRefineCubit;
   final ExploreCubit Function({
     required String sessionId,
     required bool isExplore,
@@ -252,12 +257,13 @@ class _SessionStubPageState extends State<SessionStubPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    state.mode == 'explore'
-                        ? 'EXPLORE YOUR DNA · ${state.decade}s'
-                        : 'THE INTERVIEW',
-                    style: theme.textTheme.labelSmall,
-                  ),
+                  Text(switch (state.sessionMode) {
+                    SessionMode.explore =>
+                      'EXPLORE YOUR DNA · ${state.decade}s',
+                    SessionMode.refine => 'REFINE YOUR DNA',
+                    SessionMode.unknown => 'YOUR READING',
+                    SessionMode.discover => 'THE INTERVIEW',
+                  }, style: theme.textTheme.labelSmall),
                   if (state.parentSessionId != null)
                     TextButton(
                       onPressed: () => context.go(
@@ -600,6 +606,27 @@ class _SessionStubPageState extends State<SessionStubPage> {
                     ),
                   if (state.status == SessionStatus.revealed &&
                       state.reveal?.result != null &&
+                      state.sessionMode.supported &&
+                      widget.createRefineCubit != null &&
+                      state.sessionId != null &&
+                      context.read<AuthCubit>().state.user?.id ==
+                          widget.ownerId &&
+                      context.read<AuthCubit>().state.user?.isAnonymous ==
+                          false)
+                    BlocProvider<RefineCubit>(
+                      key: ValueKey((
+                        'refine-reading',
+                        widget.ownerId,
+                        state.sessionId,
+                        state.reveal!.result!.version,
+                      )),
+                      create: (_) =>
+                          widget.createRefineCubit!(sessionId: state.sessionId!)
+                            ..load(),
+                      child: const RefineView(),
+                    ),
+                  if (state.status == SessionStatus.revealed &&
+                      state.reveal?.result != null &&
                       widget.createExploreCubit != null &&
                       state.sessionId != null &&
                       context.read<AuthCubit>().state.user?.isAnonymous ==
@@ -612,7 +639,7 @@ class _SessionStubPageState extends State<SessionStubPage> {
                       )),
                       create: (_) => widget.createExploreCubit!(
                         sessionId: state.sessionId!,
-                        isExplore: state.mode == 'explore',
+                        isExplore: state.sessionMode == SessionMode.explore,
                       )..load(),
                       child: const ExploreView(),
                     ),

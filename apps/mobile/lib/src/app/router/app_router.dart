@@ -164,8 +164,14 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
               sessionId,
               resultVersion: version,
             ),
-            childBuilder: (_) =>
-                _sessionPage(dependencies, sessionId, resultVersion: version),
+            childBuilder: (_) => _sessionPage(
+              dependencies,
+              sessionId,
+              resultVersion: version,
+              hint: state.extra is StartedMusicSession
+                  ? state.extra as StartedMusicSession
+                  : null,
+            ),
             readOnlyBuilder: (_) => _sessionPage(
               dependencies,
               sessionId,
@@ -196,6 +202,9 @@ GoRouter buildAppRouter(AppDependencies dependencies) {
               createFeedbackCubit: dependencies.hasResultFeedback
                   ? dependencies.createResultFeedbackCubit
                   : null,
+              createRefineCubit: dependencies.config.experienceV1
+                  ? dependencies.createRefineCubit
+                  : null,
               createExploreCubit: dependencies.config.experienceV1
                   ? dependencies.createExploreCubit
                   : null,
@@ -216,8 +225,11 @@ Widget _sessionPage(
   String sessionId, {
   bool savedOnly = false,
   int? resultVersion,
+  StartedMusicSession? hint,
 }) {
-  final reference = StartedMusicSession.reference(sessionId);
+  final reference = hint?.sessionId == sessionId
+      ? hint!
+      : StartedMusicSession.reference(sessionId);
   return BlocProvider<SessionCubit>(
     key: ValueKey((
       dependencies.authRepository.currentUser?.id,
@@ -237,6 +249,9 @@ Widget _sessionPage(
           : null,
       createFeedbackCubit: dependencies.hasResultFeedback
           ? dependencies.createResultFeedbackCubit
+          : null,
+      createRefineCubit: dependencies.config.experienceV1 && !savedOnly
+          ? dependencies.createRefineCubit
           : null,
       createExploreCubit: dependencies.config.experienceV1
           ? dependencies.createExploreCubit

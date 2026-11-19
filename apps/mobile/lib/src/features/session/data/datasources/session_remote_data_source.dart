@@ -78,6 +78,16 @@ class SessionRemoteDataSource {
       body: {'decade': decade, 'operation_id': mutationId},
     ),
   );
+  Future<Map<String, dynamic>> startRefine({
+    required String rootId,
+    required String operationId,
+  }) async => _decodeJson(
+    await _apiClient.post(
+      '/api/v1/session/${Uri.encodeComponent(rootId)}/refine',
+      headers: _experienceHeaders,
+      body: {'operation_id': operationId},
+    ),
+  );
   Future<Map<String, dynamic>> fetchComparison(String sessionId) async =>
       _decodeJson(
         await _apiClient.get(
