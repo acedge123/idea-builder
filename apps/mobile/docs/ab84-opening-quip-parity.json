@@ -5,7 +5,7 @@
   "mobile_base": "662f88029c377b9ee1968b242111f573bafe2ef7",
   "candidate": "0.1.2 (17)",
   "web_repository": "acedge123/music-dna",
-  "web_revision": "be86204ac616a46d148c53ca798ebbf16315c65d",
+  "web_revision": "c8d80fa2401034b298383d594f27863ef28c6f4a",
   "source_contracts": [
     "docs/musicdna/flutter-critic-fillers-handoff.md",
     "docs/musicdna/experience-contract-v1.md",
@@ -16,43 +16,46 @@
     "src/routes/onboarding.tsx"
   ],
   "changes": [
-    "Same preparation component/copy while the third opener commits and the first pairing loads, with no extra dwell. Static preparation Noted is a status line, outside the rotating post-pick quip ledger, as on web.",
-    "Editorial selection matches the web group rules, hunch conflicts, actual pool lengths and finite approved final-wait pool. No filler wording edited in Dart or in the bundled copy.",
-    "Ceilings: one after1/3/5, three after2, four after4; final waits consume unused approved groups until exhausted. A ready checkpoint or saved result is never delayed to fill the budget.",
-    "One tap captures wait index, pairing era and picked title. Saving a vote, receiving its hunch and requesting the final result do not reset the displayed line or timer.",
-    "One-shot timers prevent catch-up bursts. Odd-choice dwell starts on tap and does not restart after a slow save acknowledgement.",
-    "Only painted post-pick lines are recorded; owner/interview-scoped local history survives resume. Unseen queued lines are not consumed. Persistence failure is logged and presentation continues with in-memory deduplication.",
-    "Final quips accompany a persistent Writing your full reading activity label. Pool exhaustion keeps activity visible; completed or retryable-failed requests stop timers. Late old results cannot paint/cancel a newer final request.",
-    "Saved flow lookup, checkpoint controls, skips, read-binding, four/six completion, reduced motion, AI permission and guest-save/share behavior retain their existing contracts."
+    "Shared opening preparation remains immediate when the first offer is ready. Preparation status is not consumed as a post-pick quip.",
+    "Implements six-pick-overtime-v1: Neutral after 1/5, Reaction then one complete Person group after 2, Reaction after 3, Neutral/Reaction/Person after 4/6. Era decoration no longer replaces a category.",
+    "Reaction-first picks 2/3 show activity until the saved acknowledgement provides hunch; an older successful replay without hunch uses early. Neutral-first late hunch changes only the unseen tail.",
+    "Copy and category metadata are validated together; once-per-launch refresh cannot replace the updated bundle with an older payload lacking pacing metadata/Overtime. The source-derived generator writes both fallback copy and oracle.",
+    "One tap retains pick index/title/queue through vote save and final-writing transitions. Dwell starts once on actual paint; duplicate frame callbacks and delayed timers cannot reset or catch up.",
+    "A ready read/report replaces the wait immediately unless a two-line Person setup has actually painted; its punchline then receives a full 2500ms beat. Failures interrupt immediately. Cancelled/stale deliveries cannot repaint another wait.",
+    "Only pick-six actual final writing adds twelve ordered Overtime lines, each once, then holds the last line with writing activity. Early-four, earlier exhaustion and skips never enter Overtime; no generic pool recycling.",
+    "Only displayed post-pick copy is persisted in owner/interview-scoped history. Unseen groups remain eligible, interrupted setup groups do not produce orphan punchlines, retries reuse only unexposed copy.",
+    "Existing server-owned checkpoints 2/4, four/six completion, saved flow, score/evidence/LLM/retry boundaries, account, guest save, sharing and report behavior remain in their established layers."
   ],
   "verification": {
     "flutter_tests": {
-      "passed": 329,
+      "passed": 337,
       "skipped": 1,
       "skip_reason": "Existing optional deployed-contract capture, not a failure"
     },
-    "new_regressions": 14,
-    "web_oracle_cases": 117,
+    "new_regressions": 22,
+    "web_oracle_cases": 213,
     "analyzer": "passed, no issues",
-    "ios_simulator": "passed with production app configuration, unsigned debug only",
+    "ios_simulator": "Passed unsigned debug compilation with existing production client configuration; native metadata 0.1.2(17) verified.",
     "device_acceptance": "not run; AB-86",
     "live_readings_or_model_calls": 0,
     "backend_or_production_changes": false,
-    "testflight_upload": false
+    "testflight_upload": false,
+    "deployed_static_contract": {
+      "pacing_version": "six-pick-overtime-v1",
+      "interval_ms": 2500,
+      "overtime_lines": 12,
+      "model_calls": 0
+    }
   },
   "release_boundary": "Build16 archive/IPA untouched; no merge, production promotion, signing or Apple upload. Alan owns merge and release approval.",
   "remaining_checks": [
-    "AB-86: fresh guest and signed-in physical runs, checkpoint2/4, early4/final6, repeated skips, restart at checkpoint/final wait, late/failure/retry behavior and large text/reduced motion.",
-    "Backend opener/era fix already uses shared owner-scoped profile code; both web and REST call the same commit/start/next implementations. Verify actual production revision and frozen flow when doing device QA; no extra API needed for quip changes.",
-    "True/Roxanne/Little Red Corvette may resolve differently until catalog identity/year coverage is approved; randomized sessions need not return identical pairs. This mobile task does not activate catalog entries or duplicate backend selection.",
-    "AB-68 Refine/library, AB-75 web CI, AB-82 web share cards and build16 guest/email/share/artwork acceptance remain separately tracked."
+    "AB-86: fresh guest/signed-in physical walkthrough including checkpoint 2/4, early-four/final-six, repeated skips, restarts, delayed read/result, failure/retry, large text and reduced motion.",
+    "AB-68 Refine/library compatibility is separate and still open; AB-91 final-report validation and AB-82 sharing-card/cache failures are shared-backend/web concerns, not fixed by this presentation PR. AB-75 baseline CI also remains separate.",
+    "No Apple archive/export/upload in this change. Confirm consumed build numbers and current App Store version before the later separately approved TestFlight release; build16 export is untouched.",
+    "Exact randomized song pairs need not match across independently started sessions. No Dart scoring/era selection, catalog activation, new model call or production flag change."
   ],
   "oracle_regeneration": "node tool/generate_critic_wait_parity.mjs /path/to/music-dna (reads unchanged web functions using Node stripTypeScriptTypes; generated fixture records source SHA and hashes)",
   "pull_request": "https://github.com/acedge123/idea-builder/pull/37",
-  "delivery_status": "Draft: current web parity implemented/tested, awaiting Alan notice that Lovable new per-choice cadence has landed.",
-  "pending_web_update": {
-    "owner_notice": "Alan will notify after Lovable commits the next cadence change; no new counts have been assumed.",
-    "followup": "Re-read the current handoff and web source, update cadence policy/queue as needed, regenerate the source-derived oracle, rerun checks, then mark PR ready for Alan.",
-    "merge_allowed": false
-  }
+  "delivery_status": "Ready for source review; native physical acceptance remains AB-86. No archive/signing/export/upload.",
+  "pacing_handoff_resolved": true
 }

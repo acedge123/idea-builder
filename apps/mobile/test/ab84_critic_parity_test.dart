@@ -22,13 +22,14 @@ import 'package:music_dna/src/features/onboarding/presentation/cubit/onboarding_
 import 'package:music_dna/src/features/onboarding/domain/entities/onboarding_reaction.dart';
 import 'package:music_dna/src/features/onboarding/domain/entities/started_music_session.dart';
 import 'onboarding_cubit_test.dart' show FakeOnboardingRepository;
-import 'critic_wait_contract_test.dart' show copy, pair;
+import 'critic_wait_contract_test.dart' show copy, pair, bundle;
 import 'session_checkpoint_flow_test.dart' show CheckpointRepository;
 import 'session_result_test.dart' show start, reveal;
 
 class ParityRepository extends CheckpointRepository {
   Completer<SessionReveal>? revealGate;
   Object? revealError;
+  CriticFillers? customCopy;
   @override
   Future<SessionReveal> revealSession({
     required String sessionId,
@@ -47,7 +48,7 @@ class ParityRepository extends CheckpointRepository {
     criticRepository: this,
     resultRepository: this,
     flowRepository: this,
-    loadCriticCopy: () async => copy(),
+    loadCriticCopy: () async => customCopy ?? copy(),
     resumeStore: store,
   );
 }
@@ -82,20 +83,24 @@ Future<void> mountSession(WidgetTester tester, SessionCubit cubit) =>
 
 void main() {
   test(
-    'selection matches 117 cases evaluated by the actual pinned web functions',
+    'selection matches 213 cases evaluated by the actual pinned web functions',
     () {
       final oracle =
           jsonDecode(
                 File('test/fixtures/critic-wait-web.json').readAsStringSync(),
               )
               as Map;
-      expect(oracle['revision'], 'be86204ac616a46d148c53ca798ebbf16315c65d');
+      expect(oracle['revision'], 'c8d80fa2401034b298383d594f27863ef28c6f4a');
       for (final row in oracle['cases'] as List) {
         final flow = row['flow'] == 'checkpoints'
             ? InterviewFlow.checkpoints
             : InterviewFlow.perPick;
         final wait = row['answered'] as int;
-        final budget = CriticStagePolicy.quipBudget(flow, wait);
+        final budget = CriticStagePolicy.quipBudget(
+          flow,
+          wait,
+          finalReading: row['final_reading'] == true,
+        );
         expect(budget, row['budget']);
         final decade = row['decade'] as String?;
         final year = decade == null ? null : int.parse(decade.substring(0, 4));
@@ -103,6 +108,7 @@ void main() {
           copy().waitingLines(
             wait,
             hunch: row['hunch'] as String?,
+            finalReading: row['final_reading'] == true,
             pairing: year == null ? null : pair(year, year + 9),
             budget: budget,
             used: Set<String>.from(row['used'] as List),
@@ -115,27 +121,243 @@ void main() {
   );
 
   test(
-    'late hunch leaves the displayed opener and an already-started joke intact',
+    'reaction-first waits stay empty until a saved hunch; started jokes stay intact',
     () {
-      final queue = CriticWaitQueue(copy: copy(), wait: 2, budget: 3, used: {});
-      final first = queue.line;
-      queue.updateHunch('against');
-      expect(queue.line, first);
-      expect(queue.advance(), 'Somebody raised you right.');
+      for (final pick in [2, 3]) {
+        final queue = CriticWaitQueue(
+          copy: copy(),
+          wait: pick,
+          budget: pick == 2 ? 3 : 1,
+          used: {},
+        );
+        expect(queue.line, isNull);
+        queue.updateHunch('against');
+        expect(queue.line, copy().reaction['against']![pick]);
+      }
+      final queue = CriticWaitQueue(
+        copy: copy(),
+        wait: 2,
+        hunch: 'against',
+        budget: 3,
+        used: {},
+      );
+      queue.advance();
+      expect(queue.line, 'Somebody raised you right.');
+      queue.acknowledgePaint(queue.line!);
       queue.updateHunch('with');
       expect(queue.advance(), 'Or you rebelled perfectly.');
       expect(queue.canAdvance, isFalse);
       final partial = CriticWaitQueue(
         copy: copy(),
         wait: 2,
+        hunch: 'early',
         budget: 3,
-        used: {copy().neutral[2], copy().person[2][0]},
+        used: {copy().reaction['early']![2], copy().person[2][0]},
       );
       expect(
         partial.line,
         isNull,
-        reason: 'A used setup never leaves its orphaned punchline',
+        reason: 'A used setup cannot leave an orphan punchline',
       );
+    },
+  );
+
+  testWidgets('line dwell starts on paint and late timers never catch up', (
+    tester,
+  ) async {
+    final repo = ParityRepository()..answered = 3;
+    final cubit = repo.withCopy();
+    addTearDown(cubit.close);
+    await cubit.initialize();
+    await cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+    final first = cubit.state.criticWaitLine;
+    await tester.pump(const Duration(seconds: 5));
+    expect(
+      cubit.state.criticWaitLine,
+      first,
+      reason: 'Selection is not a paint',
+    );
+    cubit.acknowledgeCriticLine(first!);
+    await tester.pump(const Duration(milliseconds: 2499));
+    expect(cubit.state.criticWaitLine, first);
+    // Duplicate rebuild acknowledgements cannot restart this beat.
+    cubit.acknowledgeCriticLine(first);
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(cubit.state.criticWaitLine, copy().reaction['early']![4]);
+    cubit.acknowledgeCriticLine(cubit.state.criticWaitLine!);
+    await tester.pump(const Duration(seconds: 10));
+    expect(cubit.state.criticWaitLine, "Dig it. We'll let you cook.");
+    repo.reads[4]!.complete(
+      const SessionRead(thesis: 'Ready before that line paints'),
+    );
+    await tester.pump();
+    expect(cubit.state.criticPending, isFalse);
+  });
+
+  testWidgets(
+    'picks 2 and 3 show activity until a durable hunch, with no neutral flash',
+    (tester) async {
+      for (final pick in [2, 3]) {
+        final repo = ParityRepository()..answered = pick - 1;
+        final cubit = repo.withCopy();
+        await cubit.initialize();
+        if (cubit.state.isCheckpoint) cubit.continueCheckpoint();
+        await mountSession(tester, cubit);
+        repo.saveGate = Completer<void>();
+        final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+        await tester.pump();
+        expect(cubit.state.criticWaitLine, isNull);
+        expect(find.byType(LinearProgressIndicator), findsOneWidget);
+        await tester.pump(const Duration(seconds: 4));
+        expect(cubit.state.criticWaitLine, isNull);
+        repo.saveGate!.complete();
+        await choice;
+        await tester.pump();
+        expect(cubit.state.criticWaitLine, copy().reaction['early']![pick]);
+        if (pick == 3) {
+          await tester.pump(const Duration(milliseconds: 2499));
+          expect(cubit.state.status, SessionStatus.critic);
+          await tester.pump(const Duration(milliseconds: 1));
+          expect(cubit.state.status, SessionStatus.ready);
+        }
+        await cubit.close();
+      }
+    },
+  );
+
+  testWidgets(
+    'ready Critic finishes only an already-painted setup and full punchline beat',
+    (tester) async {
+      final repo = ParityRepository()..answered = 1;
+      final cubit = repo.withCopy();
+      addTearDown(cubit.close);
+      await cubit.initialize();
+      await mountSession(tester, cubit);
+      await cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, 'Somebody raised you right.');
+      repo.reads[2]!.complete(
+        const SessionRead(thesis: 'Ready evidence-bound read'),
+      );
+      await tester.pump();
+      expect(cubit.state.criticPending, isTrue);
+      expect(cubit.state.read, isNull);
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, 'Or you rebelled perfectly.');
+      await tester.pump(const Duration(milliseconds: 2499));
+      expect(cubit.state.criticPending, isTrue);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(cubit.state.criticPending, isFalse);
+      expect(cubit.state.read?.thesis, 'Ready evidence-bound read');
+      expect(cubit.state.isCheckpoint, isTrue);
+    },
+  );
+
+  testWidgets(
+    'ready final report finishes a compatible two-line person group without Overtime',
+    (tester) async {
+      final data = jsonDecode(bundle) as Map<String, dynamic>;
+      (data['person'] as List)[6] = [
+        'I\'m starting to like you.',
+        "Don't make it weird.",
+      ];
+      final repo = ParityRepository()..answered = 5;
+      repo.customCopy = CriticFillers.fromJson(data);
+      repo.revealGate = Completer<SessionReveal>();
+      final cubit = repo.withCopy();
+      addTearDown(cubit.close);
+      await cubit.initialize();
+      await mountSession(tester, cubit);
+      final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2500));
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, "I'm starting to like you.");
+      repo.revealGate!.complete(reveal);
+      await tester.pump();
+      expect(cubit.state.status, SessionStatus.revealing);
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, "Don't make it weird.");
+      await tester.pump(const Duration(milliseconds: 2499));
+      expect(cubit.state.status, SessionStatus.revealing);
+      await tester.pump(const Duration(milliseconds: 1));
+      await choice;
+      expect(cubit.state.status, SessionStatus.revealed);
+    },
+  );
+
+  testWidgets('four-choice early finish never consumes Overtime', (
+    tester,
+  ) async {
+    final repo = ParityRepository()..answered = 3;
+    final cubit = repo.withCopy();
+    addTearDown(cubit.close);
+    await cubit.initialize();
+    await mountSession(tester, cubit);
+    await cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+    repo.reads[4]!.complete(const SessionRead(thesis: 'Four choices'));
+    await tester.pump();
+    repo.revealGate = Completer<SessionReveal>();
+    final early = cubit.finishEarly();
+    await tester.pump();
+    for (var i = 0; i < 16; i++) {
+      expect(copy().overtime, isNot(contains(cubit.state.criticWaitLine)));
+      await tester.pump(const Duration(milliseconds: 2500));
+    }
+    expect(cubit.state.status, SessionStatus.revealing);
+    repo.revealGate!.complete(reveal);
+    await early;
+    expect(repo.early, [true]);
+  });
+
+  testWidgets('failed Critic interrupts a started joke immediately', (
+    tester,
+  ) async {
+    final repo = ParityRepository()..answered = 1;
+    final cubit = repo.withCopy();
+    addTearDown(cubit.close);
+    await cubit.initialize();
+    await mountSession(tester, cubit);
+    await cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2500));
+    expect(cubit.state.criticWaitLine, 'Somebody raised you right.');
+    repo.reads[2]!.completeError(Exception('unavailable'));
+    await tester.pump();
+    expect(cubit.state.criticPending, isFalse);
+    expect(cubit.state.criticWaitLine, isNull);
+    expect(cubit.state.criticMessage, CriticStagePolicy.checkpointUnavailable);
+    await tester.pump(const Duration(seconds: 10));
+    expect(cubit.state.criticWaitLine, isNull);
+  });
+
+  testWidgets(
+    'next-offer failure stops a joke and retry does not repeat the vote or model',
+    (tester) async {
+      final repo = ParityRepository()..answered = 1;
+      final cubit = repo.withCopy();
+      addTearDown(cubit.close);
+      await cubit.initialize();
+      await mountSession(tester, cubit);
+      repo.nextGate = Completer<SessionRoundState>();
+      final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, 'Somebody raised you right.');
+      repo.nextGate!.completeError(Exception('unavailable'));
+      await choice;
+      expect(cubit.state.criticWaitLine, isNull);
+      expect(cubit.state.nextPairingError, isNotNull);
+      repo.reads[2]!.complete(const SessionRead(thesis: 'Saved read'));
+      await tester.pump();
+      repo.nextGate = null;
+      await cubit.retryNextMatchup();
+      expect(repo.choiceCalls, 1);
+      expect(repo.readRequests, [2]);
+      expect(cubit.state.read?.thesis, 'Saved read');
+      cubit.continueCheckpoint();
+      expect(cubit.state.status, SessionStatus.ready);
     },
   );
 
@@ -236,9 +458,11 @@ void main() {
       final cubit = repo.withCopy();
       addTearDown(cubit.close);
       await cubit.initialize();
+      await mountSession(tester, cubit);
       repo.saveGate = Completer<void>();
       final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
       expect(cubit.state.criticWaitLine, 'Writing that down.');
+      await tester.pump();
       await tester.pump(const Duration(seconds: 2));
       repo.saveGate!.complete();
       await choice;
@@ -257,8 +481,10 @@ void main() {
     final cubit = repo.withCopy();
     addTearDown(cubit.close);
     await cubit.initialize();
+    await mountSession(tester, cubit);
     repo.saveGate = Completer<void>();
     final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
+    await tester.pump();
     await tester.pump(const Duration(seconds: 6));
     repo.saveGate!.complete();
     await choice;
@@ -290,55 +516,43 @@ void main() {
   );
 
   testWidgets(
-    'final wait keeps its tap context and clock across save/next/reveal, then stops',
+    'final six keeps tap clock; Overtime starts only during final writing and ends once',
     (tester) async {
       final repo = ParityRepository()..answered = 5;
       repo.revealGate = Completer<SessionReveal>();
-      SharedPreferences.setMockInitialValues({});
-      final store = SessionResumeStore(currentOwner: () => 'owner-a');
-      await store.saveCriticLines(start.sessionId, {'Noted.'});
-      final cubit = repo.withCopy(store: store);
+      final cubit = repo.withCopy();
       addTearDown(cubit.close);
       await cubit.initialize();
       await mountSession(tester, cubit);
       repo.saveGate = Completer<void>();
       repo.nextGate = Completer<SessionRoundState>();
-      final shown = <String>[];
-      final sub = cubit.stream.listen((s) {
-        if (s.criticWaitLine != null &&
-            (shown.isEmpty || shown.last != s.criticWaitLine)) {
-          shown.add(s.criticWaitLine!);
-        }
-      });
-      addTearDown(sub.cancel);
       final choice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
       final opener = cubit.state.criticWaitLine;
+      await tester.pump();
       await tester.pump(const Duration(seconds: 2));
       repo.saveGate!.complete();
       await tester.pump();
+      expect(cubit.state.criticWaitLine, opener);
       await tester.pump(const Duration(milliseconds: 500));
-      expect(cubit.state.criticWaitLine, isNot(opener));
-      final second = cubit.state.criticWaitLine;
+      expect(cubit.state.criticWaitLine, 'Okay. Thinking.');
+      await tester.pump(const Duration(milliseconds: 2500));
+      expect(cubit.state.criticWaitLine, 'That was inconveniently persuasive.');
+      await tester.pump(const Duration(seconds: 5));
+      expect(cubit.state.criticWaitLine, 'That was inconveniently persuasive.');
+      expect(cubit.state.status, SessionStatus.critic);
       repo.nextGate!.complete(repo.round());
       await tester.pump();
       expect(cubit.state.status, SessionStatus.revealing);
-      expect(cubit.state.criticWaitLine, second);
       expect(cubit.state.criticPickedTitle, 'First song 6');
-      for (var i = 0; i < 12; i++) {
+      await tester.pump();
+      for (final line in copy().overtime) {
+        expect(cubit.state.criticWaitLine, line);
         await tester.pump(const Duration(milliseconds: 2500));
       }
-      expect(shown.length, greaterThan(4));
-      expect(shown.toSet().length, shown.length);
-      expect(
-        shown,
-        isNot(contains('Noted.')),
-        reason: 'Already displayed at preparation',
-      );
+      await tester.pump(const Duration(seconds: 10));
+      expect(cubit.state.criticWaitLine, copy().overtime.last);
       repo.revealGate!.complete(reveal);
       await choice;
-      final count = shown.length;
-      await tester.pump(const Duration(seconds: 10));
-      expect(shown.length, count);
       expect(cubit.state.status, SessionStatus.revealed);
       expect(repo.revealCalls, 1);
     },
@@ -353,6 +567,7 @@ void main() {
     final cubit = repo.withCopy();
     addTearDown(cubit.close);
     await cubit.initialize();
+    await mountSession(tester, cubit);
     final oldChoice = cubit.chooseSong(chosenSongId: 'a', msToDecide: 1);
     await tester.pump();
     expect(cubit.state.status, SessionStatus.revealing);
@@ -415,16 +630,19 @@ void main() {
     await tester.pump();
     await cubit.close();
     final used = await store.loadCriticLines(start.sessionId);
-    expect(used, {'Noted.', 'Filing that away…'});
+    expect(used, {'Noted.', 'Turning that one over…'});
     final resumed = repo.withCopy(store: store);
     addTearDown(resumed.close);
     await resumed.initialize();
+    await mountSession(tester, resumed);
     expect(resumed.state.isCheckpoint, isTrue);
     final retry = resumed.retryCheckpointRead();
     expect(resumed.state.criticWaitLine, 'Somebody raised you right.');
+    await tester.pump();
     await tester.pump(const Duration(milliseconds: 2500));
     expect(resumed.state.criticWaitLine, 'Or you rebelled perfectly.');
     repo.reads[2]!.complete(const SessionRead(thesis: 'Restored checkpoint'));
+    await tester.pump(const Duration(milliseconds: 2500));
     await retry;
   });
 

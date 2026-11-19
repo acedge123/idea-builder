@@ -5,6 +5,10 @@ import 'interview_flow.dart';
 class CriticFillers {
   CriticFillers.fromJson(Map<String, dynamic> json)
     : version = json['version'] as String,
+      pacingVersion = json['pacing_version'] as String,
+      intervalMs = json['interval_ms'] as int,
+      pickPatterns = _patterns(json['pick_patterns']),
+      overtime = _lines(json['overtime']),
       neutral = _lines(json['neutral']),
       reaction = _pools(json['reaction']),
       person = List.unmodifiable((json['person'] as List).map(_lines)),
@@ -14,9 +18,13 @@ class CriticFillers {
       skipOld = json['skip_old'] as String {
     if (json['contract'] != 1 ||
         version != 'fillers-v1' ||
+        pacingVersion != CriticStagePolicy.pacingVersion ||
+        intervalMs != CriticStagePolicy.fillerInterval.inMilliseconds ||
+        overtime.length != 12 ||
         person.isEmpty ||
         !['against', 'with', 'early'].every(reaction.containsKey) ||
         [
+          ...overtime,
           ...neutral,
           ...reaction.values.expand((x) => x),
           ...person.expand((x) => x),
@@ -32,8 +40,10 @@ class CriticFillers {
       throw const FormatException('Unsupported Critic copy contract');
     }
   }
-  final String version, skipYoung, skipOld;
-  final List<String> neutral, skip;
+  final String version, pacingVersion, skipYoung, skipOld;
+  final int intervalMs;
+  final Map<int, List<String>> pickPatterns;
+  final List<String> neutral, skip, overtime;
   final Map<String, List<String>> reaction, decade;
   final List<List<String>> person;
 
@@ -51,12 +61,26 @@ class CriticFillers {
     (value as Map<String, dynamic>).map((k, v) => MapEntry(k, _lines(v))),
   );
 
+  static Map<int, List<String>> _patterns(Object? value) {
+    if (value is! Map) throw const FormatException('Missing Critic pacing');
+    final result = <int, List<String>>{};
+    for (final entry in CriticStagePolicy.pickPatterns.entries) {
+      final lines = _lines(value['${entry.key}']);
+      if (lines.join(',') != entry.value.join(',')) {
+        throw const FormatException('Unsupported Critic pacing');
+      }
+      result[entry.key] = lines;
+    }
+    return Map.unmodifiable(result);
+  }
+
   /// Mirrors web critic-wait.ts / quip-sequences.ts. Copy stays in the bundle.
   List<String> waitingLines(
     int wait, {
     String? hunch,
     SessionPairing? pairing,
     int? budget = 4,
+    bool finalReading = false,
     Set<String> used = const {},
   }) {
     final index = wait < 0 ? 0 : wait;
@@ -70,7 +94,7 @@ class CriticFillers {
           'person-$i',
           person[i],
           praise: i != 1 && i != 4,
-          incompatible: const {'reaction-with', 'reaction-against'},
+          incompatible: i == 3 ? const {'reaction-with'} : const {},
         ),
     ];
     final priorWith = reaction['with']!.any(used.contains);
@@ -81,57 +105,40 @@ class CriticFillers {
         : hunch;
     final personIndex = index % person.length;
     final personGroup =
-        personGroups[priorWith && personIndex == 3
+        personGroups[(priorWith || resolvedHunch == 'with') && personIndex == 3
             ? 4 % person.length
             : personIndex];
-    final a = pairing?.songA.year, b = pairing?.songB.year;
-    final key = a != null && b != null && a ~/ 10 == b ~/ 10
-        ? '${a ~/ 10 * 10}s'
-        : null;
-    final era = [
-      for (var i = 0; i < (decade[key]?.length ?? 0); i++)
-        _QuipGroup('era-$key-$i', [decade[key]![i]]),
-    ];
-    _QuipGroup reactionGroup() {
-      final kind = reaction.containsKey(resolvedHunch)
-          ? resolvedHunch!
-          : 'early';
-      final pool = reaction[kind]!;
-      return _QuipGroup(
-        'reaction-$kind',
-        [pool[index % pool.length]],
-        incompatible: kind == 'early'
-            ? const {}
-            : {
-                'reaction-with',
-                'reaction-against',
-                ...personGroups.map((group) => group.id),
-              },
-      );
-    }
-
-    final groups = <_QuipGroup>[neutralGroups[index % neutral.length]];
-    if (era.isNotEmpty) {
-      if (resolvedHunch != null && budget != null) groups.add(reactionGroup());
-      groups.add(era[index % era.length]);
-    } else if (budget == 3 || budget == null) {
-      groups.add(personGroup);
-    } else {
-      if (resolvedHunch != null) groups.add(reactionGroup());
-      groups.add(personGroup);
-    }
-    if (budget == null) {
-      for (var i = 0; i < personGroups.length; i++) {
-        groups.add(
-          era.isNotEmpty
-              ? era[i % era.length]
-              : neutralGroups[i % neutralGroups.length],
-        );
-        if (!(priorWith && personGroups[i].id == 'person-3')) {
-          groups.add(personGroups[i]);
+    // Era fields remain compatible, but never replace a six-pick category.
+    final groups = <_QuipGroup>[];
+    for (final category in pickPatterns[index] ?? const ['neutral']) {
+      if (category == 'neutral') {
+        groups.add(neutralGroups[index % neutral.length]);
+      } else if (resolvedHunch != null) {
+        if (category == 'person') {
+          groups.add(personGroup);
+        } else {
+          final kind = reaction.containsKey(resolvedHunch)
+              ? resolvedHunch
+              : 'early';
+          final pool = reaction[kind]!;
+          groups.add(
+            _QuipGroup(
+              'reaction-$kind',
+              [pool[index % pool.length]],
+              incompatible: kind == 'with'
+                  ? const {'reaction-against', 'person-3'}
+                  : kind == 'against'
+                  ? const {'reaction-with'}
+                  : const {},
+            ),
+          );
         }
       }
-      groups.addAll([...era, ...neutralGroups]);
+    }
+    if (wait == 6 && finalReading) {
+      for (var i = 0; i < overtime.length; i++) {
+        groups.add(_QuipGroup('overtime-$i', [overtime[i]]));
+      }
     }
     final selected = <String>[];
     final selectedGroups = <_QuipGroup>[];
@@ -183,16 +190,23 @@ abstract final class CriticStagePolicy {
   static const preparingTitle = 'Preparing your interview…';
   static const writingTitle = 'Writing your full reading…';
 
-  /// Null is the finite approved pool, uncapped (never loop/repeat it).
+  static const pacingVersion = 'six-pick-overtime-v1';
+  static const pickPatterns = <int, List<String>>{
+    1: ['neutral'],
+    2: ['reaction', 'person'],
+    3: ['reaction'],
+    4: ['neutral', 'reaction', 'person'],
+    5: ['neutral'],
+    6: ['neutral', 'reaction', 'person'],
+  };
+
+  /// Null is a finite approved queue without a primary-beat cap, never a loop.
   static int? quipBudget(
     InterviewFlow flow,
     int answered, {
     bool finalReading = false,
   }) {
-    if (finalReading || (flow == InterviewFlow.checkpoints && answered >= 6)) {
-      return null;
-    }
-    if (flow == InterviewFlow.perPick) return 4;
+    if (finalReading || answered >= 6) return null;
     return switch (answered) {
       2 => 3,
       4 => 4,

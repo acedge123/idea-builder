@@ -339,6 +339,7 @@ class SessionCubit extends Cubit<SessionState> {
   int _flowRevision = 0;
   Timer? _criticDeadlineTimer, _criticFillerTimer, _quipHoldTimer;
   bool _holdingQuip = false;
+  Completer<void>? _personReady;
   String? _readPairingId;
   int? _readAnswered;
   final Future<CriticFillers> Function()? _loadCriticCopy;
@@ -585,17 +586,13 @@ class SessionCubit extends Cubit<SessionState> {
       ),
     );
 
-    _beginWaitingCopy(
-      wait: state.currentRound!.round,
-      pairing: pairing,
-      finalReading:
-          state.currentRound!.round >=
-          (state.currentRound!.maxAnswered ?? maxPairingRounds),
-    );
-    // The one-line dwell starts on tap, not again on the save acknowledgement.
-    if (state.flow == InterviewFlow.checkpoints &&
-        const [1, 3, 5].contains(state.currentRound!.round)) {
-      _holdingQuip = true;
+    _beginWaitingCopy(wait: state.currentRound!.round, pairing: pairing);
+    // Odd checkpoint waits hold one painted beat, not an extra save-time delay.
+    _holdingQuip =
+        state.flow == InterviewFlow.checkpoints &&
+        const [1, 3, 5].contains(state.currentRound!.round);
+    // Older/no-copy callers retain their existing short activity-only hold.
+    if (_holdingQuip && _waitQueue == null) {
       _quipHoldTimer = Timer(CriticStagePolicy.fillerInterval, () {
         if (isClosed || revision != _flowRevision) return;
         _holdingQuip = false;
@@ -629,6 +626,7 @@ class SessionCubit extends Cubit<SessionState> {
             feedback.readPending &&
             _criticRepository != null;
         _waitQueue?.updateHunch(feedback.hunch ?? 'early');
+        if (_waitQueue != null) _refreshWaitingCopy();
         emit(
           state.copyWith(
             status: SessionStatus.critic,
@@ -876,11 +874,17 @@ class SessionCubit extends Cubit<SessionState> {
       ),
     );
 
-    if (!continuingWait) {
+    if (continuingWait) {
+      _waitQueue!.beginFinalWriting();
+      _refreshWaitingCopy();
+    } else {
       _beginWaitingCopy(
-        wait: requestedEarly ? 4 : 6,
+        wait: requestedEarly
+            ? 4
+            : max(0, min(6, (state.currentRound?.round ?? 1) - 1)),
         pairing: state.currentRound?.pairing,
         finalReading: true,
+        hunch: state.lastFeedback?.hunch ?? 'early',
       );
     }
     try {
@@ -895,6 +899,12 @@ class SessionCubit extends Cubit<SessionState> {
             finishEarly: requestedEarly,
           );
       if (isClosed || revision != _flowRevision) return;
+      await _finishStartedPerson();
+      if (isClosed ||
+          revision != _flowRevision ||
+          state.status != SessionStatus.revealing) {
+        return;
+      }
       SharedReveal? sharedReveal;
       if (reveal.result == null &&
           reveal.shareToken != null &&
@@ -939,6 +949,12 @@ class SessionCubit extends Cubit<SessionState> {
           );
           if (isClosed || revision != _flowRevision) return;
           if (saved != null) {
+            await _finishStartedPerson();
+            if (isClosed ||
+                revision != _flowRevision ||
+                state.status != SessionStatus.revealing) {
+              return;
+            }
             emit(
               state.copyWith(
                 status: SessionStatus.revealed,
@@ -1250,10 +1266,16 @@ class SessionCubit extends Cubit<SessionState> {
     _criticDeadlineTimer?.cancel();
     _quipHoldTimer?.cancel();
     _holdingQuip = false;
-    if (!preserveWaiting) {
-      _criticFillerTimer?.cancel();
-      _waitQueue = null;
-    }
+    if (!preserveWaiting) _stopWaitingCopy();
+  }
+
+  void _stopWaitingCopy() {
+    _criticFillerTimer?.cancel();
+    _quipHoldTimer?.cancel();
+    _holdingQuip = false;
+    _waitQueue = null;
+    _personReady?.complete();
+    _personReady = null;
   }
 
   void _beginWaitingCopy({
@@ -1261,6 +1283,7 @@ class SessionCubit extends Cubit<SessionState> {
     SessionPairing? pairing,
     bool finalReading = false,
     bool preparation = false,
+    String? hunch,
   }) {
     _criticFillerTimer?.cancel();
     final copy = _fillers;
@@ -1276,6 +1299,8 @@ class SessionCubit extends Cubit<SessionState> {
         finalReading: finalReading,
       ),
       preparation: preparation,
+      hunch: hunch,
+      finalReading: finalReading,
     );
     _waitQueue = queue;
     _logger.event('session.critic_wait_started', {
@@ -1285,7 +1310,13 @@ class SessionCubit extends Cubit<SessionState> {
       'preparation': preparation,
     });
     _showWaitLine(queue.line);
-    _scheduleWaitLine(queue);
+  }
+
+  void _refreshWaitingCopy() {
+    final queue = _waitQueue!;
+    _showWaitLine(
+      queue.beatFinished && queue.canAdvance ? queue.advance() : queue.line,
+    );
   }
 
   void _showWaitLine(String? line) {
@@ -1294,21 +1325,23 @@ class SessionCubit extends Cubit<SessionState> {
     );
   }
 
-  /// Called after the active line paints. Unseen candidates are never consumed.
+  /// A view reports the first painted frame; selection alone consumes no copy.
   void acknowledgeCriticLine(String line) {
+    final queue = _waitQueue;
     if (isClosed ||
+        queue == null ||
+        queue.preparation ||
         line != state.criticWaitLine ||
-        line != _waitQueue?.line ||
         !const [
-          SessionStatus.loading,
           SessionStatus.submitting,
           SessionStatus.critic,
           SessionStatus.revealing,
         ].contains(state.status) ||
-        _waitQueue?.preparation == true ||
-        !_usedQuips.add(line)) {
+        !queue.acknowledgePaint(line)) {
       return;
     }
+    _scheduleWaitLine(queue);
+    if (!_usedQuips.add(line)) return;
     final sessionId = state.sessionId;
     if (_resumeStore == null || sessionId == null) return;
     final displayed = Set<String>.of(_usedQuips);
@@ -1323,23 +1356,38 @@ class SessionCubit extends Cubit<SessionState> {
     });
   }
 
+  Future<void> _finishStartedPerson() async {
+    if (_waitQueue?.finishingPerson != true) return;
+    _personReady ??= Completer<void>();
+    await _personReady!.future;
+  }
+
   void _scheduleWaitLine(CriticWaitQueue queue) {
-    // One-shot timers dwell from the actual display: never catch up in a burst.
+    _criticFillerTimer?.cancel();
+    // One shot per actual paint, so delayed frames/timers never cause bursts.
     _criticFillerTimer = Timer(CriticStagePolicy.fillerInterval, () {
       if (isClosed ||
           !identical(queue, _waitQueue) ||
           !const [
-            SessionStatus.loading,
             SessionStatus.submitting,
             SessionStatus.critic,
             SessionStatus.revealing,
           ].contains(state.status)) {
         return;
       }
+      queue.finishBeat();
+      if (!queue.finishingPerson && _personReady != null) {
+        final ready = _personReady!;
+        _personReady = null;
+        ready.complete();
+        return;
+      }
+      _holdingQuip = false;
+      _releaseCriticWhenReady();
+      if (!identical(queue, _waitQueue)) return;
       if (queue.canAdvance) {
         _showWaitLine(queue.advance());
-        _scheduleWaitLine(queue);
-      } else if (queue.budget == null &&
+      } else if (queue.finalReading &&
           state.status == SessionStatus.revealing) {
         _logger.event('session.quip_pool_exhausted');
       }
@@ -1425,8 +1473,10 @@ class SessionCubit extends Cubit<SessionState> {
           state.status != SessionStatus.critic) {
         return;
       }
+      _stopWaitingCopy();
       emit(
         state.copyWith(
+          clearCriticWaitLine: true,
           nextPairingLoading: false,
           nextPairingError:
               'Your choice is saved. The next matchup couldn’t load.',
@@ -1455,6 +1505,7 @@ class SessionCubit extends Cubit<SessionState> {
         !state.criticSettled ||
         state.isCheckpoint ||
         _holdingQuip ||
+        _waitQueue?.finishingPerson == true ||
         state.reacting ||
         _pendingReaction != null ||
         next == null) {
@@ -1514,7 +1565,10 @@ class SessionCubit extends Cubit<SessionState> {
         clearCriticMessage: true,
       ),
     );
-    _beginWaitingCopy(wait: _readAnswered!);
+    _beginWaitingCopy(
+      wait: _readAnswered!,
+      hunch: state.lastFeedback?.hunch ?? 'early',
+    );
     _startCriticDeadline(revision);
     await _deliverCriticRead(
       sessionId: state.sessionId!,
@@ -1579,6 +1633,14 @@ class SessionCubit extends Cubit<SessionState> {
         afterPairingId: afterPairingId,
         answered: answered,
       );
+      if (isClosed ||
+          revision != _flowRevision ||
+          state.status != SessionStatus.critic ||
+          !state.criticPending) {
+        return;
+      }
+      _criticDeadlineTimer?.cancel();
+      await _finishStartedPerson();
       if (isClosed ||
           revision != _flowRevision ||
           state.status != SessionStatus.critic ||

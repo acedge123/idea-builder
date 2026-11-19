@@ -28,30 +28,23 @@ void main() {
     'shared copy selects real hunch only, preserves paired punchlines and actual pool lengths',
     () {
       final c = copy();
-      expect(c.waitingLines(1, hunch: 'early'), [
-        'Writing that down.',
-        'Let me sit with that.',
-        'Bold move.',
-        "I'll allow it.",
-      ]);
+      expect(c.waitingLines(1, hunch: 'early'), ['Writing that down.']);
       expect(c.waitingLines(2, hunch: 'against', pairing: pair(1981, 1989)), [
-        'Filing that away…',
         "Huh. Didn't see that coming.",
-        "Let's not make a whole music video out of this.",
-      ]);
-      expect(
-        c.waitingLines(2, pairing: pair(1981, 1990)).last,
+        'Somebody raised you right.',
         'Or you rebelled perfectly.',
-      );
-      expect(c.waitingLines(11, hunch: 'against').first, 'Mm-hm.');
-      expect(
-        c.waitingLines(11, hunch: 'against')[1],
-        'My notes and my ego will need a moment apart.',
-      );
-      final all = [
-        for (var i = 0; i <= 6; i++) ...c.waitingLines(i, hunch: 'early'),
-      ];
-      expect(all.toSet().length, all.length);
+      ]);
+      expect(c.waitingLines(2), isEmpty);
+      expect(c.waitingLines(3, hunch: 'early', budget: 1), [
+        'Running that back in my head.',
+      ]);
+      expect(c.waitingLines(11, hunch: 'against'), ['Mm-hm.']);
+      final used = <String>{};
+      for (var i = 0; i <= 6; i++) {
+        final next = c.waitingLines(i, hunch: 'early', used: used);
+        expect(next.any(used.contains), isFalse);
+        used.addAll(next);
+      }
     },
   );
   test(
@@ -96,8 +89,30 @@ void main() {
       expect(requests, 1);
     },
   );
+  test(
+    'legacy remote copy cannot downgrade six-pick fallback pacing',
+    () async {
+      final old = jsonDecode(bundle) as Map<String, dynamic>;
+      old.remove('pacing_version');
+      old.remove('interval_ms');
+      old.remove('pick_patterns');
+      old.remove('overtime');
+      final store = CriticCopyStore(
+        baseUri: Uri.parse('https://example.invalid'),
+        loadBundle: () async => bundle,
+        client: MockClient((_) async => http.Response(jsonEncode(old), 200)),
+      );
+      addTearDown(store.dispose);
+      await store.snapshot();
+      await Future<void>.delayed(Duration.zero);
+      final kept = await store.snapshot();
+      expect(kept.pacingVersion, 'six-pick-overtime-v1');
+      expect(kept.overtime.length, 12);
+    },
+  );
+
   testWidgets(
-    'waiting lines hold 2.5s, keep fixed setup/punchline order and hold final line',
+    'a painted beat gets 2.5s; first pick holds one neutral without recycling',
     (tester) async {
       final repo = FlowRepository();
       final cubit = repo.cubit();
@@ -105,21 +120,19 @@ void main() {
       await cubit.initialize();
       await cubit.chooseSong(chosenSongId: 'a', msToDecide: 10);
       expect(cubit.state.criticWaitLine, 'Writing that down.');
+      await tester.pump(const Duration(seconds: 5));
+      expect(cubit.state.criticWaitLine, 'Writing that down.');
+      cubit.acknowledgeCriticLine(cubit.state.criticWaitLine!);
       await tester.pump(const Duration(milliseconds: 2499));
       expect(cubit.state.criticWaitLine, 'Writing that down.');
       await tester.pump(const Duration(milliseconds: 1));
-      expect(cubit.state.criticWaitLine, 'Let me sit with that.');
-      await tester.pump(const Duration(milliseconds: 2500));
-      expect(cubit.state.criticWaitLine, 'Bold move.');
-      await tester.pump(const Duration(milliseconds: 2500));
-      expect(cubit.state.criticWaitLine, "I'll allow it.");
-      await tester.pump(const Duration(seconds: 5));
-      expect(cubit.state.criticWaitLine, "I'll allow it.");
+      expect(cubit.state.criticWaitLine, 'Writing that down.');
       repo.reads[1]!.complete(const SessionRead(thesis: 'The real read.'));
       await tester.pump();
       expect(cubit.state.status, SessionStatus.ready);
     },
   );
+
   testWidgets(
     '20s deadline releases prefetched pairing once; late read cannot overwrite newer choice',
     (tester) async {
