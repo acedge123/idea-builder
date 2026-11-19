@@ -45,7 +45,7 @@ class SessionResultView extends StatelessWidget {
           ),
         ),
         if (result.report != null) ...[
-          ReadingDimensions(report: result.report!),
+          ReadingDimensions(report: result.report!, mode: state.sessionMode),
           if (result.report!.panel != null)
             ReadingEvidence(panel: result.report!.panel!),
         ],

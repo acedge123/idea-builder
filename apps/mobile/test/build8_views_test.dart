@@ -180,6 +180,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('My readings'), findsWidgets);
       await tester.scrollUntilVisible(find.text('’80s exploration'), 150);
+      await tester.pumpAndSettle();
       await tester.tap(find.text('’80s exploration'));
       await tester.pumpAndSettle();
       expect(find.text('private child'), findsOneWidget);

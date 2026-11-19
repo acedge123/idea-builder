@@ -17,8 +17,8 @@ class RestReadingLibraryRepository implements ReadingLibraryRepository {
       v is String ? DateTime.tryParse(v) ?? _invalid() : _invalid();
   List _list(Object? v) => v is List ? v : _invalid();
   ReadingSummary _summary(Map<String, dynamic> row, {bool child = false}) {
-    final mode = child ? 'explore' : row['mode'] ?? 'discover';
-    if (!['discover', 'explore'].contains(mode)) _invalid();
+    final mode = row['mode'] ?? (child ? 'explore' : 'discover');
+    if (mode is! String || mode.isEmpty) _invalid();
     final decade = row['decade'];
     if (mode == 'explore' && !decades.contains(decade)) _invalid();
     final status = row['status'];
@@ -31,7 +31,7 @@ class RestReadingLibraryRepository implements ReadingLibraryRepository {
       id: _text(row['session_id']),
       startedAt: _date(row['started_at']),
       completed: completed as bool,
-      mode: mode as String,
+      mode: mode,
       decade: decade as int?,
       parentId: row['parent_session_id'] as String?,
       lane: row['lane'] as String?,
@@ -69,9 +69,17 @@ class RestReadingLibraryRepository implements ReadingLibraryRepository {
           ready: d['ready'] as bool,
         );
       }).toList(),
-      runs: _list(
-        data['runs'],
-      ).map((v) => _summary(_obj(v), child: true)).toList(),
+      // Older servers returned every child here. Only verifiable decade runs
+      // belong in this collection; refinements never masquerade as a decade.
+      runs: _list(data['runs'])
+          .map(_obj)
+          .where(
+            (row) =>
+                row['mode'] == 'explore' ||
+                row['mode'] == null && decades.contains(row['decade']),
+          )
+          .map((row) => _summary(row, child: true))
+          .toList(),
     );
   }
 

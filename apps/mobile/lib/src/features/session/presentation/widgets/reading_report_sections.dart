@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'archetype_art.dart';
 import '../../domain/entities/reading_report.dart';
+import '../../domain/entities/session_mode.dart';
 
 class ReadingIdentity extends StatelessWidget {
   const ReadingIdentity({super.key, required this.report});
@@ -41,7 +42,8 @@ class ReadingIdentity extends StatelessWidget {
 }
 
 class ReadingDimensions extends StatelessWidget {
-  const ReadingDimensions({super.key, required this.report});
+  const ReadingDimensions({super.key, required this.report, this.mode});
+  final SessionMode? mode;
   final ReadingReport report;
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,13 @@ class ReadingDimensions extends StatelessWidget {
       children: [
         const SizedBox(height: 24),
         Text('Your Music DNA', style: theme.titleLarge),
+        if ((report.sessionMode.supported ? report.sessionMode : mode) ==
+                SessionMode.refine &&
+            panel != null)
+          Text(
+            '${panel.answered} choices across your original reading and this refinement. Interview progress counts only the new choices.',
+            style: theme.bodySmall,
+          ),
         const SizedBox(height: 8),
         if (!report.panelAvailable || panel == null)
           const Text(
