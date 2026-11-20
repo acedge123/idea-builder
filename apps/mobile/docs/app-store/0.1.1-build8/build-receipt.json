@@ -8,7 +8,7 @@
   "archive": "/tmp/musicdna-build8-release.xcarchive",
   "archive_status": "succeeded",
   "app_store_export_status": "succeeded_after_owner_xcode_sign_in",
-  "uploaded": false,
+  "uploaded": true,
   "phone_install": "development_signed_release_mode_succeeded",
   "tests": {
     "passed": 163,
@@ -44,5 +44,13 @@
   "ipa_sha256": "cd91c4ac74b104e5fd8870cdf84bb974be615aa03ddae1146c814771b15784d0",
   "distribution_signature_verification": "codesign deep strict succeeded with macOS trust access",
   "distribution_signing": "Cloud Managed Apple Distribution",
-  "distribution_profile_expiry": "2027-07-17"
+  "distribution_profile_expiry": "2027-07-17",
+  "merged_mobile_sha": "f164aef424c1e5424d033341ec337afa70f18d87",
+  "merged_source_matches_archive": true,
+  "upload_pacific": "2026-11-11T08:02:12-08:00",
+  "upload_utc": "2026-11-11T16:02:12Z",
+  "apple_upload_status": "Uploaded Runner / EXPORT SUCCEEDED",
+  "apple_processing": "processing_confirmed_by_upload_receipt_completion_pending",
+  "public_app_store_submission": false,
+  "owner_testflight_acceptance": "pending"
 }
